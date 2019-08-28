@@ -1,0 +1,13 @@
+alias notebook='nohup jupyter-notebook > ~/.jupyter/notebook.log &'
+alias qtconsole='jupyter-qtconsole --pylab=inline --ConsoleWidget.font_size=10 &'
+alias scs='sshpass -p hassan\?kachal25 ssh -XY arjang@scs.itd.umich.edu'
+alias lfiles='find . -type f | sed '"'"'s/.*\.//'"'"' | sort | uniq -c'
+alias lcount='ls -l | grep -v ^l | wc -l'
+alias print='lp -d _10_58_50_150 -o sides=two-sided-long-edge,media="letter"'
+alias tk='ssh -AXY arjang@tk'
+alias tk_rmate='ssh -AXY -R 52698:localhost:52698 tk'
+alias tk_jupyter='ssh -N -f -L localhost:7777:localhost:7777 tk'
+# enable color support of ls and also add handy aliases
+alias ls='ls --color=auto'
+alias ll='ls -lhtaFXG --group-directories-first --color=always'
+alias tmux='tmux -2'

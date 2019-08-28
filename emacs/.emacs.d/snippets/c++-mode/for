@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: for
+# key: forl
+# --
+for (${1:unsigned int} ${2:i} = 0; $2 < $3; $2++)
+{
+    $0
+}

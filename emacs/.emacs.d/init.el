@@ -20,6 +20,7 @@
 (load "~/.emacs.d/cplusplus.el")
 (load "~/.emacs.d/latex.el")
 (load "~/.emacs.d/magit.el")
+(load "~/.emacs.d/irc.el")
 
 ;; Appearance
 (set-face-attribute 'default nil :height 80)

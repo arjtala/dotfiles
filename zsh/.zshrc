@@ -99,6 +99,7 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 source ~/.purepower
 #PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
+PATH=$HOME/.local/bin:$PATH
 POWERLEVEL10k_MODE='nerdfont-complete'
 POWERLEVEL10k_LEFT_PROMPT_ELEMENTS=(dir vcs newline status ssh)
 POWERLEVEL10k_RIGHT_PROMPT_ELEMENTS=(status virtualenv aws)

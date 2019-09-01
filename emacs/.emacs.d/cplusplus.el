@@ -55,7 +55,6 @@
   ;; (electric-pair-local-mode)
   ;; (lsp-cquery-enable)
   (cquery//enable)
-  (lsp-ui-mode nil)
  )
 
 (add-hook 'c++-mode-hook 'my-c++-mode-hook)

@@ -68,7 +68,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git virtualenv)
+plugins=(git virtualenv bazel)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -97,7 +97,7 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-source ~/.purepower
+source $HOME/.purepower
 #PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 PATH=$HOME/.local/bin:$PATH
 POWERLEVEL10k_MODE='nerdfont-complete'

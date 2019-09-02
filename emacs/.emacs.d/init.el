@@ -13,6 +13,7 @@
 
 (load "~/.emacs.d/evil")
 (load "~/.emacs.d/elisp")
+(load "~/.emacs.d/virtualenvwrapper.el")
 (load "~/.emacs.d/python")
 (load "~/.emacs.d/javascript")
 (load "~/.emacs.d/cmake")
@@ -281,7 +282,7 @@
     ("0598c6a29e13e7112cfbc2f523e31927ab7dce56ebb2016b567e1eff6dc1fd4f" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "c3d4af771cbe0501d5a865656802788a9a0ff9cf10a7df704ec8b8ef69017c68" "bd7b7c5df1174796deefce5debc2d976b264585d51852c962362be83932873d9")))
  '(package-selected-packages
    (quote
-    (pyenv-mode elpygen restclient jinja2-mode evil-collection w3m eyebrowse lsp-ui cquery company-lsp lsp-mode elf-mode ag yasnippet cuda-mode cl-lib evil-escape helm powerline cmake-font-lock fill-column-indicator evil-magit linum-relative evil monokai-theme)))
+    (elpygen restclient jinja2-mode evil-collection w3m eyebrowse lsp-ui cquery company-lsp lsp-mode elf-mode ag yasnippet cuda-mode cl-lib evil-escape helm powerline cmake-font-lock fill-column-indicator evil-magit linum-relative evil monokai-theme)))
  '(projectile-other-file-alist
    (quote
     (("cpp" "h" "hpp" "ipp")

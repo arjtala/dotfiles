@@ -8,11 +8,13 @@
 
 (setq elpy-rpc-backend "jedi")
 (elpy-enable)
-(require-package 'pyenv-mode)
-(require 'pyenv-mode)
-(add-to-list 'exec-path "~/.pyenv/shims")
-(setenv "WORKON_HOME" "~/.pyenv/versions/")
-(pyenv-mode)
+(require 'virtualenvwrapper)
+(venv-initialize-interactive-shells) ;; if you want interactive shell support
+(venv-initialize-eshell) ;; if you want eshell support
+;; note that setting `venv-location` is not necessary if you
+;; use the default location (`~/.virtualenvs`), or if the
+;; the environment variable `WORKON_HOME` points to the right place
+(setq venv-location "~/.virtualenvs/")
 
 (defun python-toggle-breakpoint ()
   "Add a break point, highlight it."

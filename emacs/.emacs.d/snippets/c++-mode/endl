@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: endl
-# key: endl
-# --
-std::cout << std::endl;$0

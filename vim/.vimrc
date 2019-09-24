@@ -29,7 +29,7 @@ filetype plugin indent on    " required
 autocmd! bufwritepost ~/.zshrc	!source ~/.zshrc
 set nocp
 set nu
-execute pathogen#infect()
+"execute pathogen#infect()
 filetype on
 set bg=dark
 

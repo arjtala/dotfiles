@@ -1,1 +1,0 @@
-forecast-api.key.secrets.el

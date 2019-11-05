@@ -10,4 +10,5 @@ alias tk_jupyter='ssh -N -f -L localhost:7777:localhost:7777 tk'
 # enable color support of ls and also add handy aliases
 alias ls='gls --color=auto'
 alias ll='gls -lhtaFXG --group-directories-first --color=always'
+alias sed='gsed'
 alias tmux='tmux -2'

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# contributor : Rodrigo Setti <rodrigosetti@gmail.com>
+# name: <tag> ... </tag>
+# group : list
+# --
+<$1$3>$2</$1>

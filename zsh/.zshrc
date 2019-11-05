@@ -1,4 +1,5 @@
 export ZSH="$HOME/.oh-my-zsh"
+export PURE_POWER_USE_P10K_EXTENSIONS=1
 ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git virtualenv bazel)
 source $ZSH/oh-my-zsh.sh

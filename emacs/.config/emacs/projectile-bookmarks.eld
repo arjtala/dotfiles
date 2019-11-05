@@ -1,0 +1,1 @@
+("~/Documents/data_science/" "~/dotfiles/" "~/Documents/ankaboot/")

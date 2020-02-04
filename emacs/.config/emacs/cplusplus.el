@@ -1,8 +1,6 @@
-(require-package 'cquery)
-(require 'cquery)
-
-(require-package 'cuda-mode)
-(require-package 'glsl-mode)
+(use-package cquery)
+(use-package cuda-mode)
+(use-package glsl-mode)
 
 ;; (setq cquery-executable "/path/to/cquery/build/release/bin/cquery")
 ;; ;; Arch Linux aur/cquery-git aur/cquery
@@ -55,16 +53,14 @@
   ;; (electric-pair-local-mode)
   ;; (lsp-cquery-enable)
   (cquery//enable)
+  (lsp-ui-mode nil)
+  (company-mode)
  )
 
 (add-hook 'c++-mode-hook 'my-c++-mode-hook)
 (add-hook 'c-mode-hook 'my-c++-mode-hook)
 (add-hook 'cuda-mode-hook 'my-c++-mode-hook)
 (add-hook 'glsl-mode-hook 'my-c++-mode-hook)
-
-(add-hook 'c++-mode-hook 'company-mode)
-(add-hook 'c-mode-hook 'company-mode)
-(add-hook 'cuda-mode-hook 'company-mode)
 
 ;; File associations
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
@@ -73,3 +69,9 @@
 (add-to-list 'auto-mode-alist '("\\.fs\\'" . glsl-mode))
 (add-to-list 'auto-mode-alist '("\\.vs\\'" . glsl-mode))
 (add-to-list 'auto-mode-alist '("\\.gs\\'" . glsl-mode))
+
+;; Associate cu files with h files and vice versa
+(eval-after-load 'projectile
+  '(progn
+     (push '("cu" "h") projectile-other-file-alist)
+     (push "cu" (cdr (assoc "h" projectile-other-file-alist)))))

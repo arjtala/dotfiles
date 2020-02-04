@@ -15,33 +15,15 @@
 (require-package 'evil-numbers)
 (require 'evil-numbers)
 
-
 (require-package 'evil-org)
 (require 'evil-org)
 (add-hook 'org-mode-hook 'evil-org-mode)
 (add-hook 'org-mode-hook 'auto-fill-mode)
 
-
-(require-package 'evil-collection)
-(evil-collection-init '(eww dired comint))
-
-(require 'evil-collection-comint)
-(evil-collection-comint-setup)
-
-(require 'evil-collection-term)
-(evil-collection-term-setup)
-
-(require 'evil-collection-occur)
-(evil-collection-occur-setup)
-
 (global-set-key (kbd "C-x") nil)
 (define-key evil-normal-state-map (kbd "C-a") 'evil-numbers/inc-at-pt)
 (define-key evil-normal-state-map (kbd "C-x") 'evil-numbers/dec-at-pt)
 (define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
-
-
-;; (require-package 'evil-collection)
-;; (evil-collection-init)
 
 ;;Leader
 (require-package 'evil-leader)
@@ -53,7 +35,6 @@
 (require-package 'evil-matchit)
 (require 'evil-matchit)
 (global-evil-matchit-mode 1)
-
 
 (global-evil-leader-mode)
 (evil-leader/set-leader "<SPC>")
@@ -70,7 +51,6 @@
 (evil-leader/set-key "wo" 'delete-other-windows)
 
 (evil-leader/set-key "wwn" 'make-frame)
-
 
 (evil-leader/set-key "bb" 'helm-buffers-list)
 (evil-leader/set-key "bn" 'next-buffer)
@@ -104,8 +84,6 @@
   (helm--make-action "run")
   )
 
-
-
 (defun kill-compilation-buffer ()
   "Close the window containing the '*compilation*' buffer."
   (interactive)
@@ -118,7 +96,6 @@
 
 (evil-leader/set-key "mga" 'projectile-find-other-file)
 (evil-leader/set-key "mgr" 'lsp-rename)
-
 
 ;;Searching
 (evil-leader/set-key "sap" 'helm-projectile-ag)
@@ -147,8 +124,6 @@
 (evil-leader/set-key "mrw" 'LaTeX-close-environment)
 (evil-leader/set-key "vk" 'hide-body)
 (evil-leader/set-key "vj" 'show-all)
-
-
 
 ;;Function to open init file
 (defun open-init-file ()
@@ -179,7 +154,6 @@
      (define-key company-mode-map (kbd "C-@") 'helm-company)
      (define-key company-active-map (kbd "C-SPC") 'helm-company)))
 (setq company-dabbrev-downcase nil)
-
 
 (with-eval-after-load 'company
   (define-key company-active-map (kbd "TAB") 'company-select-next)

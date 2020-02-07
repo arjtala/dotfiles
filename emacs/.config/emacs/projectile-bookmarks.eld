@@ -1,1 +1,0 @@
-("~/Documents/data_science/" "~/dotfiles/" "~/Documents/Scape/reconstruction_localization_pipeline/" "~/Documents/ankaboot/")

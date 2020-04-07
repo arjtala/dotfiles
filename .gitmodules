@@ -1,3 +1,4 @@
 [submodule "emacs/.config/emacs"]
 	path = emacs/.config/emacs
 	url = git@github.com:arjology/dotfiles_emacs.git
+    branch = master

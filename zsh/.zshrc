@@ -1,6 +1,3 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -100,9 +97,6 @@ export LANG=en_US.UTF-8
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 source $HOME/.purepower
 #PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
-PATH=$HOME/.local/bin:$PATH
-SCAPE_HOME=$HOME/libs/reconstruction_localization_pipeline
-PATH=$PATH:$SCAPE_HOME/bazel-python/bin
 POWERLEVEL10k_MODE='nerdfont-complete'
 POWERLEVEL10k_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)

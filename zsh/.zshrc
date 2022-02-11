@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -68,7 +75,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git virtualenv bazel)
+plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 export VIRTUAL_ENV_DISABLE_PROMPT=0
@@ -99,13 +106,19 @@ export LANG=en_US.UTF-8
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 source $HOME/.purepower
-#PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
+if [[ ! -v FB ]]; then
+	PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
+fi
 PATH=$HOME/.local/bin:$PATH
-SCAPE_HOME=$HOME/libs/reconstruction_localization_pipeline
-PATH=$PATH:$SCAPE_HOME/bazel-python/bin
 POWERLEVEL10k_MODE='nerdfont-complete'
 POWERLEVEL10k_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
-POWERLEVEL10k_RIGHT_PROMPT_ELEMENTS=(status virtualenv aws)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status virtualenv aws)
+POWERLEVEL10k_RIGHT_PROMPT_ELEMENTS=(status)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status)
 POWERLEVEL10k_PROMPT_ADD_NEWLINE=true
+export PATH="/usr/local/sbin:$PATH"
+export PATH="/usr/local/opt/llvm/bin:$PATH"
+export PATH="/usr/local/opt/binutils/bin:$PATH"
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

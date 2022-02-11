@@ -78,7 +78,6 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
-export VIRTUAL_ENV_DISABLE_PROMPT=0
 
 # User configuration
 
@@ -106,19 +105,12 @@ export LANG=en_US.UTF-8
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 source $HOME/.purepower
-if [[ ! -v FB ]]; then
-	PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
-fi
-PATH=$HOME/.local/bin:$PATH
 POWERLEVEL10k_MODE='nerdfont-complete'
 POWERLEVEL10k_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
 POWERLEVEL10k_RIGHT_PROMPT_ELEMENTS=(status)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status)
 POWERLEVEL10k_PROMPT_ADD_NEWLINE=true
-export PATH="/usr/local/sbin:$PATH"
-export PATH="/usr/local/opt/llvm/bin:$PATH"
-export PATH="/usr/local/opt/binutils/bin:$PATH"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

@@ -12,4 +12,10 @@ if [[ ! -v FB ]]; then
 	PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig"
 	source "$HOME/.cargo/env"
 	export PATH="/usr/local/opt/curl/bin:$PATH"
+    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:$PATH"
+	PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 fi
+PATH=$HOME/.local/bin:$PATH
+export PATH="/usr/local/sbin:$PATH"
+export PATH="/usr/local/opt/llvm/bin:$PATH"
+export PATH="/usr/local/opt/binutils/bin:$PATH"

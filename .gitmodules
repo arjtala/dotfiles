@@ -4,6 +4,17 @@
     branch = master
 
 [submodule "tmux/.tmux/plugins/tpm"]
-    path = tmux/.tmux/plugins/tpm
+	path = tmux/.tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm
 	branch = master
+
+[submodule "tmux/.tmux/plugins/tmux-scroll-copy-mode"]
+	path = tmux/.tmux/plugins/tmux-scroll-copy-mode
+	url = https://github.com/nhdaly/tmux-scroll-copy-mode
+	branch = master
+
+
+[submodule "tmux/.tmux/plugins/tmux-yank"]
+	path = tmux/.tmux/plugins/tmux-yank
+	url = https://github.com/tmux-plugins/tmux-yank
+   branch = master

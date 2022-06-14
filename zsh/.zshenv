@@ -23,3 +23,4 @@ if [[ -v FB ]]; then
 fi
 PATH=$HOME/.local/bin:$PATH
 export PATH="/usr/local/sbin:$PATH"
+. "$HOME/.cargo/env"

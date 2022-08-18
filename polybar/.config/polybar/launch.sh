@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-
+MONITOR=$(polybar -m|tail -1|sed -e 's/:.*$//g')
 # Terminate already running bar instances
 killall -q polybar
 
@@ -7,13 +7,13 @@ killall -q polybar
 while pgrep -x polybar >/dev/null; do sleep 1; done
 
 # Launch bar1 and bar2
-#polybar example &
+polybar example &
 #polybar -c ${HOME}/.config/polybar/config2 laptop &
-polybar -c ${HOME}/.config/polybar/config2 centerLeft &
-polybar -c ${HOME}/.config/polybar/config2 centerMiddle &
-polybar -c ${HOME}/.config/polybar/config2 centerRight &
-polybar -c ${HOME}/.config/polybar/config2 rightLeft &
-polybar -c ${HOME}/.config/polybar/config2 rightRight &
+#polybar -c ${HOME}/.config/polybar/config2 centerLeft &
+#polybar -c ${HOME}/.config/polybar/config2 centerMiddle &
+#polybar -c ${HOME}/.config/polybar/config2 centerRight &
+#polybar -c ${HOME}/.config/polybar/config2 rightLeft &
+#polybar -c ${HOME}/.config/polybar/config2 rightRight &
 #polybar -c ${HOME}/.config/polybar/config_3 title &
 #polybar -c ${HOME}/.config/polybar/config_3 cpu &
 #polybar -c ${HOME}/.config/polybar/config_3 memory & 

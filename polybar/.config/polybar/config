@@ -20,11 +20,10 @@ alert = #bd2c40
 
 [bar/example]
 monitor = ${env:MONITOR:DP3}
-;monitor = ${env:MONITOR:HDMI-1}
 width = 100%
 height = 27
 ;offset-x = 1%
-;offset-y = 1%
+offset-y = 2%
 radius = 6.0
 fixed-center = false
 

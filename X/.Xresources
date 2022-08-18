@@ -26,7 +26,7 @@ URxvt.solarized.default:    dark
 URxvt.urlLauncher: /usr/bin/xdg-open
 URxvt.matcher.button: 1
 ! Set terminal padding
-URxvt.internalBorder: 36 
+URxvt.internalBorder: 36
 ! Enables copy/paste with Ctrl-Shift-C/V
 URxvt.iso14755: false
 URxvt.iso14755_52: false

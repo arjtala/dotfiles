@@ -6,12 +6,12 @@ export LANGUAGE=en_US.UTF-8
 
 if [[ "$HOST" == *"facebook"* ]];
 then
-  echo "Loading FB specific settings...";
+  if [[ -t 1 ]]; then  echo "Loading FB specific settings..."; fi
   source /usr/facebook/ops/rc/master.zshrc;
-  echo "Setting proxy alias...";
+  if [[ -t 1 ]]; then echo "Setting proxy alias..."; fi
   alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
 else
-	echo "Loading local settings...";
+    if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
 	export PATH=$PATH:$HOME/Library/Python/3.7/bin;
 	PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
 	PATH="/usr/local/opt/curl/bin:$PATH";

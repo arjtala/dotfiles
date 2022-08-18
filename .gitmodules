@@ -18,3 +18,4 @@
 	path = tmux/.tmux/plugins/tmux-yank
 	url = https://github.com/tmux-plugins/tmux-yank
     branch = master
+

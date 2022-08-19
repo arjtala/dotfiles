@@ -12,6 +12,9 @@ then
   alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
 else
     if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
+	if [ -d "/Applications/Emacs.app/Contents/MacOS/bin" ]; then
+		export PATH="/Applications/Emacs.app/Contents/MacOS/bin:$PATH";
+	fi
 	export TERMINAL=kitty
 	export PATH=$PATH:$HOME/Library/Python/3.7/bin;
 	PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";

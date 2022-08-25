@@ -111,6 +111,7 @@ POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
 POWERLEVEL10k_RIGHT_PROMPT_ELEMENTS=(status)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status)
 POWERLEVEL10k_PROMPT_ADD_NEWLINE=true
+# POWERLEVEL9K_VCS_BACKENDS=(git hg)
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

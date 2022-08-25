@@ -7,7 +7,17 @@ export LANGUAGE=en_US.UTF-8
 if [[ "$HOST" == *"facebook"* ]];
 then
   if [[ -t 1 ]]; then  echo "Loading FB specific settings..."; fi
-  source /usr/facebook/ops/rc/master.zshrc;
+	if [[ -z "${LOCAL_ADMIN_SCRIPTS}" ]]; then
+		LOCAL_ADMIN_SCRIPTS="/usr/facebook/ops/rc/"
+	fi
+    local fb_master_zshrc="${LOCAL_ADMIN_SCRIPTS}/master.zshrc"
+    local fb_prompt_file="${LOCAL_ADMIN_SCRIPTS}/scm-prompt"
+    if [ -f "$fb_master_zshrc" ]; then
+        source "$fb_master_zshrc"
+    fi
+    if [ -f "$fb_prompt_file" ]; then
+    	source "$fb_prompt_file"
+    fi
   if [[ -t 1 ]]; then echo "Setting proxy alias..."; fi
   alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
 else

@@ -23,13 +23,13 @@ bindsym $super+Shift+Return exec i3-sensible-terminal ranger
 # start dmenu (a program launcher)
 # bindsym $super+Shift+d exec i3-dmenu-desktop --dmenu="dmenu -i -fn 'Noto Sans:size=8'"
 # bindsym $super+d exec rofi -lines 12 -padding 18 -width 60 -location 0 -show drun -sidebar-mode -columns 3 -font 'Noto Sans 8'
-bindsym $super+d exec rofi -show run -opacity "85" -font "Noto Sans 8"
-bindsym $super+c exec rofi -show run -lines 6 -separator-style solid -font "Noto Sans 8" -width 35 -hide-scrollbar
+bindsym $super+d exec rofi -show run -opacity "85" -font "Noto Sans 10"
+bindsym $super+c exec rofi -show run -lines 6 -separator-style solid -font "Noto Sans 10" -width 35 -hide-scrollbar
 
 # common apps keybinds
 bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
 bindsym $super+l exec i3lock -i ~/wallpapers/inuse/wallpaper.png
-bindsym $super+Shift+w exec googe-chrome
+bindsym $super+Shift+w exec google-chrome
 bindsym $super+Shift+f exec thunar;workspace 3;focus
 bindsym $super+Shift+g exec emacs
 

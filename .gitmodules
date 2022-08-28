@@ -86,7 +86,7 @@
 
 [submodule "vim/.vim/bundle/vim-eunuch"]
 	path = vim/.vim/bundle/vim-eunuch
-	url = https://github.com/tpope/vim-eunuch.git
+	url = git@github.com:tpope/vim-eunuch.git
 	branch = master
 
 [submodule "vim/.vim/bundle/vim-gitgutter"]

@@ -19,11 +19,11 @@ secondary = #e60053
 alert = #bd2c40
 
 [bar/example]
-monitor = ${env:MONITOR:DP3}
+monitor = ${env:MONITOR:XWAYLAND0}
 width = 100%
 height = 27
 ;offset-x = 1%
-offset-y = 2%
+;offset-y = 2%
 radius = 6.0
 fixed-center = false
 
@@ -42,19 +42,25 @@ padding-right = 2
 module-margin-left = 1
 module-margin-right = 2
 
-font-0 = fixed:pixelsize=10;1
-font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
-font-2 = wuncon siji:size=30:pixelsize=50;1
-font-3 = symbola:fontformat=truetype:size=8
+font-0 = "Tamsyn:pixelsize=10;0"
+font-1 = "Roboto:size=11:weight=bold;2"
+font-2 = "Noto Sans:size=11;1"
+font-3 = NotoColorEmoji:scale=10
 
-modules-left = bspwm i3
+;font-0 = fixed:pixelsize=10;1
+;font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
+;font-2 = wuncon siji:size=30:pixelsize=50;1
+;font-3 = symbola:fontformat=truetype:size=8
+
+modules-left = ewmh ;bspwm i3
 modules-center = mpd
 modules-right = filesystem xbacklight volume xkeyboard memory cpu wlan eth battery temperature date powermenu
 
 tray-position = right
 tray-padding = 2
-;tray-transparent = true
-;tray-background = #0063ff
+tray-transparent = true
+transparent = #00FFFFFF
+tray-background = #0063ff
 
 ;wm-restack = bspwm
 ;wm-restack = i3
@@ -66,6 +72,96 @@ tray-padding = 2
 
 ;scroll-up = i3wm-wsnext
 ;scroll-down = i3wm-wsprev
+
+[module/ewmh]
+type = internal/xworkspaces
+; Only show workspaces defined on the same output as the bar
+; Useful if you want to show monitor specific workspaces
+; on different bars
+; Default: false
+pin-workspaces = true
+; Create click handler used to focus desktop
+; Default: true
+enable-click = false
+; Create scroll handlers used to cycle desktops
+; Default: true
+enable-scroll = true
+; Reverse the scroll direction
+; Default: false
+; New in version 3.6.0
+reverse-scroll = true
+
+; icon-[0-9]+ = <desktop-name>;<icon>
+; NOTE: The desktop name needs to match the name configured by the WM
+; You can get a list of the defined desktops using:
+; $ xprop -root _NET_DESKTOP_NAMES
+; Note: Neither <desktop-name> nor <icon> can contain a semicolon (;)
+icon-default = ♟
+icon-0 = Workspace 1;💻
+icon-1 = Workspace 2;💻
+icon-2 = Workspace 3;💻
+icon-3 = Workspace 4;💻
+icon-4 = Workspace 5;💻
+icon-5 = Workspace 6;💻
+
+; Available tags:
+;   <label-monitor>
+;   <label-state> - gets replaced with <label-(active|urgent|occupied|empty)>
+; Default: <label-state>
+format = <label-state>
+
+; Available tokens:
+;   %name%
+; Default: %name%
+label-monitor = %name%
+
+; Available tokens:
+;   %name%
+;   %icon%
+;   %index%
+;   %nwin% (New in version 3.6.0)
+; Default: %icon% %name%
+label-active = %icon% %nwin%
+label-active-foreground = #ffffff
+label-active-background = #3f3f3f
+label-active-underline = #999999
+label-active-padding = 4
+label-active-font = 3
+
+; Available tokens:
+;   %name%
+;   %icon%
+;   %index%
+;   %nwin% (New in version 3.6.0)
+; Default: %icon% %name%
+label-occupied = %nwin%
+label-occupied-underline = #555555
+label-occupied-font = 3
+label-occupied-padding = 4
+
+; Available tokens:
+;   %name%
+;   %icon%
+;   %index%
+;   %nwin% (New in version 3.6.0)
+; Default: %icon% %name%
+label-urgent = %nwin%
+label-urgent-foreground = #000000
+label-urgent-background = #bd2c40
+label-urgent-underline = #9b0a20
+label-urgent-padding = 4
+label-urgent-font = 3
+
+; Available tokens:
+;   %name%
+;   %icon%
+;   %index%
+;   %nwin% (New in version 3.6.0)
+; Default: %icon% %name%
+label-empty = %nwin%
+label-empty-foreground = #55
+label-empty-padding = 4
+label-empty-font = 3
 
 [module/xwindow]
 type = internal/xwindow
@@ -362,6 +458,7 @@ screenchange-reload = true
 ;compositing-background = screen
 ;compositing-foreground = source
 ;compositing-border = over
+pseudo-transparency = false
 
 [global/wm]
 margin-top = 5

@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 MONITOR=$(polybar -m|tail -1|sed -e 's/:.*$//g')
+echo "Found monitor ${MONITOR}"
 # Terminate already running bar instances
 killall -q polybar
 

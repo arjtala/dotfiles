@@ -396,7 +396,7 @@ format-padding = 1
 
 
 [module/weather]
-format-padding = ${const.format-padding}
+format-padding = ${clonst.format-padding}
 type = custom/script
 interval = 10
 format = <label>

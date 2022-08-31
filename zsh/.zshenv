@@ -25,7 +25,12 @@ else
 	if [ -d "/Applications/Emacs.app/Contents/MacOS/bin" ]; then
 		export PATH="/Applications/Emacs.app/Contents/MacOS/bin:$PATH";
 	fi
-	export TERMINAL=kitty
+	if [[ "$HOST" == *"fedora"* ]];
+	then
+		export TERMINAL=urxvt
+	else
+		export TERMINAL=kitty
+	fi
 	export PATH=$PATH:$HOME/Library/Python/3.7/bin;
 	PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
 	PATH="/usr/local/opt/curl/bin:$PATH";

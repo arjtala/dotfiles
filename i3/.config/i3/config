@@ -3,16 +3,22 @@ set $super Mod4
 set $alt Mod1
 
 # set font
-font pango: Noto Sans 8
+font pango:Hack Nerd Font 10
 
 # Use Mouse+$super to drag floating windows to their wanted position
 floating_modifier $super
 
 #autostart
-exec --no-startup-id hsetroot -center ~/wallpapers/inuse/wallpaper.png
+exec --no-startup-id nm-applet
+exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id xsettingsd &
-exec --no-startup-id compton -b
 exec --no-statrup-id xrdb ~/.Xresources
+# exec --no-startup-id feh --bg-fill ~/.wallpapers/inuse.png
+# exec --no-startup-id picom 
+# exec --no-startup-id picom --experimental-backends &
+# exec --no-startup-id betterlockscreen -w dim
+exec --no-startup-id sh "reset.sh"
+exec --no-startup-id source ~/.fehbg
 
 # start a terminal
 bindsym $super+Return exec i3-sensible-terminal
@@ -28,7 +34,8 @@ bindsym $super+c exec rofi -show run -lines 6 -separator-style solid -font "Noto
 
 # common apps keybinds
 bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
-bindsym $super+l exec i3lock -i ~/wallpapers/inuse/wallpaper.png
+# bindsym $super+l exec i3lock -i ~/wallpapers/inuse/wallpaper.png
+bindsym $super+Shift+l exec betterlockscreen --lock blur
 bindsym $super+Shift+w exec google-chrome
 bindsym $super+Shift+f exec thunar;workspace 3;focus
 bindsym $super+Shift+g exec emacs
@@ -121,20 +128,61 @@ mode "resize" {
 bindsym $super+r mode "resize"
 
 # panel
-bar {
-        colors {
-        background #2f343f
-        statusline #2f343f
-        separator #4b5262
+# bar {
+#         colors {
+#         background #2f343f
+#         statusline #2f343f
+#         separator #4b5262
 
-        # colour of border, background, and text
-        focused_workspace       #2f343f #bf616a #d8dee8
-        active_workspace        #2f343f #2f343f #d8dee8
-        inactive_workspace      #2f343f #2f343f #d8dee8
-        urgent_workspacei       #2f343f #ebcb8b #2f343f
-    }
+#         # colour of border, background, and text
+#         focused_workspace       #2f343f #bf616a #d8dee8
+#         active_workspace        #2f343f #2f343f #d8dee8
+#         inactive_workspace      #2f343f #2f343f #d8dee8
+#         urgent_workspacei       #2f343f #ebcb8b #2f343f
+#     }
+#         status_command i3status
+# }
+
+# Start i3bar to display a workspace bar (plus the system information i3status
+# finds out, if available)
+bar {
+        # workspace_buttons yes
+        mode hide
+        strip_workspace_name no
+        strip_workspace_numbers no
+        modifier none
         status_command i3status
+        position bottom
+        separator_symbol "  "
+        # i3bar_command i3bar --transparency
+        colors {
+            background  $bg
+            statusline  $fg
+            separator   $fg
+            # separator   $color7
+
+            # <colorclass> <border> <background> <text>
+            focused_workspace  $color12 $bg      $color12
+            # focused_workspace  $bg      $color10 $bg
+            active_workspace   $color4  $bg      $color4
+            inactive_workspace $bg      $bg      $fg
+            urgent_workspace   $color1  $bg      $color1
+            # binding_mode       #2f343a #900000 #ffffff
+    }
 }
+
+
+# Toggle bar state
+bindsym $super+b bar mode toggle
+# Use pactl to adjust volume in PulseAudio
+set $refresh_i3status killall -SIGUSR1 i3status
+
+# gaps
+smart_gaps on
+gaps inner 8
+gaps outer 4
+# bindsym $sup+Ctrl+Shift n exec gaps inner 0 && gaps outer 0
+# bindsym $sup+Ctrl+Shift g exec gaps inner 8 && gaps outer 4
 
 # window rules, you can find the window class using xprop
 for_window [class=".*"] border pixel 0
@@ -148,10 +196,47 @@ for_window [class=Viewnior|feh|Audacious|File-roller|Lxappearance|Lxtask|Pavucon
 for_window [class=URxvt|Firefox|Geany|Evince|Soffice|libreoffice*|mpv|Ghb|Xfburn|Gimp*|Inkscape|Vlc|Lxappearance|Audacity] focus
 for_window [class=Xfburn|GParted|System-config-printer.py|Lxtask|Pavucontrol|Exo-helper*|Lxrandr|Arandr] focus
 
-# colour of border, background, text, indicator, and child_border
-client.focused              #bf616a #2f343f #d8dee8 #bf616a #d8dee8
-client.focused_inactive     #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.unfocused            #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.urgent               #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.placeholder          #2f343f #2f343f #d8dee8 #2f343f #2f343f
-client.background           #2f343f
+
+# Color: {{{
+
+# set xresources colors
+set_from_resource $color0 color0 #323232
+set_from_resource $color1 color1 #323232
+set_from_resource $color2 color2 #323232
+set_from_resource $color3 color3 #323232
+set_from_resource $color4 color4 #323232
+set_from_resource $color5 color5 #323232
+set_from_resource $color6 color6 #323232
+set_from_resource $color7 color7 #323232
+set_from_resource $color8 color8 #323232
+set_from_resource $color9 color9 #323232
+set_from_resource $color10 color10 #323232
+set_from_resource $color11 color11 #323232
+set_from_resource $color12 color12 #323232
+set_from_resource $color13 color13 #323232
+set_from_resource $color14 color14 #323232
+set_from_resource $color15 color15 #323232
+
+set_from_resource $bg background #ffffff
+set_from_resource $fg foreground #000000
+
+# class                 border  bg      text    indicator child_border
+client.focused          #323232 #323232 #ffffff $color2   $color4
+client.focused_inactive #333333 #5f676a #ffffff #484e50   #5f676a
+client.unfocused        #333333 #222222 #888888 #292d2e   #222222
+client.urgent           #2f343a #900000 #ffffff #900000   #900000
+client.placeholder      #000000 #0c0c0c #ffffff #000000   #0c0c0c
+
+client.background       #000000
+
+# # colour of border, background, text, indicator, and child_border
+# client.focused              #bf616a #2f343f #d8dee8 #bf616a #d8dee8
+# client.focused_inactive     #2f343f #2f343f #d8dee8 #2f343f #2f343f
+# client.unfocused            #2f343f #2f343f #d8dee8 #2f343f #2f343f
+# client.urgent               #2f343f #2f343f #d8dee8 #2f343f #2f343f
+# client.placeholder          #2f343f #2f343f #d8dee8 #2f343f #2f343f
+# client.background           #2f343f
+
+# }}}
+
+

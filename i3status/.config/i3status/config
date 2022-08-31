@@ -1,53 +1,83 @@
+# i3status configuration file.
+# see "man i3status" for documentation.
+
+# It is important that this file is edited as UTF-8.
+# The following line should contain a sharp s:
+# ß
+# If the above line is not correctly displayed, fix your editor first!
+
 general {
-        output_format = "i3bar"
-        colors = false
-        markup = pango
-        interval = 5
-        color_good = '#2f343f'
-		color_degraded = '#ebcb8b'
-		color_bad = '#ba5e57'
+        colors = true
+        # Color 10
+        color_good = "#b3bbc3"
+        # Color 13
+        color_degraded = "#95c7ae"
+        # Color 9
+        color_bad = "#d077a3"
+        interval = 1
 }
 
-order += "load"
-order += "cpu_temperature 0"
+# order += "ipv6"
+order += "tztime local2"
+order += "tztime local1"
+order += "ethernet _first_"
+order += "wireless _first_"
 order += "disk /"
-order += "disk /store"
-order += "ethernet enp1s0"
+order += "memory"
+order += "load"
 order += "volume master"
-order += "tztime local"
+order += "battery all"
 
-load {
-        format = "<span background='#f59335'>  %5min Load </span>"
+wireless _first_ {
+        format_up = "\  %quality %essid (%ip) "
+        format_up = "  %quality (%ip)"
+        # format_up = "%ip "
+        format_down = " 睊"
 }
 
-cpu_temperature 0 {
-        format = "<span background='#bf616a'>  %degrees °C </span>"
-        path = "/sys/class/thermal/thermal_zone0/temp"
+ethernet _first_ {
+        format_up = "  %speed %ip"
+        format_down = ""
+}
+
+battery all {
+        format = "%status %percentage "
+        last_full_capacity = true
+        low_threshold = 20
+        format_down = " "
+        status_chr = " "
+        status_bat = " "
+        status_unk = " "
+        status_full = " "
 }
 
 disk "/" {
-        format = "<span background='#fec7cd'>  %free Free </span>"
+        format = " %free"
+        low_threshold = 10
 }
 
-disk "/store" {
-        format = "<span background='#fec7cd'>  %free Free </span>"
+load {
+        format = "load  %1min"
 }
 
-ethernet enp1s0 {
-        format_up = "<span background='#88c0d0'>  %ip </span>"
-        format_down = "<span background='#88c0d0'>  Disconnected </span>"
+memory {
+        format = " %used / %available"
+        threshold_degraded = "1G"
+        format_degraded = " < %available"
+}
+
+tztime local1{
+        format = " %d/%m/%Y"
+        # format = " %d/%b/%Y  %H:%M:%S  "
+}
+
+tztime local2 {
+        format = " %H:%M:%S "
+        # format = " %d/%b/%Y  %H:%M:%S  "
 }
 
 volume master {
-        format = "<span background='#ebcb8b'>  %volume </span>"
-        format_muted = "<span background='#ebcb8b'>  Muted </span>"
-        device = "default"
-        mixer = "Master"
-        mixer_idx = 0
+        format = "  %volume"
+        format_muted = " 婢 (%volume)"
+        device = "pulse:alsa_output.pci-0000_00_14.2.analog-stereo"
 }
-
-tztime local {
-		format = "<span background='#81a1c1'> %time </span>"
-		format_time = " %a %-d %b %H:%M"
-}
-

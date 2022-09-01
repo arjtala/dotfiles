@@ -52,7 +52,7 @@ battery all {
 }
 
 disk "/" {
-        format = " %free"
+        format = " %used / %total"
         low_threshold = 10
 }
 
@@ -61,7 +61,7 @@ load {
 }
 
 memory {
-        format = " %used / %available"
+        format = " %used / %total"
         threshold_degraded = "1G"
         format_degraded = " < %available"
 }

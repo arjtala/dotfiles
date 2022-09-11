@@ -1,0 +1,25 @@
+kitty_mod ctrl+super
+
+map kitty_mod+t new_tab
+map alt+right next_tab
+map alt+left prev_tab
+tab_bar_style powerline
+
+font_family DejaVu Sans Mono for Powerline
+bold_font DejaVu Sans Mono for Powerline
+font_size 10
+adjust_line_height 100%
+cursor_shape underline
+cursor_underline_thickness 2
+window_padding_width 20
+editor emacsclient -t
+disable_ligatures cursor
+map ctrl+shift+c copy_to_clipboard
+map ctrl+shift+v paste
+# macos_hide_titlebar yes
+hide_window_decorations yes
+macos_option_as_alt yes
+linux_display_server X11
+
+# include dracula.conf
+include theme.conf

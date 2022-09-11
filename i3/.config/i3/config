@@ -180,8 +180,8 @@ set $refresh_i3status killall -SIGUSR1 i3status
 
 # gaps
 smart_gaps on
-gaps inner 8
-gaps outer 4
+gaps inner 30
+gaps outer 20
 # bindsym $sup+Ctrl+Shift n exec gaps inner 0 && gaps outer 0
 # bindsym $sup+Ctrl+Shift g exec gaps inner 8 && gaps outer 4
 

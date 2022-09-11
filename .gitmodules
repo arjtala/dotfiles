@@ -1,6 +1,6 @@
 [submodule "emacs/.config/emacs"]
 	path = emacs/.config/emacs
-	url = git@github.com:arjology/dotfiles_emacs.git
+	url = git@github.com:arjtala/dotfiles_emacs.git
     branch = master
 
 [submodule "tmux/.tmux/plugins/tmux"]

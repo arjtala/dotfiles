@@ -69,6 +69,7 @@ urxvt*.background:           [70]#040406
 ! black
 *.color0:       #656972
 *.color8:       #656972
+*.color16:       #00656972
 
 ! red
 *.color1:       #d077a3

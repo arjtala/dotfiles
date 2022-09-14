@@ -17,7 +17,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- betterlockscreen -l
 exec --no-startup-id xsettingsd &
 exec --no-statrup-id xrdb ~/.Xresources
 # exec --no-startup-id feh --bg-fill ~/.wallpapers/inuse.png
-# exec --no-startup-id picom
+j# exec --no-startup-id picom
 # exec --no-startup-id picom --experimental-backends &
 # exec --no-startup-id betterlockscreen -w dim
 exec --no-startup-id source ~/.fehbg

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export wlap_ip = "$(ifconfig wlp0s20f3 | grep 'inet ' | awk '{ print $2 }')"
+export eth_ip = "$(ifconfig enp0s13f0u2u3 | grep 'inet ' | awk '{ print $2 }')"

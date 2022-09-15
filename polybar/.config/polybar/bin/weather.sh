@@ -43,7 +43,12 @@ get_icon() {
     echo $icon
 }
 
-KEY="***REMOVED***"
+FILE=./key.txt
+if [ ! -f "$FILE" ]; then
+	gpg --output $FILE --decrypt api.key.gpg
+fi
+KEY=$(cat $FILE | tr -s '\n' ' ')
+
 CITY=""
 UNITS="imperial"
 SYMBOL="°"

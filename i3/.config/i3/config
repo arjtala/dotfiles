@@ -147,37 +147,37 @@ bindsym $super+r mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
-bar {
-        # workspace_buttons yes
-        mode hide
-        strip_workspace_name no
-        strip_workspace_numbers no
-        modifier none
-        status_command i3status
-        position bottom
-        separator_symbol "  "
-        # i3bar_command i3bar --transparency
-        colors {
-            background  $bg
-            statusline  $fg
-            separator   $fg
-            # separator   $color7
+# bar {
+#         # workspace_buttons yes
+#         mode hide
+#         strip_workspace_name no
+#         strip_workspace_numbers no
+#         modifier none
+#         status_command i3status
+#         position bottom
+#         separator_symbol "  "
+#         # i3bar_command i3bar --transparency
+#         colors {
+#             background  $bg
+#             statusline  $fg
+#             separator   $fg
+#             # separator   $color7
 
-            # <colorclass> <border> <background> <text>
-            focused_workspace  $color12 $bg      $color12
-            # focused_workspace  $bg      $color10 $bg
-            active_workspace   $color4  $bg      $color4
-            inactive_workspace $bg      $bg      $fg
-            urgent_workspace   $color1  $bg      $color1
-            # binding_mode       #2f343a #900000 #ffffff
-    }
-}
+#             # <colorclass> <border> <background> <text>
+#             focused_workspace  $color12 $bg      $color12
+#             # focused_workspace  $bg      $color10 $bg
+#             active_workspace   $color4  $bg      $color4
+#             inactive_workspace $bg      $bg      $fg
+#             urgent_workspace   $color1  $bg      $color1
+#             # binding_mode       #2f343a #900000 #ffffff
+#     }
+# }
 
 
 # Toggle bar state
-bindsym $super+b bar mode toggle
+# bindsym $super+b bar mode toggle
 # Use pactl to adjust volume in PulseAudio
-set $refresh_i3status killall -SIGUSR1 i3status
+# set $refresh_i3status killall -SIGUSR1 i3status
 
 # gaps
 smart_gaps on

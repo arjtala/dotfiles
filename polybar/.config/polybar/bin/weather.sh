@@ -45,7 +45,7 @@ get_icon() {
 
 FILE=./key.txt
 if [ ! -f "$FILE" ]; then
-	gpg --output $FILE --decrypt api.key.gpg
+	gpg --output $FILE --decrypt api.key.asc
 fi
 KEY=$(cat $FILE | tr -s '\n' ' ')
 

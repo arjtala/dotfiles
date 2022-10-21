@@ -9,9 +9,9 @@ font pango:Hack Nerd Font 10
 floating_modifier $super
 
 #autostart
-exec_always --no-startup-id ~/.config/polybar/launch.sh &
 exec_always --no-startup-id sh ~/.config/i3/reset.sh
-exec --no-startup-id xrandr --output eDP1 --mode "1920x1200_60.00" --output HDMI1 --auto --primary --left-of eDP1
+exec_always --no-startup-id ~/.config/polybar/launch.sh '$MONITOR' &
+exec --no-startup-id xrandr --output eDP1 --mode "1920x1200_60.00" --output '$MONITOR' --auto --primary --left-of eDP1
 exec --no-startup-id nm-applet
 # exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id xss-lock --transfer-sleep-lock -- betterlockscreen -l

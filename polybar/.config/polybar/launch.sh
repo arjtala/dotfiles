@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
-FOUND=$(polybar -m|tail -1|sed -e 's/:.*$//g')
-export MONITOR=${1:FOUND}
+export MONITOR=$(/usr/bin/xrandr | /usr/bin/grep connected | /usr/bin/grep -v disconnected | /usr/bin/grep -v eDP1 | /usr/bin/awk '{print $1}')
 echo "Found monitor ${MONITOR}"
 
 # Terminate already running bar instances

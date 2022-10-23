@@ -1,7 +1,5 @@
 #!/bin/zsh
 
-wal -R
-
 feh --bg-fill ~/.wallpapers/inuse.png
 
 killall -q compton

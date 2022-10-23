@@ -11,13 +11,14 @@ floating_modifier $super
 #autostart
 exec_always --no-startup-id ~/.config/polybar/launch.sh &
 exec_always --no-startup-id sh ~/.config/i3/reset.sh
+exec --no-startup-id xrandr --output eDP1 --mode "1920x1200_60.00" --output HDMI1 --auto --primary --left-of eDP1
 exec --no-startup-id nm-applet
 # exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id xss-lock --transfer-sleep-lock -- betterlockscreen -l
 exec --no-startup-id xsettingsd &
 exec --no-statrup-id xrdb ~/.Xresources
 # exec --no-startup-id feh --bg-fill ~/.wallpapers/inuse.png
-j# exec --no-startup-id picom
+# exec --no-startup-id picom
 # exec --no-startup-id picom --experimental-backends &
 # exec --no-startup-id betterlockscreen -w dim
 exec --no-startup-id source ~/.fehbg
@@ -104,6 +105,8 @@ bindsym $super+3 workspace 3
 bindsym $super+4 workspace 4
 bindsym $super+5 workspace 5
 bindsym $super+6 workspace 6
+bindsym $super+7 workspace 7
+bindsym $super+8 workspace 8
 
 # move focused container to workspace
 bindsym $super+Shift+1 move container to workspace 1
@@ -112,6 +115,8 @@ bindsym $super+Shift+3 move container to workspace 3
 bindsym $super+Shift+4 move container to workspace 4
 bindsym $super+Shift+5 move container to workspace 5
 bindsym $super+Shift+6 move container to workspace 6
+bindsym $super+Shift+7 move container to workspace 7
+bindsym $super+Shift+8 move container to workspace 8
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $super+Shift+r restart
@@ -147,37 +152,37 @@ bindsym $super+r mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
-bar {
-        # workspace_buttons yes
-        mode hide
-        strip_workspace_name no
-        strip_workspace_numbers no
-        modifier none
-        status_command i3status
-        position bottom
-        separator_symbol "  "
-        # i3bar_command i3bar --transparency
-        colors {
-            background  $bg
-            statusline  $fg
-            separator   $fg
-            # separator   $color7
+# bar {
+#         # workspace_buttons yes
+#         mode hide
+#         strip_workspace_name no
+#         strip_workspace_numbers no
+#         modifier none
+#         status_command i3status
+#         position bottom
+#         separator_symbol "  "
+#         # i3bar_command i3bar --transparency
+#         colors {
+#             background  $bg
+#             statusline  $fg
+#             separator   $fg
+#             # separator   $color7
 
-            # <colorclass> <border> <background> <text>
-            focused_workspace  $color12 $bg      $color12
-            # focused_workspace  $bg      $color10 $bg
-            active_workspace   $color4  $bg      $color4
-            inactive_workspace $bg      $bg      $fg
-            urgent_workspace   $color1  $bg      $color1
-            # binding_mode       #2f343a #900000 #ffffff
-    }
-}
+#             # <colorclass> <border> <background> <text>
+#             focused_workspace  $color12 $bg      $color12
+#             # focused_workspace  $bg      $color10 $bg
+#             active_workspace   $color4  $bg      $color4
+#             inactive_workspace $bg      $bg      $fg
+#             urgent_workspace   $color1  $bg      $color1
+#             # binding_mode       #2f343a #900000 #ffffff
+#     }
+# }
 
 
 # Toggle bar state
-bindsym $super+b bar mode toggle
+# bindsym $super+b bar mode toggle
 # Use pactl to adjust volume in PulseAudio
-set $refresh_i3status killall -SIGUSR1 i3status
+# set $refresh_i3status killall -SIGUSR1 i3status
 
 # gaps
 smart_gaps on

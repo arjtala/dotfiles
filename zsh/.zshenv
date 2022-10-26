@@ -27,7 +27,8 @@ else
 		export PATH="/usr/local/opt/curl/bin:$PATH";
 		export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH";
 	fi
-	export TERMINAL=kitty
+	export TERMINAL=alacritty
+	(cat ~/.cache/wal/sequences &)
 	export PATH=$PATH:$HOME/Library/Python/3.7/bin;
 	PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
 	PATH="/usr/local/opt/curl/bin:$PATH";

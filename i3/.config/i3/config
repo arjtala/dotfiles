@@ -185,8 +185,8 @@ bindsym $super+r mode "resize"
 
 # gaps
 smart_gaps on
-gaps inner 30
-gaps outer 20
+gaps inner 10
+gaps outer 5
 # bindsym $sup+Ctrl+Shift n exec gaps inner 0 && gaps outer 0
 # bindsym $sup+Ctrl+Shift g exec gaps inner 8 && gaps outer 4
 

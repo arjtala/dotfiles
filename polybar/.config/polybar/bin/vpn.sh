@@ -4,7 +4,7 @@ export VPN="$(nmcli -t -f name,type connection show --order name --active 2>/dev
 
 
 if [ -n "$VPN" ]; then
-	echo "%{F#aec795}%{F-}[%{F#fAA} $VPN %{F-}]"
+	echo "%{F#aec795} %{F-}[%{F#fAA} $VPN %{F-}]"
 else
 	echo %{F#f00}%{F-}[]
 fi

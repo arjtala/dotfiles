@@ -43,11 +43,11 @@ exec nitrogen --restore &
 # ----------
 # i3
 # ----------
-# exec i3 --shmlog-size=26214400
+exec i3 --shmlog-size=26214400
 
 # ----------
 # dwm
 # ----------
 # Statusbar loop
-while true ; do xsetroot -name "`date '+%Y-%m-%d %H:%M.%S'` `uptime |sed 's/.*,//'`"; sleep 1 ; done &
-exec dwm
+# while true ; do xsetroot -name "`date '+%Y-%m-%d %H:%M.%S'` `uptime |sed 's/.*,//'`"; sleep 1 ; done &
+# exec dwm-run

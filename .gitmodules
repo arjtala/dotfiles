@@ -18,10 +18,24 @@
 	url = https://github.com/nhdaly/tmux-scroll-copy-mode
 	branch = master
 
-
 [submodule "tmux/.tmux/plugins/tmux-yank"]
 	path = tmux/.tmux/plugins/tmux-yank
 	url = https://github.com/tmux-plugins/tmux-yank
+    branch = master
+
+[submodule "tmux/.tmux/plugins/tmux-continuum"]
+	path = tmux/.tmux/plugins/tmux-continuum
+	url = https://github.com/tmux-plugins/tmux-continuum
+    branch = master
+
+[submodule "tmux/.tmux/plugins/tmux-resurrect"]
+	path = tmux/.tmux/plugins/tmux-resurrect
+	url = https://github.com/tmux-plugins/tmux-resurrect
+    branch = master
+
+[submodule "tmux/.tmux/plugins/tmux-sensible"]
+	path = tmux/.tmux/plugins/tmux-sensible
+	url = https://github.com/tmux-plugins/tmux-sensible
     branch = master
 
 [submodule "vim/.vim/bundle/Vundle.vim"]

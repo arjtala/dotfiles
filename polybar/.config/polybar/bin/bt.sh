@@ -2,9 +2,9 @@
 
 function get_batt_level()
 {
-    MX=""
+    MX="MXErgo"
 	local _PATH=$1
-	local _BATT=""
+	local _BATT="n/a"
 	if [[ !  -z  $1  ]]
 	then
 	   local _MX="MXErgo"

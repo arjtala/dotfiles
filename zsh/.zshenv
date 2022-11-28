@@ -26,6 +26,7 @@ else
 		export PATH="/Applications/Emacs.app/Contents/MacOS/bin:$PATH";
 		export PATH="/usr/local/opt/curl/bin:$PATH";
 		export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH";
+		export PATH="${PATH}:$HOME/Library/Python/3.10/bin"
 	fi
 	export TERMINAL=alacritty
 	(cat ~/.cache/wal/sequences &)

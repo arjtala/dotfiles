@@ -37,7 +37,7 @@ then
   alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
 else
     if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
-	if [ -f "$HOME/.local/homebrew/bin/brew" ]; then export PATH="${PATH}:$HOME/.local/homebrew/bin"; fi
+	if [ -f "$HOME/.local/homebrew/bin/brew" ]; then export PATH="$HOME/.local/homebrew/bin:${PATH}"; fi
 	if [ -d "/Applications/Emacs.app/Contents/MacOS/bin" ]; then
 		export PATH="/Applications/Emacs.app/Contents/MacOS/bin:$PATH";
 		export PATH="/usr/local/opt/curl/bin:$PATH";

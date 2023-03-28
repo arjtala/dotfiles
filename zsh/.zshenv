@@ -1,8 +1,23 @@
-autoload zmv
-export TERM=xterm-256color
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-export LANGUAGE=en_US.UTF-8
+# emacs M-x shell
+if [[ "dumb" == $TERM ]] ; then
+  alias l='cat'
+  alias less='cat'
+  alias m='cat'
+  alias more='cat'
+  export PAGER=cat
+  export TERM=xterm-256color
+  unsetopt zle
+  unsetopt prompt_cr
+  unsetopt prompt_subst
+  unsetopt zle
+  PS1='$ '
+  return
+else
+  autoload zmv
+  export LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
+  export LANGUAGE=en_US.UTF-8
+fi
 
 if [[ "$HOST" == *"facebook"* ]];
 then
@@ -28,9 +43,9 @@ else
 		export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH";
 		export PATH="${PATH}:$HOME/Library/Python/3.10/bin"
 	fi
-	export TERMINAL=alacritty
+	# export TERMINAL=alacritty
 	(cat ~/.cache/wal/sequences &)
-	export PATH=$PATH:$HOME/Library/Python/3.7/bin;
+	export PATH=$PATH:$HOME/Library/Python/3.9/bin;
 	PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
 	PATH="/usr/local/opt/curl/bin:$PATH";
 	LDFLAGS="-L/usr/local/opt/curl/lib";
@@ -38,18 +53,9 @@ else
 	PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
 	source "$HOME/.cargo/env";
 	export PATH="/usr/local/opt/curl/bin:$PATH";
-
     export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:$PATH";
 	PATH="/usr/local/opt/grep/libexec/gnubin:$PATH";
+	. "$HOME/.cargo/env"
 fi
 PATH=$HOME/.local/bin:$PATH
 export PATH="/usr/local/sbin:$PATH"
-. "$HOME/.cargo/env"
-
-
-
-
-
-
-
-

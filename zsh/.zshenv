@@ -21,6 +21,7 @@ fi
 
 if [[ "$HOST" == *"facebook"* ]];
 then
+  export TERMINAL=xterm-256color
   if [[ -t 1 ]]; then  echo "Loading FB specific settings..."; fi
 	if [[ -z "${LOCAL_ADMIN_SCRIPTS}" ]]; then
 		LOCAL_ADMIN_SCRIPTS="/usr/facebook/ops/rc/"

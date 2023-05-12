@@ -23,41 +23,39 @@ if [[ "$HOST" == *"facebook"* ]];
 then
   export TERMINAL=xterm-256color
   if [[ -t 1 ]]; then  echo "Loading FB specific settings..."; fi
-	if [[ -z "${LOCAL_ADMIN_SCRIPTS}" ]]; then
-		LOCAL_ADMIN_SCRIPTS="/usr/facebook/ops/rc/"
-	fi
+	if [[ -z "${LOCAL_ADMIN_SCRIPTS}" ]]; then LOCAL_ADMIN_SCRIPTS="/usr/facebook/ops/rc/"; fi
     local fb_master_zshrc="${LOCAL_ADMIN_SCRIPTS}/master.zshrc"
     local fb_prompt_file="${LOCAL_ADMIN_SCRIPTS}/scm-prompt"
-    if [ -f "$fb_master_zshrc" ]; then
-        source "$fb_master_zshrc"
-    fi
-    if [ -f "$fb_prompt_file" ]; then
-    	source "$fb_prompt_file"
-    fi
+    if [ -f "$fb_master_zshrc" ]; then source "$fb_master_zshrc"; fi
+    if [ -f "$fb_prompt_file" ]; then source "$fb_prompt_file"; fi
   if [[ -t 1 ]]; then echo "Setting proxy alias..."; fi
   alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
 else
     if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
-	if [ -f "$HOME/.local/homebrew/bin/brew" ]; then export PATH="$HOME/.local/homebrew/bin:${PATH}"; fi
-	if [ -d "/Applications/Emacs.app/Contents/MacOS/bin" ]; then
-		export PATH="/Applications/Emacs.app/Contents/MacOS/bin:$PATH";
-		export PATH="/usr/local/opt/curl/bin:$PATH";
-		export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH";
-		export PATH="${PATH}:$HOME/Library/Python/3.10/bin"
+	if [ -d "$HOME/.local/homebrew/Cellar/libgccjit/13.1.0" ]; then
+		LDFLAGS="-L$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/lib";
+		CPPFLAGS="-I$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/include";
 	fi
-	# export TERMINAL=alacritty
-	(cat ~/.cache/wal/sequences &)
-	export PATH=$PATH:$HOME/Library/Python/3.9/bin;
-	PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
-	PATH="/usr/local/opt/curl/bin:$PATH";
-	LDFLAGS="-L/usr/local/opt/curl/lib";
-	CPPFLAGS="-I/usr/local/opt/curl/include";
-	PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
-	source "$HOME/.cargo/env";
-	export PATH="/usr/local/opt/curl/bin:$PATH";
-    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:$PATH";
-	PATH="/usr/local/opt/grep/libexec/gnubin:$PATH";
-	. "$HOME/.cargo/env"
+	if [ -d "/Applications/Emacs.app/" ]; then export PATH="/Applications/Emacs.app/Contents/MacOS:$PATH"; fi
+	if [ -d "/usr/local/opt/curl" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
+	if [ -d "$HOME/.rubies/ruby-3.1.2/" ]; then	export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH"; fi
+	if [ -d "$HOME/Library/Python/3.10/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.10/bin"; fi
+	if [ -d "$HOME/Library/Python/3.9/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.9/bin"; fi
+	if [ -d "/usr/local/opt" ]; then 
+		PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
+		LDFLAGS="-L/usr/local/opt/curl/lib";
+		CPPFLAGS="-I/usr/local/opt/curl/include";
+		PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
+	fi
+	if [ -d "$HOME/.cargo" ]; then
+		source "$HOME/.cargo/env";
+	fi
+	if [ -d "/usr/local/opt/grep/libexec/gnubin" ]; then PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"; fi
 fi
-PATH=$HOME/.local/bin:$PATH
-export PATH="/usr/local/sbin:$PATH"
+if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
+if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
+if [ -d "$HOME/.local/homebrew" ]; then
+	echo "Replacing path for local Homebrew...";
+	export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
+	export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
+fi

@@ -1,3 +1,9 @@
+Xft.antialias: true
+Xft.hinting:   true
+Xft.rgba:      rgb
+Xft.hintstyle: hintfull
+Xft.dpi:       120
+
 #ifndef _BASE16_ONE_DARK
 #define _BASE16_ONE_DARK
 

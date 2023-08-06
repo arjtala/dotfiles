@@ -3,11 +3,6 @@
 	url = git@github.com:arjtala/dotfiles_emacs.git
     branch = master
 
-[submodule "emacs/.config/emacs/gptel"]
-	path = emacs/.config/emacs/gptel
-	url = git@github.com:karthink/gptel.git
-    branch = master
-
 [submodule "tmux/.tmux/plugins/tmux"]
 	path = tmux/.tmux/plugins/tmux
 	url = https://git::@github.com/dracula/tmux

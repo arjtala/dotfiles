@@ -128,3 +128,6 @@ fi
 
 
 if [ -f "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
+
+# opam configuration
+[[ ! -r /home/arjangt/.opam/opam-init/init.zsh ]] || source /home/arjangt/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null

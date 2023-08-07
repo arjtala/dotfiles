@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-export MONITOR=$(/usr/bin/xrandr | /usr/bin/grep connected | /usr/bin/grep -v disconnected | /usr/bin/grep -v eDP1 | /usr/bin/awk '{print $1}')
+export MONITOR=$(xrandr | grep connected | grep -v disconnected | grep -v eDP-1 | /usr/bin/awk '{print $1}')
 echo "Monitor ${MONITOR}"
 
 export DEFAULT_NETWORK_INTERFACE=$(ip route | /usr/bin/grep -v vpn | /usr/bin/grep '^default' | /usr/bin/awk '{print $5}' | head -n1)

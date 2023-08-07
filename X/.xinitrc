@@ -19,16 +19,20 @@ if [ -f "$usermodmap" ]; then
     xmodmap "$usermodmap"
 fi
 
-MONITOR=$(/usr/bin/xrandr | /usr/bin/grep connected | /usr/bin/grep -v disconnected | /usr/bin/grep -v eDP1 | /usr/bin/awk '{print $1}')
+source ~/.config/i3/monitor.sh
 VAR='GNU/Linux is an operating system'
-if [[ $MONITOR == "eDP1" ]]; then
+if [[ ($MONITOR == "eDP1") || ($MONITOR == "eDP-1") ]]; then
 	xrandr --newmode 1920x1200_60 154 1920 1968 2000 2080 1200 1203 1209 1235 -hsync +vsync
-	xrandr --addmode eDP1 1920x1200_60
-	xrandr --output eDP1 --mode 1920x1200_60
+	xrandr --addmode $MONITOR 1920x1200_60
+	xrandr --output $MONITOR --mode 1920x1200_60
+else
+	LAPTOP=$(xrandr | grep connected | grep -v disconnected | grep eDP | /usr/bin/awk '{print $1}')
+	xrandr -s 1 --output $MONITOR
+	xrandr --output $LAPTOP --same-as DP-2
 fi
 
 sh ~/.config/polybar/launch.sh &
-sh ~/.config/i3/reset.sh
+sh ~/.config/i3/reset.sh &
 
 # start some nice programs
 if [ -d /etc/X11/xinit/xinitrc.d ] ; then

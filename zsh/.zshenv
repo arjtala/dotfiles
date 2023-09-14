@@ -54,8 +54,15 @@ else
 fi
 if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
+if type brew &> /dev/null; then
+	export PATH="$(brew --prefix sqlite)/bin:$PATH";
+	LDFLAGS="-L/usr/local/opt/sqlite/lib";
+	CPPFLAGS="-I/usr/local/opt/sqlite/include";
+	export PKG_CONFIG_PATH=“/usr/local/opt/sqlite/lib/pkgconfig”;
+fi 
 if [ -d "$HOME/.local/homebrew" ]; then
 	echo "Replacing path for local Homebrew...";
 	export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
 	export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
+	export DYLD_LIBRARY_PATH=/usr/local/opt/sqlite/lib:/usr/lib;
 fi

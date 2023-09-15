@@ -59,3 +59,4 @@ if [ -d "$HOME/.local/homebrew" ]; then
 	export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
 	export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 fi
+if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi

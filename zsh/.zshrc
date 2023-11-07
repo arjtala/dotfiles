@@ -133,3 +133,4 @@ if [ -f "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 # opam configuration
 [[ ! -r /home/arjangt/.opam/opam-init/init.zsh ]] || source /home/arjangt/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
+if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi

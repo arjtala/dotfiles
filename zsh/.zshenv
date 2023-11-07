@@ -22,6 +22,7 @@ fi
 if [[ "$HOST" == *"facebook"* ]];
 then
   export TERMINAL=xterm-256color
+  export TERM=xterm-256color
   if [[ -t 1 ]]; then  echo "Loading FB specific settings..."; fi
 	if [[ -z "${LOCAL_ADMIN_SCRIPTS}" ]]; then LOCAL_ADMIN_SCRIPTS="/usr/facebook/ops/rc/"; fi
     local fb_master_zshrc="${LOCAL_ADMIN_SCRIPTS}/master.zshrc"
@@ -47,10 +48,10 @@ else
 		CPPFLAGS="-I/usr/local/opt/curl/include";
 		PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
 	fi
-	if [ -d "$HOME/.cargo" ]; then
-		source "$HOME/.cargo/env";
-	fi
 	if [ -d "/usr/local/opt/grep/libexec/gnubin" ]; then PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"; fi
+fi
+if [ -d "$HOME/.cargo" ]; then
+	source "$HOME/.cargo/env";
 fi
 if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
@@ -66,4 +67,3 @@ if [ -d "$HOME/.local/homebrew" ]; then
 	export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 	export DYLD_LIBRARY_PATH=/usr/local/opt/sqlite/lib:/usr/lib;
 fi
-if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi

@@ -64,6 +64,9 @@ if [ -d "$HOME/.local/homebrew" ]; then
 	echo "Replacing path for local Homebrew...";
 	export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
 	export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
-	export DYLD_LIBRARY_PATH=/usr/local/opt/sqlite/lib:/usr/lib;
+	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
+	export PATH="$(brew --prefix sqlite)/bin:$PATH"
+	LDFLAGS="-L$(brew --prefix sqlite)/lib"
+	CPPFLAGS="-I$(brew --prefix sqlite)/include"
+	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
 fi
-if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi

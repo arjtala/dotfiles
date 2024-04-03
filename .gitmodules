@@ -3,6 +3,11 @@
 	url = git@github.com:arjtala/dotfiles_emacs.git
     branch = master
 
+[submodule "alacritty/.config/alacritty/themes"]
+	path = alacritty/.config/alacritty/themes
+	url = https://github.com/alacritty/alacritty-theme
+  branch = master
+
 [submodule "tmux/.tmux/plugins/tmux"]
 	path = tmux/.tmux/plugins/tmux
 	url = https://git::@github.com/dracula/tmux

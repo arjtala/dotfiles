@@ -61,7 +61,6 @@ if type brew &> /dev/null; then
 	export PKG_CONFIG_PATH=“/usr/local/opt/sqlite/lib/pkgconfig”;
 fi 
 if [ -d "$HOME/.local/homebrew" ]; then
-	echo "Replacing path for local Homebrew...";
 	export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
 	export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
@@ -69,4 +68,7 @@ if [ -d "$HOME/.local/homebrew" ]; then
 	LDFLAGS="-L$(brew --prefix sqlite)/lib"
 	CPPFLAGS="-I$(brew --prefix sqlite)/include"
 	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
+fi
+if [ -d "/opt/anaconda3/bin" ]; then
+	export PATH="/opt/anaconda3/bin:${PATH}";
 fi

@@ -1,4 +1,4 @@
-[[ -o interactive ]] || exit 0
+# [[ -o interactive ]] || exit 0
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -134,3 +134,19 @@ if [ -f "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$
 # opam configuration
 [[ ! -r /home/arjangt/.opam/opam-init/init.zsh ]] || source /home/arjangt/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
 if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/arjangt/.local/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/arjangt/.local/etc/profile.d/conda.sh" ]; then
+        . "/home/arjangt/.local/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/arjangt/.local/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+

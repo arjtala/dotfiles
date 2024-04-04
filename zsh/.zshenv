@@ -19,6 +19,10 @@ else
   export LANGUAGE=en_US.UTF-8
 fi
 
+if [[ "$HOST" == *"ip-10-0-1-5"* ]];
+then
+	if [ -d "$HOME/.local/share/info" ]; then export INFOPATH=$HOME/.local/share/info; fi
+fi
 if [[ "$HOST" == *"facebook"* ]];
 then
   export TERMINAL=xterm-256color
@@ -52,8 +56,8 @@ else
 	fi
 	if [ -d "/usr/local/opt/grep/libexec/gnubin" ]; then PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"; fi
 fi
-if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
+if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if type brew &> /dev/null; then
 	export PATH="$(brew --prefix sqlite)/bin:$PATH";
 	LDFLAGS="-L/usr/local/opt/sqlite/lib";

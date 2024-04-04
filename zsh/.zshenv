@@ -75,6 +75,9 @@ if [ -d "$HOME/.local/homebrew" ]; then
 	CPPFLAGS="-I$(brew --prefix sqlite)/include"
 	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
 fi
+if [ -d "$HOME/.local/conda/bin" ]; then
+	export PATH="$HOME/.local/conda/bin:${PATH}";
+fi
 if [ -d "/opt/anaconda3/bin" ]; then
 	export PATH="/opt/anaconda3/bin:${PATH}";
 fi

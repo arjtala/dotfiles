@@ -81,3 +81,7 @@ fi
 if [ -d "/opt/anaconda3/bin" ]; then
 	export PATH="/opt/anaconda3/bin:${PATH}";
 fi
+if [ -d "/usr/local/cuda/bin" ]; then
+		export PATH="/usr/local/cuda/bin:${PATH}";
+fi
+

@@ -37,6 +37,7 @@ then
   alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
 else
     if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
+set -g @prefix_highlight_fg 'white' # default is 'colour231'
 	if [ -d "$HOME/.local/homebrew/Cellar/libgccjit/13.1.0" ]; then
 		LDFLAGS="-L$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/lib";
 		CPPFLAGS="-I$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/include";
@@ -59,21 +60,16 @@ if [ -d "$HOME/.cargo" ]; then
 fi
 if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
-if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if type brew &> /dev/null; then
-	export PATH="$(brew --prefix sqlite)/bin:$PATH";
-	LDFLAGS="-L/usr/local/opt/sqlite/lib";
-	CPPFLAGS="-I/usr/local/opt/sqlite/include";
-	export PKG_CONFIG_PATH=“/usr/local/opt/sqlite/lib/pkgconfig”;
-fi 
-if [ -d "$HOME/.local/homebrew" ]; then
-	export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
-	export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
-	export PATH="$(brew --prefix sqlite)/bin:$PATH"
 	LDFLAGS="-L$(brew --prefix sqlite)/lib"
 	CPPFLAGS="-I$(brew --prefix sqlite)/include"
 	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
+    export PATH="$(brew --prefix sqlite)/bin:$PATH";
+fi 
+if [ -d "$HOME/.local/homebrew" ]; then
+	# export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
+    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 fi
 if [ -d "$HOME/.local/conda/bin" ]; then
 	export PATH="$HOME/.local/conda/bin:${PATH}";
@@ -84,4 +80,3 @@ fi
 if [ -d "/usr/local/cuda/bin" ]; then
 		export PATH="/usr/local/cuda/bin:${PATH}";
 fi
-

@@ -1,16 +1,16 @@
 [submodule "emacs/.config/emacs"]
 	path = emacs/.config/emacs
 	url = git@github.com:arjtala/dotfiles_emacs.git
-    branch = master
+	branch = master
 
 [submodule "alacritty/.config/alacritty/themes"]
 	path = alacritty/.config/alacritty/themes
 	url = https://github.com/alacritty/alacritty-theme
-  branch = master
+	branch = master
 [submodule "zsh/.zsh/pure"]
-    path = zsh/.zsh/pure
-    url = https://github.com/sindresorhus/pure.git
-    branch = main
+	path = zsh/.zsh/pure
+	url = https://github.com/sindresorhus/pure.git
+	branch = main
 [submodule "tmux/.tmux/plugins/tmux"]
 	path = tmux/.tmux/plugins/tmux
 	url = https://git::@github.com/dracula/tmux
@@ -29,55 +29,55 @@
 [submodule "tmux/.tmux/plugins/tmux-yank"]
 	path = tmux/.tmux/plugins/tmux-yank
 	url = https://github.com/tmux-plugins/tmux-yank
-    branch = master
+	branch = master
 
 [submodule "tmux/.tmux/plugins/tmux-continuum"]
 	path = tmux/.tmux/plugins/tmux-continuum
 	url = https://github.com/tmux-plugins/tmux-continuum
-    branch = master
+	branch = master
 
 [submodule "tmux/.tmux/plugins/tmux-resurrect"]
 	path = tmux/.tmux/plugins/tmux-resurrect
 	url = https://github.com/tmux-plugins/tmux-resurrect
-    branch = master
+	branch = master
 
 [submodule "tmux/.tmux/plugins/tmux-sensible"]
 	path = tmux/.tmux/plugins/tmux-sensible
 	url = https://github.com/tmux-plugins/tmux-sensible
-    branch = master
+	branch = master
 
 [submodule "vim/.vim/bundle/Vundle.vim"]
-    path = vim/.vim/bundle/Vundle.vim
+	path = vim/.vim/bundle/Vundle.vim
 	url = https://github.com/VundleVim/Vundle.vim.git
 	branch = master
 
 [submodule "vim/.vim/bundle/Zenburn"]
-    path = vim/.vim/bundle/Zenburn
+	path = vim/.vim/bundle/Zenburn
 	url = https://github.com/jnurmine/Zenburn.git
 	branch = master
 
 [submodule "vim/.vim/bundle/ack.vim"]
-    path = vim/.vim/bundle/ack.vim
+	path = vim/.vim/bundle/ack.vim
 	url = https://github.com/mileszs/ack.vim.git
 	branch = master
 
 [submodule "vim/.vim/bundle/ale"]
-    path = vim/.vim/bundle/ale
+	path = vim/.vim/bundle/ale
 	url = https://github.com/w0rp/ale.git
 	branch = master
 
 [submodule "vim/.vim/bundle/editorconfig-vim"]
-    path = vim/.vim/bundle/editorconfig-vim
+	path = vim/.vim/bundle/editorconfig-vim
 	url = https://github.com/editorconfig/editorconfig-vim.git
 	branch = master
 
 [submodule "vim/.vim/bundle/fzf"]
-    path = vim/.vim/bundle/fzf
+	path = vim/.vim/bundle/fzf
 	url = https://github.com/junegunn/fzf.git
 	branch = master
 
 [submodule "vim/.vim/bundle/fzf.vim"]
-    path = vim/.vim/bundle/fzf.vim
+	path = vim/.vim/bundle/fzf.vim
 	url = https://github.com/junegunn/fzf.vim.git
 	branch = master
 

@@ -19,7 +19,8 @@ export ZSH="$HOME/.oh-my-zsh"
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 # ZSH_THEME="powerlevel10k/powerlevel10k"
 # ZSH_THEME="half-life"
-ZSH_THEME="sonicradish"
+# ZSH_THEME="sonicradish"
+ZSH_THEME=""
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -108,13 +109,13 @@ export LANG=en_US.UTF-8
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-source $HOME/.purepower
-POWERLEVEL10k_MODE='nerdfont-complete'
-POWERLEVEL10k_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
-POWERLEVEL10k_RIGHT_PROMPT_ELEMENTS=(status)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status)
-POWERLEVEL10k_PROMPT_ADD_NEWLINE=true
+# source $HOME/.purepower
+# POWERLEVEL10k_MODE='nerdfont-complete'
+# POWERLEVEL10k_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
+# POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs status ssh)
+# POWERLEVEL10k_RIGHT_PROMPT_ELEMENTS=(status)
+# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status)
+# POWERLEVEL10k_PROMPT_ADD_NEWLINE=true
 # POWERLEVEL9K_VCS_BACKENDS=(git hg)
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
@@ -128,6 +129,12 @@ if [ -f "$HOME/perl5" ]; then
 	PERL_MM_OPT="INSTALL_BASE=/home/arjangt/perl5"; export PERL_MM_OPT;
 fi
 
+if [ -d "$HOME/.zsh/pure" ]; then
+    fpath+=($HOME/.zsh/pure);
+    autoload -U promptinit;
+    promptinit;
+    prompt pure
+fi
 
 if [ -f "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

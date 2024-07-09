@@ -81,3 +81,7 @@ fi
 if [ -d "/opt/anaconda3/bin" ]; then
 	export PATH="/opt/anaconda3/bin:${PATH}";
 fi
+if [ -d "$HOME/.local/homebrew/anaconda3" ]; then
+	export PATH="$HOME/.local/homebrew/anaconda3/bin:${PATH}";
+fi
+

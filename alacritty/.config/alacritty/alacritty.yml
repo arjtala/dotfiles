@@ -44,7 +44,7 @@ window:
   #
   # Window opacity as a floating point number from `0.0` to `1.0`.
   # The value `0.0` is completely transparent and `1.0` is opaque.
-  opacity: 0.8
+  opacity: 1.0
 
   # Window decorations
   #
@@ -111,38 +111,26 @@ scrolling:
 font:
   # Normal (roman) font face
   normal:
-    # family: RobotoMono Nerd Font
-    # family: Hack
-    # family: TerminessTTF Nerd Font
-    family: Mononoki Nerd Font
+    family: JetBrainsMono Nerd Font
     style: Regular
 
   # Bold font face
   bold:
-    # family: RobotoMono Nerd Font
-    # family: Hack
-    # family: TerminessTTF Nerd Font
-    family: Mononoki Nerd Font
+    family: JetBrainsMono Nerd Font
     style: Bold
 
   # Italic font face
   italic:
-    # family: RobotoMono Nerd Font
-    # family: Hack
-    # family: TerminessTTF Nerd Font
-    family: Mononoki Nerd Font
+    family: JetBrainsMono Nerd Font
     style: Italic
 
   # Bold italic font face
   bold_italic:
-    # family: RobotoMono Nerd Font
-    # family: Hack
-    # family: TerminessTTF Nerd Font
-    family: Mononoki Nerd Font
+    family: JetBrainsMono Nerd Font
     style: Bold Italic
 
   # Point size
-  size: 15.0
+  size: 14.0
 
   # Offset is the extra space around each character. `offset.y` can be thought of
   # as modifying the line spacing, and `offset.x` as modifying the letter spacing.

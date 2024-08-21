@@ -21,6 +21,11 @@
 	url = https://github.com/tmux-plugins/tpm
 	branch = master
 
+[submodule "tmux/.tmux/plugins/tmux-nerd-font-window-name"]
+	path = tmux/.tmux/plugins/tmux-nerd-font-window-name
+	url = https://github.com/joshmedeski/tmux-nerd-font-window-name
+	branch = master
+
 [submodule "tmux/.tmux/plugins/tmux-scroll-copy-mode"]
 	path = tmux/.tmux/plugins/tmux-scroll-copy-mode
 	url = https://github.com/nhdaly/tmux-scroll-copy-mode
@@ -34,6 +39,11 @@
 [submodule "tmux/.tmux/plugins/tmux-continuum"]
 	path = tmux/.tmux/plugins/tmux-continuum
 	url = https://github.com/tmux-plugins/tmux-continuum
+	branch = master
+
+[submodule "tmux/.tmux/plugins/tmux-power"]
+	path = tmux/.tmux/plugins/tmux-power
+	url = https://github.com/wfxr/tmux-power
 	branch = master
 
 [submodule "tmux/.tmux/plugins/tmux-resurrect"]

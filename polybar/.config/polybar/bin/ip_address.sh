@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export wlan_ip="$(ifconfig wlp65s0 | grep 'inet ' | awk '{ print $2 }')"
+export wlan_ip="$(ip route | /usr/bin/grep -v vpn | /usr/bin/grep '^default' | /usr/bin/awk '{print $5}' | head -n1)"
 export eth_ip="$(ifconfig enp1s0 | grep 'inet ' | awk '{ print $2 }')"
 
 if [ -n "$eth_ip" ]; then

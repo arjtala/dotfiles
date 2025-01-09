@@ -1,7 +1,7 @@
 #! /bin/bash
 
-WCONNECTED=""
-ECONNECTED=""
+WCONNECTED=" "
+ECONNECTED="모"
 DEVICES=$(route | awk '/^default/{print $NF}')
 IPV4=$(dig +short txt ch whoami.cloudflare @1.0.0.1 | tr -d '"')
 IPV6=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | tr -d '"')
@@ -13,7 +13,7 @@ else
 	IP_ADDRESS="N/A"
 fi;
 
-for nic in $DEVICES; do  
+for nic in $DEVICES; do
   if [[ $nic == *"vpn"* ]]; then
 	  DEVICE="%{F#2ab7ca} $ECONNECTED %{F-}"
 	  LOCAL_ADDRESS="%{F#6497b1}$(ifconfig $nic | grep 'inet ' | awk '{ print $2 }' | tr -d '\n')%{F-} | "

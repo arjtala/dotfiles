@@ -6,19 +6,20 @@ echo "Monitor ${MONITOR}"
 export DEFAULT_NETWORK_INTERFACE=$(ip route | /usr/bin/grep -v vpn | /usr/bin/grep '^default' | /usr/bin/awk '{print $5}' | head -n1)
 echo "Network interface: ${DEFAULT_NETWORK_INTERFACE}"
 
-IS_DWM=$(pgrep dwm)
+IS_DWL=$(pgrep dwl)
 IS_I3=$(pgrep i3)
 IS_DESKTOP=0
 if ! [ -x "$(command -v xbacklight)" ]; then
 	IS_DESKTOP=1
 fi
 
-if [[ ! -z "$IS_DWM" ]]; then
-	BIN="/usr/local/bin/polybar"
+if [[ ! -z "$IS_DWL" ]]; then
+	# BIN="/usr/local/bin/polybar"
+	BIN="/usr/bin/polybar"
 	if [[ "$IS_DESKTOP" -eq 1 ]]; then
-		BAR="dwmBar";
+		BAR="dwm3Bar";
 	else
-		BAR="dwmBarLaptop";
+		BAR="dwm3BarLaptop";
 	fi
 fi
 if [[ ! -z "$IS_I3" ]]; then

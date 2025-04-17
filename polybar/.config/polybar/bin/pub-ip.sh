@@ -1,7 +1,7 @@
 #! /bin/bash
 
 WCONNECTED=" "
-ECONNECTED="모"
+ECONNECTED="🌐"
 DEVICES=$(route | awk '/^default/{print $NF}')
 IPV4=$(dig +short txt ch whoami.cloudflare @1.0.0.1 | tr -d '"')
 IPV6=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | tr -d '"')

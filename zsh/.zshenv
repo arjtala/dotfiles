@@ -58,7 +58,6 @@ fi
 if [ -d "$HOME/.cargo" ]; then
 	source "$HOME/.cargo/env";
 fi
-if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
 if type brew &> /dev/null; then
 	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
@@ -84,3 +83,4 @@ fi
 if [ -d "/usr/local/cuda/bin" ]; then
 		export PATH="/usr/local/cuda/bin:${PATH}";
 fi
+if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi

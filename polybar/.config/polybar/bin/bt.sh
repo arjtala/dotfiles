@@ -8,10 +8,11 @@ function get_batt_level()
 	if [[ !  -z  $1  ]]
 	then
 	   local _MX="MXErgo"
-	   local _NAME=$(/usr/bin/upower --show-info $_PATH | /usr/bin/grep model | /usr/bin/awk '{print $2 $3}')
+	   local _NAME=$(/usr/bin/upower --show-info $_PATH | /usr/bin/grep model | /usr/bin/awk '{print $3 $4}')
 	   if [[ $_NAME = $_MX ]]
 	   then
-		   local _BATT=$(/usr/bin/upower --show-info $_PATH | /usr/bin/grep percentage | /usr/bin/awk '{print $2}')
+		   local _BATT=$(solaar show | grep -m1 Battery | awk '{print $2}' | sed 's/[^0-9%]*//g')
+		   # local _BATT=$(/usr/bin/upower --show-info $_PATH | /usr/bin/grep percentage | /usr/bin/awk '{print $2}')
 	   fi
 	fi
     BATT=$_BATT

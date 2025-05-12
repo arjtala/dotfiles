@@ -60,16 +60,19 @@ if [ -d "$HOME/.cargo" ]; then
 fi
 if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
+if [ -d "/opt/homebrew" ]; then
+    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}";
+fi
+if [ -d "$HOME/.local/homebrew" ]; then
+    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
+fi
 if type brew &> /dev/null; then
+    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
 	LDFLAGS="-L$(brew --prefix sqlite)/lib"
 	CPPFLAGS="-I$(brew --prefix sqlite)/include"
 	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
     export PATH="$(brew --prefix sqlite)/bin:$PATH";
-fi
-if [ -d "$HOME/.local/homebrew" ]; then
-	# export PATH=$(echo "$PATH" | tr ":" "\n" | grep -v '/opt/homebrew/bin' | xargs | tr ' ' ':');
-    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 fi
 if [ -d "$HOME/.local/conda/bin" ]; then
 	export PATH="$HOME/.local/conda/bin:${PATH}";

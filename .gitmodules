@@ -7,10 +7,12 @@
 	path = alacritty/.config/alacritty/themes
 	url = https://github.com/alacritty/alacritty-theme
 	branch = master
+
 [submodule "zsh/.zsh/pure"]
 	path = zsh/.zsh/pure
-	url = https://github.com/sindresorhus/pure.git
+	url = https://github.com/sindresorhus/pure
 	branch = main
+
 [submodule "tmux/.tmux/plugins/tmux"]
 	path = tmux/.tmux/plugins/tmux
 	url = https://git::@github.com/dracula/tmux
@@ -24,7 +26,7 @@
 [submodule "tmux/.tmux/plugins/tmux-nerd-font-window-name"]
 	path = tmux/.tmux/plugins/tmux-nerd-font-window-name
 	url = https://github.com/joshmedeski/tmux-nerd-font-window-name
-	branch = master
+	branch = main
 
 [submodule "tmux/.tmux/plugins/tmux-scroll-copy-mode"]
 	path = tmux/.tmux/plugins/tmux-scroll-copy-mode

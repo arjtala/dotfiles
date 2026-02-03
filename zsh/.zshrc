@@ -145,6 +145,13 @@ if [ -f "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$
 [[ ! -r /home/arjangt/.opam/opam-init/init.zsh ]] || source /home/arjangt/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
 if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi
 
+# Copy input to clipboard using OSC 52 (limit 74994 bytes)
+clip() { # limit copy to 74994 bytes (OSC 52 limit)
+  input_data=$(cat)
+  encoded_data=$(printf '%s' "$input_data" | base64 | tr -d '\n')
+  printf "\033]52;c;%s\a" "$encoded_data"
+}
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/Users/arjangt/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
@@ -159,4 +166,3 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-

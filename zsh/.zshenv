@@ -19,7 +19,6 @@ else
   export LANGUAGE=en_US.UTF-8
 fi
 
-if [[ -d "$HOME/fbsource/fbcode/" ]]; then source ~/fbsource/tools/arcanist/completions/arc-completion.zsh; fi
 if [[ "$HOST" == *"ip-10-0-1-5"* ]];
 then
 	if [ -d "$HOME/.local/share/info" ]; then export INFOPATH=$HOME/.local/share/info; fi

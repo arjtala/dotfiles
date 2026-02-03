@@ -1,3 +1,4 @@
+
 # [[ -o interactive ]] || exit 0
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -20,7 +21,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # ZSH_THEME="powerlevel10k/powerlevel10k"
 # ZSH_THEME="half-life"
 # ZSH_THEME="sonicradish"
-ZSH_THEME=""
+ZSH_THEME="half-life"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -137,6 +138,7 @@ if [ -d "$HOME/.zsh/pure" ]; then
     prompt pure
 fi
 
+if [ -d "$CONDA_PREFIX" ]; then export DYLD_LIBRARY_PATH="$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH"; fi
 if [ -f "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 # opam configuration
@@ -145,14 +147,14 @@ if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/arjangt/.local/homebrew/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/Users/arjangt/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/Users/arjangt/.local/homebrew/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/Users/arjangt/.local/homebrew/anaconda3/etc/profile.d/conda.sh"
+    if [ -f "/Users/arjangt/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "/Users/arjangt/miniforge3/etc/profile.d/conda.sh"
     else
-        export PATH="/Users/arjangt/.local/homebrew/anaconda3/bin:$PATH"
+        export PATH="/Users/arjangt/miniforge3/bin:$PATH"
     fi
 fi
 unset __conda_setup

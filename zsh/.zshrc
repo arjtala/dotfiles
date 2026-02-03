@@ -20,7 +20,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # ZSH_THEME="powerlevel10k/powerlevel10k"
 # ZSH_THEME="half-life"
 # ZSH_THEME="sonicradish"
-ZSH_THEME=""
+ZSH_THEME="half-life"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -145,16 +145,18 @@ if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/arjangt/.local/homebrew/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/usr/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/Users/arjangt/.local/homebrew/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/Users/arjangt/.local/homebrew/anaconda3/etc/profile.d/conda.sh"
+    if [ -f "/usr/etc/profile.d/conda.sh" ]; then
+        . "/usr/etc/profile.d/conda.sh"
     else
-        export PATH="/Users/arjangt/.local/homebrew/anaconda3/bin:$PATH"
+        export PATH="/usr/bin:$PATH"
     fi
 fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+zmodload zsh/zprof
+zprof

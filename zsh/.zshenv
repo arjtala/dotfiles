@@ -62,6 +62,9 @@ if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
 if [ -d "/opt/homebrew" ]; then
     export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}";
 fi
+if [ -d "/opt/homebrew/opt/libiconv" ]; then
+	 export PATH="/opt/homebrew/opt/libiconv/bin:${PATH}";
+fi
 if [ -d "$HOME/.local/homebrew" ]; then
     export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 fi

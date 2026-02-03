@@ -154,14 +154,27 @@ clip() { # limit copy to 74994 bytes (OSC 52 limit)
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/arjangt/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/Users/arjangt/miniforge3/etc/profile.d/conda.sh" ]; then
-        . "/Users/arjangt/miniforge3/etc/profile.d/conda.sh"
+if [ -f "/Users/arjangt/miniforge3/bin/conda" ]; then
+    __conda_setup="$('/Users/arjangt/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
     else
-        export PATH="/Users/arjangt/miniforge3/bin:$PATH"
+        if [ -f "/Users/arjangt/miniforge3/etc/profile.d/conda.sh" ]; then
+            . "/Users/arjangt/miniforge3/etc/profile.d/conda.sh"
+        else
+            export PATH="/Users/arjangt/miniforge3/bin:$PATH"
+        fi
+    fi
+elif [ -f "/usr/bin/conda" ]; then
+    __conda_setup="$('/usr/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
+    else
+        if [ -f "/usr/etc/profile.d/conda.sh" ]; then
+            . "/usr/etc/profile.d/conda.sh"
+        else
+            export PATH="/usr/bin:$PATH"
+        fi
     fi
 fi
 unset __conda_setup

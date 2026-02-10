@@ -79,6 +79,12 @@ fi
 if [ -d "$HOME/.local/conda/bin" ]; then
 	export PATH="$HOME/.local/conda/bin:${PATH}";
 fi
+if [ -d "/opt/conda/bin" ]; then
+	export PATH="/opt/conda/bin:${PATH}";
+fi
+if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+	. "/opt/conda/etc/profile.d/conda.sh"
+fi
 if [ -d "/opt/anaconda3/bin" ]; then
 	export PATH="/opt/anaconda3/bin:${PATH}";
 fi

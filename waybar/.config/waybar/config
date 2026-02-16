@@ -1,0 +1,176 @@
+{
+    "layer": "top",
+    "position": "bottom",
+    "height": 31,
+    "modules-left": [
+        "sway/workspaces",
+        "tray",
+        "bluetooth",
+        "network",
+        "pulseaudio",
+        "battery",
+        "custom/vpn"
+    ],
+    "modules-center": [
+        "custom/adhan",
+        "clock",
+        "sway/window"
+    ],
+    "modules-right": [
+        "cpu",
+        "memory",
+        "disk",
+        "custom/nvidia"
+    ],
+    "sway/window": {
+        "format": "{title}",
+        "max-length": 50
+    },
+    "clock": {
+        "format": "  {:%a, %d %b %Y   %H:%M}",
+        "timezone": "America/Los_Angeles",
+        "tooltip": "true",
+        "tooltip-format": " <tt><span size='11pt'>{calendar}</span></tt> ",
+        "calendar": {
+            "mode": "month",
+            "week-pos": "right",
+            "on-click-right": "mode",
+            "format": {
+                "months": "<span color='#ebdbb2'><b>{}</b></span>",
+                "days": "<span color='#83a598'>{}</span>",
+                "weeks": "<span color='#d3869b'><b>W{}</b></span>",
+                "weekdays": "<span color='#fabd2f'><b>{}</b></span>",
+                "today": "<span color='#fb4934'><b>{}</b></span>"
+            }
+        },
+        "actions": {
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        }
+    },
+    "tray": {
+        "icon-size": 15
+    },
+    "sway/workspaces": {
+        "format": "{name}",
+        "tooltip": false,
+        "all-outputs": true
+    },
+    "cpu": {
+        "interval": 3,
+        "format": "  {usage:2}%",
+        "max-length": 10,
+        "tooltip": false,
+        "warning": 70,
+        "critical": 85,
+        "on-click": "kitty -e 'htop'"
+    },
+    "memory": {
+        "interval": 3,
+        "format": "󰍛  {percentage:2}%",
+        "max-length": 10,
+        "tooltip": false,
+        "warning": 70,
+        "critical": 85,
+        "on-click": "kitty -e 'htop'"
+    },
+    "disk": {
+        "interval": 120,
+        "tooltip": false,
+        "format": "󰋊  {free}"
+    },
+    "bluetooth": {
+        "format": "",
+        "format-disabled": "",
+        "format-connected": " {num_connections}",
+        "on-click": "blueberry"
+    },
+    "custom/nvidia": {
+        "format": "󰏔  {}",
+        "interval": 60,
+        "exec": "$HOME/.config/waybar/scripts/system-nvidia-smi.sh",
+        "tooltip": false
+    },
+    "custom/adhan": {
+        "format": "☪ {}",
+        "interval": 60,
+        "tooltip": false,
+        "exec": "adhan_rs",
+        "icon-size": 10,
+        "spacing": 10
+    },
+    "battery": {
+        "interval": 5,
+        "states": {
+            "warning": 20,
+            "critical": 12
+        },
+        "format": "{icon}  ",
+        "format-charging": " {capacity}%  ",
+        "format-plugged": "  {capacity}%  ",
+        "format-icons": [
+            "",
+            "",
+            "",
+            "",
+            ""
+        ],
+        "format-alt": "{icon} {capacity}% ({time})  "
+    },
+    "network": {
+        "format": "{icon}",
+        "format-wifi": "{icon}",
+        "format-icons": {
+            "wifi": [
+                ""
+            ],
+            "ethernet": [
+                "󰈀"
+            ],
+            "disconnected": [
+                ""
+            ]
+        },
+        "on-right-click": "nm-connection-editor",
+        "tooltip-format": "{icon} {essid} [{ipaddr}] 𝌩 {signalStrength}% <span color='#b8bb26'>  {bandwidthUpBits}</span> <span color='#fb4934'>  {bandwidthDownBits}</span> <span color='#d3869b'>󰹹 {bandwidthTotalBits}</span>"
+    },
+    "custom/vpn": {
+        "format": "{}",
+        "interval": 5,
+        "return-type": "json",
+        "exec": "$HOME/.config/waybar/scripts/vpn.sh 2> /dev/null",
+        "tooltip": true
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}% {format_source}",
+        "format-bluetooth": "{icon} {volume}% {format_source}",
+        "format-bluetooth-muted": " {format_source}",
+        "format-muted": "  {format_source}",
+        "format-source": "  {volume}%",
+        "format-source-muted": " ",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": [
+                "",
+                "",
+                ""
+            ]
+        },
+        "on-click": "pavucontrol"
+    },
+    "backlight": {
+        "device": "intel_backlight",
+        "format": "{icon} {percent}%",
+        "format-icons": [
+            ""
+        ],
+        "tooltip": false,
+        "on-scroll-down": "brightnessctl -c backlight set 5%-",
+        "on-scroll-up": "brightnessctl -c backlight set +5%"
+    }
+}

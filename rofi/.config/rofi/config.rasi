@@ -1,6 +1,90 @@
 configuration {
- font: "Noto sans 10";
- combi: "window,run,ssh";
- }
-//@theme "/usr/share/rofi/themes/main.rasi"
-@theme "/usr/share/rofi/themes/arthur.rasi"
+    font: "JetBrainsMono Nerd Font 11";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+}
+
+@theme "/dev/null"
+
+* {
+    bg:       #282828;
+    bg-alt:   #3c3836;
+    fg:       #ebdbb2;
+    fg-alt:   #a89984;
+    accent:   #d79921;
+    urgent:   #cc241d;
+
+    background-color: @bg;
+    text-color: @fg;
+    border-color: @accent;
+}
+
+window {
+    background-color: @bg;
+    border: 2px solid;
+    border-color: @accent;
+    border-radius: 6px;
+    padding: 5px;
+    width: 600px;
+}
+
+mainbox {
+    background-color: @bg;
+    children: [ "inputbar", "listview" ];
+}
+
+inputbar {
+    background-color: @bg-alt;
+    text-color: @fg;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 0 0 5px 0;
+    children: [ "prompt", "entry" ];
+}
+
+prompt {
+    text-color: @accent;
+    background-color: transparent;
+}
+
+entry {
+    text-color: @fg;
+    background-color: transparent;
+    placeholder: "Search...";
+    placeholder-color: @fg-alt;
+}
+
+listview {
+    background-color: @bg;
+    lines: 8;
+    spacing: 2px;
+    scrollbar: false;
+    border: 0;
+}
+
+element {
+    padding: 6px 12px;
+    background-color: @bg;
+    text-color: @fg;
+    border-radius: 4px;
+}
+
+element selected.normal {
+    background-color: @bg-alt;
+    text-color: @accent;
+}
+
+element normal.normal {
+    background-color: @bg;
+    text-color: @fg;
+}
+
+element-icon {
+    size: 24px;
+    background-color: transparent;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+}

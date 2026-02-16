@@ -1,0 +1,28 @@
+* {
+    bg:         #282828;
+    bg1:        #3c3836;
+    bg2:        #504945;
+    fg:         #ebdbb2;
+    fg2:        #a89984;
+    red:        #cc241d;
+    green:      #98971a;
+    yellow:     #d79921;
+    blue:       #458588;
+    purple:     #b16286;
+    aqua:       #689d6a;
+    orange:     #d65d0e;
+    br-red:     #fb4934;
+    br-green:   #b8bb26;
+    br-yellow:  #fabd2f;
+    br-blue:    #83a598;
+    br-purple:  #d3869b;
+    br-aqua:    #8ec07c;
+    br-orange:  #fe8019;
+
+    /* aliases for launcher-fullscreen compatibility */
+    background:         #282828;
+    surface-container:  #3c3836;
+    primary:            #ebdbb2;
+    on-primary:         #d79921;
+    on-error:           #cc241d;
+}

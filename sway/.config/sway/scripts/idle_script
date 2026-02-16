@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euox pipefail
+# Requires swayidle
+
+SIGNAL=6
+pidf="/tmp/idle_script"
+
+# Time settings in seconds
+LOCK_TIMEOUT=$((5 * 60))            # 5 minutes
+DPMS_TIMEOUT=$((10 * 60))           # 10 minutes
+CHECK_INTERVAL=60                   # 30 seconds
+
+# Determine which idle manager is available
+if command -v swayidle &>/dev/null; then
+	procname=swayidle
+else
+	echo "ERROR: swayidle is not installed. Please install and try again."
+	exit 1
+fi
+
+status() {
+	if [ -s "$pidf" ]; then
+		printf '{"text":"󰒲", "tooltip":"Running\\nName: %s\\nPID: %s"}\n' "$procname" "$(awk 'NR==1{print}' "$pidf")"
+	else
+		printf '{"text":"󰒳", "tooltip":"Stopped"}\n'
+	fi
+}
+
+toggle() {
+	if [ -s "$pidf" ]; then
+		off
+	else
+		on
+	fi
+}
+
+check_media_playing() {
+	if playerctl status 2>/dev/null | grep -q "Playing"; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+on() {
+	if [ -s "$pidf" ]; then
+		echo "Idle script is already running."
+		exit 1
+	fi
+
+	swayidle -w \
+			timeout "$LOCK_TIMEOUT" '$HOME/.config/sway/scripts/swaylock.sh' \
+			timeout "$DPMS_TIMEOUT" 'swaymsg "output * dpms off"' \
+			resume 'swaymsg "output * dpms on"' \
+			1>/dev/null 2>&1 &
+	echo "$!" >"$pidf"
+	pkill -RTMIN+$SIGNAL waybar
+}
+
+off() {
+	if [ ! -s "$pidf" ]; then
+		echo "Idle script is not running."
+		exit 1
+	fi
+
+	pid=$(awk 'NR==1' "$pidf")
+	if [ -z "$pid" ]; then
+		echo "No valid PID found."
+		exit 2
+	fi
+
+	if kill -0 "$pid" 2>/dev/null; then
+		kill "$pid"
+	fi
+
+	>"$pidf"
+	pkill -RTMIN+$SIGNAL waybar
+}
+
+case "$1" in
+status) status ;;
+toggle) toggle ;;
+on) on ;;
+off) off ;;
+*) printf "ERROR: Argument %s not valid\n" "$1" ;;
+esac

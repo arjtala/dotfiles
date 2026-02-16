@@ -152,6 +152,12 @@ clip() { # limit copy to 74994 bytes (OSC 52 limit)
   printf "\033]52;c;%s\a" "$encoded_data"
 }
 
+# Fix Wayland/Sway sockets in tmux (stale sessions after sway restart)
+if [ -n "$TMUX" ]; then
+    export SWAYSOCK=$(ls -t /run/user/1000/sway-ipc.*.sock 2>/dev/null | head -1)
+    export WAYLAND_DISPLAY=$(ls /run/user/1000/wayland-* 2>/dev/null | grep -v lock | head -1 | xargs basename)
+fi
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 if [ -f "/Users/arjangt/miniforge3/bin/conda" ]; then

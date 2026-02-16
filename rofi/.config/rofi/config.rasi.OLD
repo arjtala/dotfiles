@@ -1,0 +1,138 @@
+@import "colors.rasi"
+
+* {
+accent: @primary;
+text: @on-primary;
+normal: @secondary-fixed;
+on-normal: @on-secondary-fixed;
+selected: @primary;
+on-selected: @on-primary;
+border: @primary;
+background: @surface;
+background-alt: @surface-container;
+handle: @primary;
+placeholder: @primary;
+on-search: @primary;
+}
+
+configuration {
+show-icons: true;
+display-drun: "";
+drun-display-format: "{icon} {name}";
+disable-history: false;
+click-to-exit: false;
+location: 0;
+}
+
+window {
+border-radius: 8px;
+width: 500px;
+anchor: center;
+x-offset: 0;
+y-offset: 0;
+background-color: @background;
+border-color: @border;
+}
+
+prompt {
+enabled: true;
+padding: 8px;
+text-color: @on-search;
+}
+
+textbox-prompt-colon {
+expand: false;
+str: "";
+border-radius: 100%;
+padding: 8px 12px 8px 12px;
+text-color: @on-search;
+}
+
+entry {
+placeholder: "Search...";
+placeholder-color: @placeholder;
+blink: true;
+background-color: @background;
+border: 0px 0px 2px 0px;
+border-radius: 10px;
+padding: 8px;
+text-color: @primary;
+border-color: @border;
+}
+
+inputbar {
+children: [ textbox-prompt-colon, prompt, entry ];
+expand: false;
+border: 0px;
+border-radius: 0px;
+margin: 0px;
+padding: 0px;
+position: center;
+}
+
+case-indicator {
+spacing: 0;
+}
+
+listview {
+enabled: true;
+columns: 1;
+lines: 5;
+spacing: 4px;
+cycle: false;
+dynamic: true;
+layout: vertical;
+background-color: @background;
+padding: 10px;
+border-radius: 8px;
+border-color: transparent;
+}
+
+mainbox {
+children: [ inputbar, listview ];
+spacing: 15px;
+padding: 15px;
+background-color: @background-alt;
+border-radius: 8px;
+}
+
+element {
+enabled: true;
+orientation: horizontal;
+border-radius: 4px;
+padding: 6px 6px 6px 6px;
+}
+
+element-icon {
+horizontal-align: 0.5;
+vertical-align: 0.5;
+size: 36px;
+border: 0px;
+}
+
+element alternate.normal,
+element normal.active,
+element normal.normal {
+background-color: @secondary-fixed;
+text-color: @on-secondary-fixed;
+}
+
+element selected.active,
+element selected.normal {
+background-color: @selected;
+text-color: @on-selected;
+}
+
+button.selected {
+background-color: @selected;
+text-color:       @on-selected;
+}
+
+scrollbar {
+background-color: @background-alt;
+width:        4px;
+border:       0;
+handle-width: 8px;
+handle-color: @handle;
+padding:      0;
+}

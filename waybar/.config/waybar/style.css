@@ -1,0 +1,164 @@
+@define-color bg       #282828;
+@define-color bg1      #3c3836;
+@define-color bg2      #504945;
+@define-color fg       #ebdbb2;
+@define-color fg2      #a89984;
+@define-color red      #cc241d;
+@define-color green    #98971a;
+@define-color yellow   #d79921;
+@define-color blue     #458588;
+@define-color purple   #b16286;
+@define-color aqua     #689d6a;
+@define-color orange   #d65d0e;
+@define-color br_red   #fb4934;
+@define-color br_green #b8bb26;
+@define-color br_yellow #fabd2f;
+@define-color br_blue  #83a598;
+@define-color br_purple #d3869b;
+@define-color br_aqua  #8ec07c;
+@define-color br_orange #fe8019;
+
+* {
+    transition: none;
+    box-shadow: none;
+    font-family: JetBrainsMono Nerd Font, Material Design Icons, Noto, FontAwesome;
+    font-size: 13px;
+    min-height: 0;
+    color: @fg;
+}
+
+#waybar {
+    background: @bg;
+}
+
+#battery,
+#cpu,
+#disk,
+#memory,
+#network,
+#pulseaudio,
+#idle_inhibitor,
+#backlight,
+#mpd,
+#clock,
+#temperature,
+#bluetooth,
+#custom-nvidia,
+#custom-adhan,
+#custom-vpn,
+#window {
+    margin: 6px 6px;
+    min-width: 6px;
+}
+
+#cpu {
+    color: @br_green;
+}
+
+#memory {
+    color: @br_blue;
+}
+
+#disk {
+    color: @br_aqua;
+}
+
+#custom-nvidia {
+    color: @br_green;
+}
+
+#bluetooth {
+    color: @br_blue;
+}
+
+#network {
+    color: @br_purple;
+}
+
+#pulseaudio {
+    color: @br_orange;
+}
+
+#battery {
+    color: @br_green;
+}
+
+#battery.warning {
+    color: @br_yellow;
+}
+
+#battery.critical {
+    color: @br_red;
+}
+
+#clock {
+    color: @br_yellow;
+}
+
+#custom-adhan {
+    color: @br_aqua;
+}
+
+#window {
+    color: @fg2;
+}
+
+#workspaces {}
+
+#workspaces button {
+    padding: 0 1px;
+}
+
+#workspaces button.empty * {
+    color: @bg2;
+    background: transparent;
+}
+
+#workspaces button.visible * {
+    color: @fg2;
+    background: transparent;
+}
+
+#workspaces button.active * {
+    color: @br_yellow;
+    background: transparent;
+}
+
+#workspaces button.urgent * {
+    color: @br_red;
+    background: transparent;
+}
+
+#tray {
+    margin: 2px 1px;
+    border-radius: 12px;
+    background-color: @bg1;
+}
+
+#tray * {
+    padding: 0 3px;
+    border-left: 1px solid @bg1;
+}
+
+#tray *:first-child {
+    border-left: none;
+}
+
+#submap {
+    margin: 5px 5px;
+    color: @br_red;
+}
+
+#custom-vpn.con {
+    color: @br_green;
+}
+
+#custom-vpn.discon {
+    color: @br_red;
+}
+
+tooltip {
+    background-color: @bg;
+    color: @fg;
+    border: 1px solid @yellow;
+}

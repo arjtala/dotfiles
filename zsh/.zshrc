@@ -157,6 +157,48 @@ if [ -n "$TMUX" ]; then
     export SWAYSOCK=$(ls -t /run/user/1000/sway-ipc.*.sock 2>/dev/null | head -1)
     export WAYLAND_DISPLAY=$(ls /run/user/1000/wayland-* 2>/dev/null | grep -v lock | head -1 | xargs basename)
 fi
+export WLR_NO_HARDWARE_CURSORS=1
+# PATH setup (kept before conda init so conda can prepend correctly)
+if [ -d "$HOME/.cargo" ]; then
+	source "$HOME/.cargo/env";
+fi
+if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
+if [ -d "/opt/homebrew" ]; then
+    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}";
+fi
+if [ -d "/opt/homebrew/opt/libiconv" ]; then
+	 export PATH="/opt/homebrew/opt/libiconv/bin:${PATH}";
+fi
+if [ -d "$HOME/.local/homebrew" ]; then
+    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
+fi
+if type brew &> /dev/null; then
+    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
+	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
+	LDFLAGS="-L$(brew --prefix sqlite)/lib"
+	CPPFLAGS="-I$(brew --prefix sqlite)/include"
+	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
+    export PATH="$(brew --prefix sqlite)/bin:$PATH";
+fi
+if [ -d "$HOME/.local/conda/bin" ]; then
+	export PATH="$HOME/.local/conda/bin:${PATH}";
+fi
+if [ -d "/opt/conda/bin" ]; then
+	export PATH="/opt/conda/bin:${PATH}";
+fi
+if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+	. "/opt/conda/etc/profile.d/conda.sh"
+fi
+if [ -d "/opt/anaconda3/bin" ]; then
+	export PATH="/opt/anaconda3/bin:${PATH}";
+fi
+if [ -d "$HOME/.local/homebrew/anaconda3" ]; then
+	export PATH="$HOME/.local/homebrew/anaconda3/bin:${PATH}";
+fi
+if [ -d "/usr/local/cuda/bin" ]; then
+	export PATH="/usr/local/cuda/bin:${PATH}";
+fi
+if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -185,3 +227,22 @@ elif [ -f "/usr/bin/conda" ]; then
 fi
 unset __conda_setup
 # <<< conda initialize <<<
+
+# Fix for system conda: env bins are placed mid-PATH (replacing /usr/bin)
+# instead of being prepended. Wrap conda to move the env bin to the front.
+if (( $+functions[conda] )); then
+    functions[__wrapped_conda]=$functions[conda]
+    conda() {
+        __wrapped_conda "$@"
+        local ret=$?
+        if [[ -n "$CONDA_PREFIX" && "$CONDA_PREFIX" != "/usr" && -d "$CONDA_PREFIX/bin" && "$PATH" != "$CONDA_PREFIX/bin:"* ]]; then
+            local conda_bin="$CONDA_PREFIX/bin"
+            PATH=":$PATH:"
+            PATH="${PATH//":$conda_bin:"/":"}"
+            PATH="${PATH#:}"
+            PATH="${PATH%:}"
+            export PATH="$conda_bin:$PATH"
+        fi
+        return $ret
+    }
+fi

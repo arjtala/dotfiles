@@ -95,7 +95,7 @@
         "format": "☪ {}",
         "interval": 60,
         "tooltip": false,
-        "exec": "adhan_rs",
+        "exec": "zsh -lc athan",
         "icon-size": 10,
         "spacing": 10
     },

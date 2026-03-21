@@ -58,6 +58,11 @@
 	url = https://github.com/tmux-plugins/tmux-sensible
 	branch = master
 
+[submodule "tmux/.tmux/plugins/tmux-mem-cpu-load"]
+	path = tmux/.tmux/plugins/tmux-mem-cpu-load
+	url = https://github.com/thewtex/tmux-mem-cpu-load
+	branch = master
+
 [submodule "vim/.vim/bundle/Vundle.vim"]
 	path = vim/.vim/bundle/Vundle.vim
 	url = https://github.com/VundleVim/Vundle.vim.git

@@ -154,8 +154,9 @@ clip() { # limit copy to 74994 bytes (OSC 52 limit)
 
 # Fix Wayland/Sway sockets in tmux (stale sessions after sway restart)
 if [ -n "$TMUX" ]; then
-    export SWAYSOCK=$(ls -t /run/user/1000/sway-ipc.*.sock 2>/dev/null | head -1)
-    export WAYLAND_DISPLAY=$(ls /run/user/1000/wayland-* 2>/dev/null | grep -v lock | head -1 | xargs basename)
+    export SWAYSOCK=$( (setopt nonomatch; ls -t /run/user/1000/sway-ipc.*.sock 2>/dev/null | head -1) )
+    local _wd=$( (setopt nonomatch; ls /run/user/1000/wayland-* 2>/dev/null | grep -v lock | head -1) )
+    if [ -n "$_wd" ]; then export WAYLAND_DISPLAY=$(basename "$_wd"); fi
 fi
 export WLR_NO_HARDWARE_CURSORS=1
 # PATH setup (kept before conda init so conda can prepend correctly)

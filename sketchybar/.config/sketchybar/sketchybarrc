@@ -1,0 +1,140 @@
+#!/bin/sh
+
+# Gruvbox SketchyBar config — matched to waybar layout
+# Left:   workspaces, front_app
+# Center: clock
+# Right:  cpu, memory, disk, volume, battery
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+source "$CONFIG_DIR/colors.sh"
+
+##### Bar Appearance #####
+# Position bottom, height ~31 to match waybar
+sketchybar --bar \
+  position=top \
+  height=31 \
+  color=$BG \
+  border_width=0 \
+  shadow=off \
+  topmost=off \
+  y_offset=0 \
+  margin=0 \
+  corner_radius=0 \
+  blur_radius=0 \
+  notch_width=0
+
+##### Defaults #####
+# Font: JetBrainsMono Nerd Font — matches waybar CSS
+default=(
+  padding_left=6
+  padding_right=6
+  icon.font="JetBrainsMono Nerd Font:Bold:14.0"
+  label.font="JetBrainsMono Nerd Font:Regular:13.0"
+  icon.color=$FG
+  label.color=$FG
+  icon.padding_left=4
+  icon.padding_right=4
+  label.padding_left=4
+  label.padding_right=4
+  background.drawing=off
+)
+sketchybar --default "${default[@]}"
+
+##### AeroSpace Workspace Indicators (left) #####
+# Register custom event from AeroSpace
+sketchybar --add event aerospace_workspace_change
+
+for sid in $(seq 1 9); do
+  sketchybar --add item space.$sid left \
+    --set space.$sid \
+      icon="$sid" \
+      icon.padding_left=8 \
+      icon.padding_right=8 \
+      label.drawing=off \
+      icon.color=$BG2 \
+      background.drawing=off \
+      click_script="aerospace workspace $sid" \
+      script="$PLUGIN_DIR/aerospace.sh $sid"
+done
+
+# Subscribe all space items to the workspace change event
+for sid in $(seq 1 9); do
+  sketchybar --subscribe space.$sid aerospace_workspace_change
+done
+
+##### Separator + Front App (left) #####
+sketchybar --add item separator left \
+  --set separator \
+    icon="│" \
+    icon.color=$BG2 \
+    label.drawing=off \
+    icon.padding_left=4 \
+    icon.padding_right=4
+
+sketchybar --add item front_app left \
+  --set front_app \
+    icon.drawing=off \
+    label.color=$FG2 \
+    label.font="JetBrainsMono Nerd Font:Regular:13.0" \
+    label.max_chars=50 \
+    script="$PLUGIN_DIR/front_app.sh" \
+  --subscribe front_app front_app_switched
+
+##### Clock (center) #####
+# Format matches waybar: "  Mon, 23 Mar 2026   14:30"
+sketchybar --add item clock center \
+  --set clock \
+    icon=" " \
+    icon.color=$BR_YELLOW \
+    label.color=$BR_YELLOW \
+    update_freq=10 \
+    script="$PLUGIN_DIR/clock.sh"
+
+##### Right side items (added right-to-left) #####
+
+# Battery — br_green (matches waybar)
+sketchybar --add item battery right \
+  --set battery \
+    icon.color=$BR_GREEN \
+    label.color=$BR_GREEN \
+    update_freq=120 \
+    script="$PLUGIN_DIR/battery.sh" \
+  --subscribe battery system_woke power_source_change
+
+# Volume — br_orange (matches waybar pulseaudio)
+sketchybar --add item volume right \
+  --set volume \
+    icon.color=$BR_ORANGE \
+    label.color=$BR_ORANGE \
+    script="$PLUGIN_DIR/volume.sh" \
+  --subscribe volume volume_change
+
+# Disk — br_aqua (matches waybar)
+sketchybar --add item disk right \
+  --set disk \
+    icon="󰋊 " \
+    icon.color=$BR_AQUA \
+    label.color=$BR_AQUA \
+    update_freq=120 \
+    script="$PLUGIN_DIR/disk.sh"
+
+# Memory — br_blue (matches waybar)
+sketchybar --add item memory right \
+  --set memory \
+    icon="󰍛 " \
+    icon.color=$BR_BLUE \
+    label.color=$BR_BLUE \
+    update_freq=3 \
+    script="$PLUGIN_DIR/memory.sh"
+
+# CPU — br_green (matches waybar)
+sketchybar --add item cpu right \
+  --set cpu \
+    icon=" " \
+    icon.color=$BR_GREEN \
+    label.color=$BR_GREEN \
+    update_freq=3 \
+    script="$PLUGIN_DIR/cpu.sh"
+
+##### Force initial update #####
+sketchybar --update

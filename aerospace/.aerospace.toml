@@ -1,12 +1,13 @@
 # AeroSpace config — matched to sway/i3 keybindings
-# i3/sway $super → alt (macOS reserves Cmd for system/app shortcuts)
+# i3/sway $super → cmd (alt/option reserved for Emacs Meta key)
+# Keys that clash with macOS essentials (v/z/x/a/space) use ctrl instead
 
 start-at-login = true
 
 # Notify SketchyBar on workspace change
 after-startup-command = ['exec-and-forget sketchybar']
 exec-on-workspace-change = ['/bin/bash', '-c',
-  'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
+'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
 ]
 
 # i3-like normalizations
@@ -35,82 +36,80 @@ outer.right = 3
 [mode.main.binding]
 
 # Launch terminal — sway: $super+Return exec ghostty
-alt-enter = 'exec-and-forget open -na Ghostty'
+cmd-enter = 'exec-and-forget open -na Ghostty'
 
 # Close window — sway: $super+Shift+q kill
-alt-shift-q = 'close'
+cmd-shift-q = 'close'
 
 # ──── Focus (sway: $super+arrows / hjkl) ────
-alt-left = 'focus left'
-alt-down = 'focus down'
-alt-up = 'focus up'
-alt-right = 'focus right'
-alt-h = 'focus left'
-alt-j = 'focus down'
-alt-k = 'focus up'
-alt-l = 'focus right'
+cmd-left = 'focus left'
+cmd-down = 'focus down'
+cmd-up = 'focus up'
+cmd-right = 'focus right'
 
 # ──── Move windows (sway: $super+Shift+arrows / hjkl) ────
-alt-shift-left = 'move left'
-alt-shift-down = 'move down'
-alt-shift-up = 'move up'
-alt-shift-right = 'move right'
-alt-shift-h = 'move left'
-alt-shift-j = 'move down'
-alt-shift-k = 'move up'
-alt-shift-l = 'move right'
+cmd-shift-left = 'move left'
+cmd-shift-down = 'move down'
+cmd-shift-up = 'move up'
+cmd-shift-right = 'move right'
+cmd-shift-h = 'move left'
+cmd-shift-j = 'move down'
+cmd-shift-k = 'move up'
+cmd-shift-l = 'move right'
 
-# ──── Split orientation (sway: $super+h splith / $super+v splitv) ────
-# alt-h is used for focus, so using join-with for split behavior
-alt-v = 'join-with down'
-alt-backslash = 'join-with right'
+# ──── Split orientation (sway: $super+v splitv) ────
+# ctrl-v instead of cmd-v to preserve paste
+cmd-ctrl-v = 'join-with down'
+cmd-backslash = 'join-with right'
 
-# ──── Layout (sway: $super+z stacking / $super+x tabbed / $super+a toggle split) ────
-alt-z = 'layout accordion horizontal'
-alt-x = 'layout accordion vertical'
-alt-a = 'layout tiles horizontal vertical'
+# ──── Layout (sway: $super+z/$super+x/$super+a) ────
+# ctrl variants to preserve cmd-z (undo), cmd-x (cut), cmd-a (select-all)
+cmd-ctrl-z = 'layout accordion horizontal'
+cmd-ctrl-x = 'layout accordion vertical'
+cmd-ctrl-a = 'layout tiles horizontal vertical'
 
-# ──── Fullscreen (sway: $super+f) ────
-alt-f = 'fullscreen'
+# ──── Fullscreen (sway: $super+Shift+f) ────
+cmd-shift-f = 'fullscreen'
 
 # ──── Float toggle (sway: $super+Space floating toggle) ────
-alt-space = 'layout floating tiling'
-
-# ──── Focus mode toggle (sway: $super+tab focus mode_toggle) ────
-alt-tab = 'focus-back-and-forth'
+# ctrl-space to preserve cmd-space (Spotlight)
+cmd-ctrl-space = 'layout floating tiling'
 
 # ──── Workspace back_and_forth (sway: $super+slash) ────
-alt-slash = 'focus-back-and-forth'
+# cmd-tab can't be overridden (macOS app switcher) — use cmd-slash
+cmd-slash = 'focus-back-and-forth'
 
 # ──── Workspaces (sway: $super+1-9) ────
-alt-1 = 'workspace 1'
-alt-2 = 'workspace 2'
-alt-3 = 'workspace 3'
-alt-4 = 'workspace 4'
-alt-5 = 'workspace 5'
-alt-6 = 'workspace 6'
-alt-7 = 'workspace 7'
-alt-8 = 'workspace 8'
-alt-9 = 'workspace 9'
+cmd-1 = 'workspace 1'
+cmd-2 = 'workspace 2'
+cmd-3 = 'workspace 3'
+cmd-4 = 'workspace 4'
+cmd-5 = 'workspace 5'
+cmd-6 = 'workspace 6'
+cmd-7 = 'workspace 7'
+cmd-8 = 'workspace 8'
+cmd-9 = 'workspace 9'
+cmd-0 = 'workspace 10'
 
 # ──── Move to workspace + focus (sway: $super+Shift+1-9) ────
-alt-shift-1 = ['move-node-to-workspace 1', 'workspace 1']
-alt-shift-2 = ['move-node-to-workspace 2', 'workspace 2']
-alt-shift-3 = ['move-node-to-workspace 3', 'workspace 3']
-alt-shift-4 = ['move-node-to-workspace 4', 'workspace 4']
-alt-shift-5 = ['move-node-to-workspace 5', 'workspace 5']
-alt-shift-6 = ['move-node-to-workspace 6', 'workspace 6']
-alt-shift-7 = ['move-node-to-workspace 7', 'workspace 7']
-alt-shift-8 = ['move-node-to-workspace 8', 'workspace 8']
-alt-shift-9 = ['move-node-to-workspace 9', 'workspace 9']
+cmd-shift-1 = ['move-node-to-workspace 1', 'workspace 1']
+cmd-shift-2 = ['move-node-to-workspace 2', 'workspace 2']
+cmd-shift-3 = ['move-node-to-workspace 3', 'workspace 3']
+cmd-shift-4 = ['move-node-to-workspace 4', 'workspace 4']
+cmd-shift-5 = ['move-node-to-workspace 5', 'workspace 5']
+cmd-shift-6 = ['move-node-to-workspace 6', 'workspace 6']
+cmd-shift-7 = ['move-node-to-workspace 7', 'workspace 7']
+cmd-shift-8 = ['move-node-to-workspace 8', 'workspace 8']
+cmd-shift-9 = ['move-node-to-workspace 9', 'workspace 9']
+cmd-shift-0 = ['move-node-to-workspace 10', 'workspace 10']
 
 # ──── Workspace cycling (sway: $super+Control+Right/Left) ────
-alt-ctrl-right = 'workspace next'
-alt-ctrl-left = 'workspace prev'
+cmd-ctrl-right = 'workspace next'
+cmd-ctrl-left = 'workspace prev'
 
 # ──── Move workspace to monitor ────
-alt-shift-ctrl-left = 'move-workspace-to-monitor prev'
-alt-shift-ctrl-right = 'move-workspace-to-monitor next'
+cmd-shift-ctrl-left = 'move-workspace-to-monitor prev'
+cmd-shift-ctrl-right = 'move-workspace-to-monitor next'
 
 # ──── Direct resize (sway: Shift+Ctrl+h/j/k/l) ────
 ctrl-shift-h = 'resize width -50'
@@ -119,13 +118,14 @@ ctrl-shift-k = 'resize height -50'
 ctrl-shift-l = 'resize width +50'
 
 # ──── Resize mode (sway: $super+r mode "resize") ────
-alt-r = 'mode resize'
+# cmd-r is reload in browsers — use cmd-ctrl-r to avoid conflict
+cmd-ctrl-r = 'mode resize'
 
 # ──── Reload config (sway: $super+Shift+r reload) ────
-alt-shift-r = 'reload-config'
+cmd-shift-r = 'reload-config'
 
 # ──── Flatten workspace tree (useful utility) ────
-alt-shift-f = 'flatten-workspace-tree'
+cmd-ctrl-f = 'flatten-workspace-tree'
 
 # ──────────────────────────────────────────────
 # Resize mode (sway: mode "resize")
@@ -147,17 +147,29 @@ esc = 'mode main'
 # ──────────────────────────────────────────────
 
 [[on-window-detected]]
-if.app-id = 'com.apple.systempreferences'
-run = 'layout floating'
+  if.app-id = 'com.apple.systempreferences'
+  run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'com.apple.finder'
-run = 'layout floating'
+  if.app-id = 'com.apple.finder'
+  run = 'layout floating'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'Calculator'
-run = 'layout floating'
+  if.app-name-regex-substring = 'Calculator'
+  run = 'layout floating'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'Preview'
-run = 'layout floating'
+  if.app-name-regex-substring = 'Preview'
+  run = 'layout floating'
+
+  # Float Emacs child frames (vertico-posframe, ediff, popups)
+[[on-window-detected]]
+  if.app-name-regex-substring = 'Emacs'
+  if.window-title-regex-substring = '^ *\\*'
+  check-further-callbacks = true
+  run = 'layout floating'
+
+[[on-window-detected]]
+  if.app-name-regex-substring = 'Emacs'
+  if.window-title-regex-substring = '^$'
+  run = 'layout floating'

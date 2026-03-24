@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Gruvbox SketchyBar config — matched to waybar layout
-# Left:   workspaces, front_app
-# Center: clock
+# Left:   workspaces, front_app, clock
+# Center: emtpy (under camera)
 # Right:  cpu, memory, disk, volume, battery
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
@@ -44,7 +44,7 @@ sketchybar --default "${default[@]}"
 # Register custom event from AeroSpace
 sketchybar --add event aerospace_workspace_change
 
-for sid in $(seq 1 9); do
+for sid in $(seq 1 10); do
   sketchybar --add item space.$sid left \
     --set space.$sid \
       icon="$sid" \
@@ -52,15 +52,20 @@ for sid in $(seq 1 9); do
       icon.padding_right=8 \
       label.drawing=off \
       icon.color=$BG2 \
+      drawing=off \
       background.drawing=off \
       click_script="aerospace workspace $sid" \
       script="$PLUGIN_DIR/aerospace.sh $sid"
 done
 
 # Subscribe all space items to the workspace change event
-for sid in $(seq 1 9); do
+for sid in $(seq 1 10); do
   sketchybar --subscribe space.$sid aerospace_workspace_change
 done
+
+# Trigger initial workspace visibility update
+FOCUSED=$(aerospace list-workspaces --focused 2>/dev/null)
+sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE="$FOCUSED"
 
 ##### Separator + Front App (left) #####
 sketchybar --add item separator left \
@@ -82,7 +87,7 @@ sketchybar --add item front_app left \
 
 ##### Clock (center) #####
 # Format matches waybar: "  Mon, 23 Mar 2026   14:30"
-sketchybar --add item clock center \
+sketchybar --add item clock left \
   --set clock \
     icon=" " \
     icon.color=$BR_YELLOW \

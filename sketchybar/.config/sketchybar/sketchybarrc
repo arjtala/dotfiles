@@ -89,7 +89,7 @@ sketchybar --add item front_app left \
 # Format matches waybar: "  Mon, 23 Mar 2026   14:30"
 sketchybar --add item clock left \
   --set clock \
-    icon=" " \
+    icon=" " \
     icon.color=$BR_YELLOW \
     label.color=$BR_YELLOW \
     update_freq=10 \
@@ -135,7 +135,7 @@ sketchybar --add item memory right \
 # CPU — br_green (matches waybar)
 sketchybar --add item cpu right \
   --set cpu \
-    icon=" " \
+    icon=" " \
     icon.color=$BR_GREEN \
     label.color=$BR_GREEN \
     update_freq=3 \

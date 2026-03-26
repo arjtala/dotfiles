@@ -49,3 +49,8 @@
 # resize-overlay-duration = 4s 200ms
 
 theme = Gruvbox Dark Soft
+
+# No titlebar — use AeroSpace accordion layout (Cmd+Ctrl+Z)
+# for tabbed window switching instead of native tabs
+macos-titlebar-style = hidden
+window-decoration = false

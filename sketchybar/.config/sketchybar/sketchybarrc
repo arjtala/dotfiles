@@ -3,7 +3,7 @@
 # Gruvbox SketchyBar config — matched to waybar layout
 # Left:   workspaces, front_app, clock
 # Center: emtpy (under camera)
-# Right:  cpu, memory, disk, volume, battery
+# Right:  cpu, memory, disk, volume, network, vpn, battery
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
@@ -86,14 +86,22 @@ sketchybar --add item front_app left \
   --subscribe front_app front_app_switched
 
 ##### Clock (center) #####
-# Format matches waybar: "  Mon, 23 Mar 2026   14:30"
+# Format: "Mon, 23 Mar 2026    14:30" (icon between date and time)
 sketchybar --add item clock left \
   --set clock \
-    icon=" " \
-    icon.color=$BR_YELLOW \
+    icon.drawing=off \
     label.color=$BR_YELLOW \
     update_freq=10 \
     script="$PLUGIN_DIR/clock.sh"
+
+# Athan — next prayer time (matches waybar custom/adhan)
+sketchybar --add item athan left \
+  --set athan \
+    icon="☾" \
+    icon.color=$BR_PURPLE \
+    label.color=$BR_PURPLE \
+    update_freq=60 \
+    script="$PLUGIN_DIR/athan.sh"
 
 ##### Right side items (added right-to-left) #####
 
@@ -105,6 +113,19 @@ sketchybar --add item battery right \
     update_freq=120 \
     script="$PLUGIN_DIR/battery.sh" \
   --subscribe battery system_woke power_source_change
+
+# VPN — br_green when connected, br_red when disconnected
+sketchybar --add item vpn right \
+  --set vpn \
+    update_freq=5 \
+    script="$PLUGIN_DIR/vpn.sh"
+
+# Network — br_aqua (matches waybar)
+sketchybar --add item network right \
+  --set network \
+    update_freq=10 \
+    script="$PLUGIN_DIR/network.sh" \
+  --subscribe network wifi_change
 
 # Volume — br_orange (matches waybar pulseaudio)
 sketchybar --add item volume right \

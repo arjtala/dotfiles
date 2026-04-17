@@ -76,6 +76,23 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 | --- | --- |
 | `prefix + b` | Toggle status bar visibility |
 
+## Theme
+
+Local sessions use `tmux-oasis`; remote (SSH) sessions fall back to
+`tmux-power` — branched on `$SSH_CONNECTION` at the bottom of `.tmux.conf`.
+
+Swap the local oasis flavor (and regenerate a matching Ghostty theme in one
+shot) with:
+
+```sh
+./scripts/oasis-theme canyon_dark     # or abyss_dark, mirage_dark, sol_dark, ...
+./scripts/oasis-theme                 # lists all available flavors
+```
+
+The script unsets stale `@thm_*` options and reloads `.tmux.conf` in place —
+no server restart needed. For Ghostty to pick up the new palette, `Cmd+Q` and
+relaunch it.
+
 ## Dependencies
 
 | Needed for | mac (brew) | Fedora (dnf) | Arch (pacman) |

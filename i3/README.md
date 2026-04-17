@@ -75,3 +75,25 @@ See also: [sway/README.md](../sway/README.md),
 | `XF86Audio Raise / Lower / Mute` | Volume control (amixer) |
 | `XF86Audio Next / Prev / Play / Stop` | Media control (mpc) |
 | `XF86MonBrightness Up / Down` | Brightness ±20 (xbacklight) |
+
+## Dependencies
+
+Linux / X11 only.
+
+| Needed for | Fedora (dnf) | Arch (pacman) |
+| --- | --- | --- |
+| i3 itself | `i3` | `i3-wm` |
+| terminal | `alacritty` | `alacritty` |
+| launcher / window switcher | `rofi` | `rofi` |
+| file manager | `thunar` | `thunar` |
+| ranger (`Super+Shift+Return`) | `ranger` | `ranger` |
+| lock screen | `betterlockscreen` (COPR) | `betterlockscreen` (AUR) |
+| auto-lock on suspend | `xss-lock` | `xss-lock` |
+| network tray | `NetworkManager-gnome` | `network-manager-applet` |
+| screenshots | `scrot` | `scrot` |
+| screenshot viewer | `viewnior` | `viewnior` |
+| brightness | `xbacklight` | `xorg-xbacklight` |
+| volume | `alsa-utils` | `alsa-utils` |
+| music control | `mpd mpc` | `mpd mpc` |
+| polybar | `polybar` | `polybar` |
+| wallpaper | `feh` | `feh` |

@@ -165,7 +165,7 @@ esc = 'mode main'
   # Float Emacs child frames (vertico-posframe, ediff, popups)
 [[on-window-detected]]
   if.app-name-regex-substring = 'Emacs'
-  if.window-title-regex-substring = '^ *\\*'
+  if.window-title-regex-substring = '^ *\*'
   check-further-callbacks = true
   run = 'layout floating'
 

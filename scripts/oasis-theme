@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# oasis-theme — switch tmux-oasis flavor + regenerate matching Ghostty theme.
+#
+# Usage:  ./scripts/oasis-theme FLAVOR
+# e.g.:   ./scripts/oasis-theme canyon_dark
+#
+# Reads palette from tmux/.tmux/plugins/tmux-oasis/themes/dark/oasis_FLAVOR.conf,
+# writes a matching Ghostty theme file, and rewrites the "theme = ..." line in
+# the Ghostty config and the "@oasis_flavor '...'" line in .tmux.conf.
+
+set -euo pipefail
+
+FLAVOR="${1:-}"
+if [[ -z "$FLAVOR" ]]; then
+  echo "Usage: $0 FLAVOR"
+  echo "Available flavors:"
+  ls "$(cd "$(dirname "$0")/.." && pwd)/tmux/.tmux/plugins/tmux-oasis/themes/dark/" \
+    | sed -E 's/^oasis_|\.conf$//g' \
+    | sed 's/^/  /'
+  exit 1
+fi
+
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+OASIS_CONF="$REPO/tmux/.tmux/plugins/tmux-oasis/themes/dark/oasis_${FLAVOR}.conf"
+
+[[ -f "$OASIS_CONF" ]] || { echo "No such flavor: oasis_${FLAVOR}.conf"; exit 1; }
+
+# Pull a named @thm_* value out of the oasis theme file.
+get() { awk -v k="@$1" '$2==k { gsub(/"/,"",$3); print $3 }' "$OASIS_CONF"; }
+
+THM_MANTLE=$(get thm_mantle)
+THM_SURFACE=$(get thm_surface)
+THM_FG=$(get thm_fg)
+THM_PRIMARY=$(get thm_primary)
+THM_LIGHT_PRIMARY=$(get thm_light_primary)
+THM_VISUAL=$(get thm_visual)
+THM_RED=$(get thm_red)
+THM_PREFIX=$(get thm_prefix)
+THM_YELLOW=$(get thm_yellow)
+THM_BLUE=$(get thm_blue)
+THM_INDIGO=$(get thm_indigo)
+THM_TEAL=$(get thm_teal)
+
+# canyon_dark → "Canyon Dark"
+TITLE=$(echo "$FLAVOR" \
+  | awk -F_ 'BEGIN{OFS=" "} { for (i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)); print }')
+THEME_NAME="Oasis $TITLE"
+
+GHOSTTY_THEME_DIR="$REPO/ghostty/.config/ghostty/themes"
+GHOSTTY_THEME_FILE="$GHOSTTY_THEME_DIR/$THEME_NAME"
+
+cat > "$GHOSTTY_THEME_FILE" <<EOF
+palette = 0=${THM_MANTLE}
+palette = 1=${THM_RED}
+palette = 2=${THM_PREFIX}
+palette = 3=${THM_YELLOW}
+palette = 4=${THM_BLUE}
+palette = 5=${THM_INDIGO}
+palette = 6=${THM_TEAL}
+palette = 7=${THM_FG}
+palette = 8=${THM_VISUAL}
+palette = 9=${THM_RED}
+palette = 10=${THM_PREFIX}
+palette = 11=${THM_LIGHT_PRIMARY}
+palette = 12=${THM_BLUE}
+palette = 13=${THM_INDIGO}
+palette = 14=${THM_TEAL}
+palette = 15=#ffffff
+background = ${THM_MANTLE}
+foreground = ${THM_FG}
+cursor-color = ${THM_PRIMARY}
+cursor-text = ${THM_MANTLE}
+selection-background = ${THM_SURFACE}
+selection-foreground = ${THM_FG}
+EOF
+
+# perl -i -pe works on both mac and linux (unlike GNU vs BSD sed)
+perl -i -pe "s|^theme = Oasis .*|theme = $THEME_NAME|" \
+  "$REPO/ghostty/.config/ghostty/config"
+perl -i -pe "s|\@oasis_flavor '.*'|\@oasis_flavor '$FLAVOR'|" \
+  "$REPO/tmux/.tmux.conf"
+
+# If a tmux server is running, live-switch: unset @thm_* (oasis uses -ogq, so
+# stale values from the previous flavor would otherwise persist), then reload.
+if tmux info &>/dev/null; then
+  for opt in strong_primary primary light_primary secondary prefix fg \
+             core mantle surface visual \
+             red orange yellow green teal blue indigo; do
+    tmux set -gu "@thm_$opt" 2>/dev/null || true
+  done
+  tmux source-file ~/.tmux.conf
+  echo "tmux: reloaded with @oasis_flavor '$FLAVOR'"
+else
+  echo "tmux not running — start it to see the new theme"
+fi
+
+cat <<EOF
+Switched to $THEME_NAME
+  Ghostty theme: $GHOSTTY_THEME_FILE
+  Ghostty config: theme = $THEME_NAME
+  tmux:          @oasis_flavor '$FLAVOR'
+
+To see Ghostty pick up the new palette: Cmd+Q and relaunch.
+EOF

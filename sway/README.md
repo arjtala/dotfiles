@@ -101,3 +101,24 @@ See also: [aerospace/README.md](../aerospace/README.md),
 | `Super + F4` | Kill window under cursor |
 | `Super + Shift + r` | Reload config |
 | `Super + Shift + e` | Exit sway (with confirm dialog) |
+
+## Dependencies
+
+Linux / Wayland only.
+
+| Needed for | Fedora (dnf) | Arch (pacman) |
+| --- | --- | --- |
+| sway itself | `sway` | `sway` |
+| lock / idle | `swaylock swayidle` | `swaylock swayidle` |
+| logout menu | `wlogout` | `wlogout` |
+| screenshots | `grimshot` (or `grim slurp`) | `grim slurp` |
+| status bar | `waybar` | `waybar` |
+| launcher | `rofi-wayland` | `rofi-wayland` |
+| file manager | `thunar` | `thunar` |
+| screen recorder | `wf-recorder` | `wf-recorder` |
+| media keys | `playerctl` | `playerctl` |
+| audio control | `pulseaudio-utils` | `libpulse` |
+| brightness | `light` | `light` |
+
+Keybindings reference `way-sh`, `$screen-recorder`, `$launcher`, `$screenshot`
+— defined in `apps.conf`, adjust to your installed binaries.

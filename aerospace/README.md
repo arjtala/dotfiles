@@ -57,3 +57,19 @@ See also: [sway/README.md](../sway/README.md), [i3/README.md](../i3/README.md).
 | `Cmd + Enter` | New Ghostty window |
 | `Cmd + Shift + Q` | Close focused window |
 | `Cmd + Shift + R` | Reload AeroSpace config |
+
+## Dependencies
+
+macOS only. See the root [Brewfile](../Brewfile) for a full one-shot:
+
+```sh
+brew bundle install --file=~/dotfiles/Brewfile
+```
+
+Key packages (subset):
+
+| Needed for | Homebrew |
+| --- | --- |
+| AeroSpace itself | `cask nikitabobko/tap/aerospace` |
+| `Cmd + Enter` → Ghostty | `cask ghostty` |
+| Status bar hooks | `sketchybar` (tap: `FelixKratz/formulae`) |

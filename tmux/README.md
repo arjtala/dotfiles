@@ -70,3 +70,21 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 | Key | Action |
 | --- | --- |
 | `prefix + b` | Toggle status bar visibility |
+
+## Dependencies
+
+| Needed for | mac (brew) | Fedora (dnf) | Arch (pacman) |
+| --- | --- | --- | --- |
+| tmux itself | `tmux` | `tmux` | `tmux` |
+| tmux-fzf-url, tmux-fuzzback | `fzf` | `fzf` | `fzf` |
+| tmux-autoreload (file watcher) | `entr` | `entr` | `entr` |
+| tmux-autoreload (bash 4+ `declare -g`) | `bash` | built-in | built-in |
+| tmux-thumbs (cargo build) | `rust` | `rust cargo` | `rust` |
+
+Manual one-off (TPM — not a package):
+
+```sh
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
+
+Then in a tmux session, `<prefix> I` to install plugins.

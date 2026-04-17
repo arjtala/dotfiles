@@ -66,10 +66,12 @@ See also: [aerospace/README.md](../aerospace/README.md),
 | `Super + Return` | Terminal |
 | `Super + d` | Launcher |
 | `Super + c` | Window overview |
-| `Super + Shift + f` | File manager (Thunar) |
 | `Super + q` | Power menu (wlogout) |
 | `Super + t` | Wallpaper selector |
 | `Super + y` | Toggle waybar |
+
+> `Super + Shift + f` → fullscreen (see Layout). The Thunar binding earlier in
+> the config is shadowed by the later fullscreen binding (last write wins).
 
 ## Screenshots and lock
 

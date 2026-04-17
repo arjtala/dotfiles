@@ -55,8 +55,10 @@ See also: [sway/README.md](../sway/README.md),
 | `Super + d` | rofi run launcher |
 | `Super + c` | rofi window switcher |
 | `Super + Shift + w` | Chrome |
-| `Super + Shift + f` | Thunar (file manager) |
 | `Super + Shift + g` | Emacs |
+
+> `Super + Shift + f` → fullscreen (see Layout). The Thunar binding earlier
+> in the config is shadowed by the later fullscreen binding (last write wins).
 
 ## System
 

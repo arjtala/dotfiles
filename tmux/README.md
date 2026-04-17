@@ -28,8 +28,8 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 
 | Key | Action |
 | --- | --- |
-| `prefix + "` | Split pane horizontally |
-| `prefix + %` | Split pane vertically |
+| `prefix + "` | Split pane — new pane below (tmux calls this "vertical") |
+| `prefix + %` | Split pane — new pane to the right (tmux calls this "horizontal") |
 | `prefix + o` | Focus next pane |
 | `prefix + ;` | Toggle last active pane |
 | `prefix + { / }` | Swap pane with previous / next |
@@ -40,13 +40,18 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 
 ## Copy mode and clipboard
 
+`mode-keys` is emacs (tmux's default). Relevant bindings:
+
 | Key | Action |
 | --- | --- |
 | `prefix + [` | Enter copy mode |
-| `v` (in copy mode) | Start selection (vi mode) |
-| `y` (in copy mode) | Yank to system clipboard (tmux-yank) |
+| `C-Space` (in copy mode) | Start selection |
+| `y` (in copy mode) | Yank selection to system clipboard (tmux-yank) |
 | Mouse drag | Select + copy to system clipboard |
+| Double / triple click | Copy word / line |
 | `prefix + ]` | Paste from tmux buffer |
+| `prefix + y` | Copy the current command line (tmux-yank) |
+| `prefix + Y` | Copy the current pane's working directory (tmux-yank) |
 
 ## Plugin keys
 

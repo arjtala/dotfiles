@@ -123,14 +123,6 @@ export LANG=en_US.UTF-8
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-if [ -f "$HOME/perl5" ]; then
-	PATH="/home/arjangt/perl5/bin${PATH:+:${PATH}}"; export PATH;
-	PERL5LIB="/home/arjangt/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-	PERL_LOCAL_LIB_ROOT="/home/arjangt/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-	PERL_MB_OPT="--install_base \"/home/arjangt/perl5\""; export PERL_MB_OPT;
-	PERL_MM_OPT="INSTALL_BASE=/home/arjangt/perl5"; export PERL_MM_OPT;
-fi
-
 if [ -d "$HOME/.zsh/pure" ]; then
     fpath+=($HOME/.zsh/pure);
     autoload -U promptinit;
@@ -152,13 +144,15 @@ clip() { # limit copy to 74994 bytes (OSC 52 limit)
   printf "\033]52;c;%s\a" "$encoded_data"
 }
 
-# Fix Wayland/Sway sockets in tmux (stale sessions after sway restart)
-if [ -n "$TMUX" ]; then
-    export SWAYSOCK=$( (setopt nonomatch; ls -t /run/user/1000/sway-ipc.*.sock 2>/dev/null | head -1) )
-    local _wd=$( (setopt nonomatch; ls /run/user/1000/wayland-* 2>/dev/null | grep -v lock | head -1) )
-    if [ -n "$_wd" ]; then export WAYLAND_DISPLAY=$(basename "$_wd"); fi
+# Linux-only: Wayland/Sway env (stale sockets after sway restart, wlroots cursor fix)
+if [[ "$OSTYPE" == linux-gnu* ]]; then
+    if [ -n "$TMUX" ]; then
+        export SWAYSOCK=$( (setopt nonomatch; ls -t /run/user/1000/sway-ipc.*.sock 2>/dev/null | head -1) )
+        local _wd=$( (setopt nonomatch; ls /run/user/1000/wayland-* 2>/dev/null | grep -v lock | head -1) )
+        if [ -n "$_wd" ]; then export WAYLAND_DISPLAY=$(basename "$_wd"); fi
+    fi
+    export WLR_NO_HARDWARE_CURSORS=1
 fi
-export WLR_NO_HARDWARE_CURSORS=1
 # PATH setup (kept before conda init so conda can prepend correctly)
 if [ -d "$HOME/.cargo" ]; then
 	source "$HOME/.cargo/env";
@@ -174,10 +168,9 @@ if [ -d "$HOME/.local/homebrew" ]; then
     export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 fi
 if type brew &> /dev/null; then
-    export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
-	LDFLAGS="-L$(brew --prefix sqlite)/lib"
-	CPPFLAGS="-I$(brew --prefix sqlite)/include"
+	export LDFLAGS="-L$(brew --prefix sqlite)/lib"
+	export CPPFLAGS="-I$(brew --prefix sqlite)/include"
 	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
     export PATH="$(brew --prefix sqlite)/bin:$PATH";
 fi

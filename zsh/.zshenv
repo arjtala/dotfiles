@@ -37,7 +37,6 @@ then
   alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
 else
     if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
-set -g @prefix_highlight_fg 'white' # default is 'colour231'
 	if [ -d "$HOME/.local/homebrew/Cellar/libgccjit/13.1.0" ]; then
 		LDFLAGS="-L$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/lib";
 		CPPFLAGS="-I$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/include";

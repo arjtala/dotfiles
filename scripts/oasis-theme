@@ -26,7 +26,7 @@ OASIS_CONF="$REPO/tmux/.tmux/plugins/tmux-oasis/themes/dark/oasis_${FLAVOR}.conf
 [[ -f "$OASIS_CONF" ]] || { echo "No such flavor: oasis_${FLAVOR}.conf"; exit 1; }
 
 # Pull a named @thm_* value out of the oasis theme file.
-get() { awk -v k="@$1" '$2==k { gsub(/"/,"",$3); print $3 }' "$OASIS_CONF"; }
+get() { awk -v k="@$1" '$3==k { gsub(/"/,"",$4); print $4 }' "$OASIS_CONF"; }
 
 THM_MANTLE=$(get thm_mantle)
 THM_SURFACE=$(get thm_surface)
@@ -100,5 +100,5 @@ Switched to $THEME_NAME
   Ghostty config: theme = $THEME_NAME
   tmux:          @oasis_flavor '$FLAVOR'
 
-To see Ghostty pick up the new palette: Cmd+Q and relaunch.
+To see Ghostty pick up the new palette: Cmd+Shift+, (reload config).
 EOF

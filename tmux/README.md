@@ -90,8 +90,8 @@ shot) with:
 ```
 
 The script unsets stale `@thm_*` options and reloads `.tmux.conf` in place —
-no server restart needed. For Ghostty to pick up the new palette, `Cmd+Q` and
-relaunch it.
+no server restart needed. For Ghostty to pick up the new palette, `Cmd+Shift+,`
+(reload config).
 
 ## Dependencies
 

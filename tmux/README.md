@@ -82,9 +82,9 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 Local sessions use `tmux-oasis`; remote (SSH) sessions fall back to
 `tmux-power` — branched on `$SSH_CONNECTION` at the bottom of `.tmux.conf`.
 
-Window labels auto-follow the current working directory, and pane borders show
-either the pane title (`prefix + T`) or a fallback derived from the directory
-or active command.
+Window labels auto-follow the current repo or directory, and pane borders show
+either the pane title (`prefix + T`) or a repo-aware shortened path/command
+fallback.
 
 Swap the local oasis flavor (and regenerate a matching Ghostty theme in one
 shot) with:

@@ -37,6 +37,7 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 | `prefix + x` | Kill pane |
 | `prefix + arrow` | Focus pane in direction |
 | `prefix + Ctrl + arrow` | Resize pane by 1 |
+| `prefix + T` | Set the current pane title |
 
 ## Copy mode and clipboard
 
@@ -80,6 +81,10 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 
 Local sessions use `tmux-oasis`; remote (SSH) sessions fall back to
 `tmux-power` — branched on `$SSH_CONNECTION` at the bottom of `.tmux.conf`.
+
+Window labels auto-follow the current working directory, and pane borders show
+either the pane title (`prefix + T`) or a fallback derived from the directory
+or active command.
 
 Swap the local oasis flavor (and regenerate a matching Ghostty theme in one
 shot) with:

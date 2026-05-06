@@ -48,7 +48,7 @@
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
 
-theme = Oasis Dune Dark
+theme = Woodland Dusk
 
 # No titlebar — use AeroSpace accordion layout (Cmd+Ctrl+Z)
 # for tabbed window switching instead of native tabs

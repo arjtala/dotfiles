@@ -1,5 +1,8 @@
 .DS_Store
 \#*.*\#
+*~
 *.key
 key.txt
 STATE.md
+.codex/
+.claude/

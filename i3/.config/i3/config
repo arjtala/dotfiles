@@ -83,7 +83,7 @@ bindsym $super+h split h
 bindsym $super+v split v
 
 # enter fullscreen mode for the focused container
-bindsym $super+f fullscreen toggle
+bindsym $super+Shift+f fullscreen toggle
 
 # change container layout split
 bindsym $super+s layout toggle split

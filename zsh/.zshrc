@@ -83,6 +83,8 @@ ZSH_THEME="half-life"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git mercurial)
 
+export ZSH_DISABLE_COMPFIX=true
+fpath=(${fpath:#/usr/share/zsh/site-functions})
 source $ZSH/oh-my-zsh.sh
 
 # User configuration

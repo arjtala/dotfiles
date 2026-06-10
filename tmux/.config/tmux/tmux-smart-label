@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+mode="${1:-pane}"
+pane_path="${2:-}"
+pane_command="${3:-}"
+pane_title="${4:-}"
+
+trim() {
+  local value="${1:-}"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
+slash_count() {
+  local value="${1:-}"
+  local slashes="${value//[^\/]/}"
+  printf '%s' "${#slashes}"
+}
+
+expand_path() {
+  local value="${1:-}"
+  case "$value" in
+    \~)
+      printf '%s' "$HOME"
+      ;;
+    \~/*)
+      printf '%s/%s' "$HOME" "${value:2}"
+      ;;
+    *)
+      printf '%s' "$value"
+      ;;
+  esac
+}
+
+shell_command() {
+  case "${1:-}" in
+    sh|bash|zsh|fish)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+path_like_title() {
+  case "${1:-}" in
+    /|/*|\~|\~/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+git_label() {
+  local label_mode="$1"
+  local path="$2"
+  local repo_root repo_name rel slash_count tail parent prev
+
+  repo_root="$(git -C "$path" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [ -z "$repo_root" ]; then
+    return 1
+  fi
+
+  repo_name="${repo_root##*/}"
+  rel="$(git -C "$path" rev-parse --show-prefix 2>/dev/null || true)"
+  rel="${rel%/}"
+
+  if [ -z "$rel" ]; then
+    printf '%s' "$repo_name"
+    return 0
+  fi
+
+  slash_count="$(slash_count "$rel")"
+  if [ "$label_mode" = "window" ]; then
+    if [ "$slash_count" -eq 0 ]; then
+      printf '%s/%s' "$repo_name" "$rel"
+    else
+      printf '%s/.../%s' "$repo_name" "${rel##*/}"
+    fi
+    return 0
+  fi
+
+  if [ "$slash_count" -le 1 ]; then
+    printf '%s/%s' "$repo_name" "$rel"
+    return 0
+  fi
+
+  tail="${rel##*/}"
+  parent="${rel%/*}"
+  prev="${parent##*/}"
+  printf '%s/.../%s/%s' "$repo_name" "$prev" "$tail"
+}
+
+home_label() {
+  local label_mode="$1"
+  local path="$2"
+  local rel slash_count tail parent prev
+
+  if [ "$path" = "$HOME" ]; then
+    printf '~'
+    return 0
+  fi
+
+  case "$path" in
+    "$HOME"/*)
+      rel="${path#$HOME/}"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  slash_count="$(slash_count "$rel")"
+  if [ "$label_mode" = "window" ]; then
+    if [ "$slash_count" -le 1 ]; then
+      printf '~/%s' "$rel"
+    else
+      tail="${rel##*/}"
+      parent="${rel%/*}"
+      printf '~/%s/%s' "${parent##*/}" "$tail"
+    fi
+    return 0
+  fi
+
+  if [ "$slash_count" -le 1 ]; then
+    printf '~/%s' "$rel"
+    return 0
+  fi
+
+  tail="${rel##*/}"
+  parent="${rel%/*}"
+  prev="${parent##*/}"
+  printf '~/.../%s/%s' "$prev" "$tail"
+}
+
+absolute_label() {
+  local label_mode="$1"
+  local path="${2%/}"
+  local rel slash_count tail parent prev
+
+  if [ -z "$path" ]; then
+    printf '/'
+    return 0
+  fi
+
+  rel="${path#/}"
+  slash_count="$(slash_count "$rel")"
+  if [ "$label_mode" = "window" ]; then
+    if [ "$slash_count" -le 1 ]; then
+      printf '/%s' "$rel"
+    else
+      tail="${rel##*/}"
+      parent="${rel%/*}"
+      printf '%s/%s' "${parent##*/}" "$tail"
+    fi
+    return 0
+  fi
+
+  if [ "$slash_count" -le 1 ]; then
+    printf '/%s' "$rel"
+    return 0
+  fi
+
+  tail="${rel##*/}"
+  parent="${rel%/*}"
+  prev="${parent##*/}"
+  printf '.../%s/%s' "$prev" "$tail"
+}
+
+path_label() {
+  local label_mode="$1"
+  local raw_path="${2:-}"
+  local path
+
+  path="$(expand_path "$raw_path")"
+  if [ -z "$path" ]; then
+    printf '%s' "${pane_command:-shell}"
+    return 0
+  fi
+
+  git_label "$label_mode" "$path" && return 0
+  home_label "$label_mode" "$path" && return 0
+  absolute_label "$label_mode" "$path"
+}
+
+pane_label() {
+  local title
+
+  title="$(trim "$pane_title")"
+  if [ -n "$title" ]; then
+    if path_like_title "$title"; then
+      path_label pane "$title"
+      return 0
+    fi
+
+    if [ "$title" != "$pane_command" ]; then
+      printf '%s' "$title"
+      return 0
+    fi
+  fi
+
+  if shell_command "$pane_command"; then
+    path_label pane "$pane_path"
+    return 0
+  fi
+
+  printf '%s' "${pane_command:-$pane_path}"
+}
+
+case "$mode" in
+  window)
+    path_label window "$pane_path"
+    ;;
+  pane)
+    pane_label
+    ;;
+  *)
+    printf '%s' "$pane_title"
+    ;;
+esac

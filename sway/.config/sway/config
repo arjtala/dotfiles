@@ -72,7 +72,7 @@ bar {
 #-----------------------------#
 #           Misc              #
 #-----------------------------#
-output * adaptive_sync off
+# output * adaptive_sync off
 
 #---------------------#
 # Focus follows mouse #

@@ -12,8 +12,8 @@
         "custom/vpn"
     ],
     "modules-center": [
-        "custom/adhan",
         "clock",
+        "custom/adhan",
         "sway/window"
     ],
     "modules-right": [
@@ -27,7 +27,7 @@
         "max-length": 50
     },
     "clock": {
-        "format": "  {:%a, %d %b %Y   %H:%M}",
+        "format": "  {:%H:%M   %a, %d %b %Y}",
         "timezone": "America/Los_Angeles",
         "tooltip": "true",
         "tooltip-format": " <tt><span size='11pt'>{calendar}</span></tt> ",

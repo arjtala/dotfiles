@@ -19,6 +19,10 @@ else
   export LANGUAGE=en_US.UTF-8
 fi
 
+if [[ -d /opt/facebook ]]; then
+    export META_CLAUDE_USE_ANTHROPIC_DIRECT=0
+    export META_CLAUDE_USE_AI_GATEWAY=1
+fi
 if [[ "$HOST" == *"ip-10-0-1-5"* ]];
 then
 	if [ -d "$HOME/.local/share/info" ]; then export INFOPATH=$HOME/.local/share/info; fi

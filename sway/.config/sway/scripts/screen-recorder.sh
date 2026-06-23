@@ -13,8 +13,8 @@ file="Recording_${time}.mp4"
 pid_file="$dir/record.pid"
 
 # Icons
-icon1="$HOME/.config/dunst/icons/collections.svg"
-icon2="$HOME/.config/dunst/icons/timer.svg"
+icon1="media-record"
+icon2="alarm-symbolic"
 
 # Buttons
 screen=" Record Desktop"

@@ -19,27 +19,42 @@ log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
 
 # 1. Packages (mirrors the Dependencies table in sway/README.md) ---------------
 log "Installing packages from the Fedora repos"
-# --skip-unavailable: tolerate packages a given Fedora release/repo set doesn't carry
-# (e.g. matugen on older releases) instead of aborting the whole transaction.
+# Notes: `dunst` is installed only for its `dunstify` CLI (used by the OSD/screenshot/
+# recorder scripts) — `mako` is the running notification daemon. `pulseaudio-utils`
+# provides `pactl` (volume/mute keys) and `light` drives the brightness keys; both are
+# referenced by keybindings.conf. matugen is handled separately below (not carried by
+# every Fedora release). --skip-unavailable tolerates remaining repo/version gaps.
 sudo dnf install -y --skip-unavailable \
   sway swaybg swaylock swayidle sway-systemd \
-  waybar mako gammastep wlogout \
+  waybar mako dunst gammastep wlogout \
   xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
   rofi grimshot grim slurp wf-recorder \
   wl-clipboard clipman \
   mate-polkit network-manager-applet \
-  playerctl brightnessctl \
+  playerctl pulseaudio-utils light \
   pipewire wireplumber \
-  python3-i3ipc matugen Thunar \
+  python3-i3ipc Thunar \
   fcitx5 fcitx5-configtool \
   adw-gtk3-theme papirus-icon-theme \
   qgnomeplatform-qt6 qgnomeplatform-qt5 qt6-qtwayland qt5-qtwayland
 
-# matugen isn't packaged on every Fedora release; flag alternatives if it got skipped.
-if ! command -v matugen >/dev/null; then
-  echo "  ! matugen not available from your repos (only needed for the Super+t wallpaper selector)."
-  echo "    Install via 'cargo install matugen', or grab a prebuilt binary from"
-  echo "    https://github.com/InioX/matugen/releases and drop it in ~/.local/bin."
+# matugen (Super+t wallpaper selector) — in Fedora repos only on recent releases (absent
+# on e.g. F42), so handle it on its own: try the repo, then cargo, else leave a note.
+if command -v matugen >/dev/null; then
+  log "matugen already installed — skipping"
+else
+  log "Installing matugen (wallpaper selector)"
+  sudo dnf install -y --skip-unavailable matugen || true
+  if ! command -v matugen >/dev/null; then
+    if command -v cargo >/dev/null; then
+      cargo install matugen
+    else
+      echo "  ! matugen not in your repos and cargo is unavailable. Install it later via"
+      echo "    'cargo install matugen' or a prebuilt binary from"
+      echo "    https://github.com/InioX/matugen/releases (drop in ~/.local/bin)."
+      echo "    Only needed for the Super+t wallpaper selector — the rest of sway works without it."
+    fi
+  fi
 fi
 
 # 2. ghostty (terminal) — not in Fedora repos, packaged on COPR ---------------

@@ -104,21 +104,54 @@ See also: [aerospace/README.md](../aerospace/README.md),
 
 ## Dependencies
 
-Linux / Wayland only.
+Linux / Wayland only. Package names verified on **Fedora**; Arch is best-effort.
 
 | Needed for | Fedora (dnf) | Arch (pacman) |
 | --- | --- | --- |
-| sway itself | `sway` | `sway` |
+| sway itself | `sway swaybg` | `sway swaybg` |
 | lock / idle | `swaylock swayidle` | `swaylock swayidle` |
-| logout menu | `wlogout` | `wlogout` |
-| screenshots | `grimshot` (or `grim slurp`) | `grim slurp` |
+| portals + session¹ | `sway-systemd xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk` | `xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk` |
+| notifications | `mako` | `mako` |
+| night light | `gammastep` | `gammastep` |
 | status bar | `waybar` | `waybar` |
-| launcher | `rofi-wayland` | `rofi-wayland` |
-| file manager | `thunar` | `thunar` |
+| launcher | `rofi` | `rofi-wayland` |
+| logout menu | `wlogout` | `wlogout` |
+| terminal² | `ghostty` | `ghostty` |
+| file manager | `Thunar` | `thunar` |
+| screenshots | `grimshot grim slurp` | `grim slurp` |
 | screen recorder | `wf-recorder` | `wf-recorder` |
+| clipboard | `wl-clipboard clipman` | `wl-clipboard clipman` |
+| polkit agent | `mate-polkit` | `mate-polkit` |
+| network applet | `network-manager-applet` | `network-manager-applet` |
 | media keys | `playerctl` | `playerctl` |
-| audio control | `pulseaudio-utils` | `libpulse` |
-| brightness | `light` | `light` |
+| brightness | `brightnessctl` (or `light`) | `brightnessctl` |
+| audio | `pipewire wireplumber` | `pipewire wireplumber` |
+| autotiling | `python3-i3ipc` | `python-i3ipc` |
+| wallpaper theming | `matugen` | `matugen` (AUR) |
+| input method (opt) | `fcitx5 fcitx5-configtool` | `fcitx5` |
+| GTK dark theme | `adw-gtk3-theme` | `adw-gtk3` |
+| icons | `papirus-icon-theme` | `papirus-icon-theme` |
+| Qt dark + wayland | `qgnomeplatform-qt6 qgnomeplatform-qt5 qt6-qtwayland qt5-qtwayland` | `qt6ct qt6-wayland` |
 
-Keybindings reference `way-sh`, `$screen-recorder`, `$launcher`, `$screenshot`
-— defined in `apps.conf`, adjust to your installed binaries.
+¹ `sway-systemd` starts `graphical-session.target` via `exec /usr/libexec/sway-systemd/session.sh`
+(in `exec.conf`). Without it the XDG portal never comes up — which breaks **dark mode in
+libadwaita apps**, screen-sharing, file pickers, and leaves new terminals without
+`WAYLAND_DISPLAY` / `SWAYSOCK`.
+
+² ghostty isn't in Fedora's repos:
+`sudo dnf copr enable mineiro/ghostty && sudo dnf install ghostty`
+(or point `$term` in `apps.conf` at `alacritty` / `kitty` / `foot`).
+
+### Not packaged / per-machine
+
+- **way-shell** (`way-sh` workspace switcher): build from source —
+  <https://github.com/ldelossa/way-shell> (`make && sudo make install`, then
+  `glib-compile-schemas /usr/share/glib-2.0/schemas`).
+- **NVIDIA**: the session entry must launch `sway --unsupported-gpu` (edit `sway.desktop`), and
+  `environment.d/90-sway.conf` carries the wlroots/NVIDIA vars (`GBM_BACKEND=nvidia-drm`, …).
+  Do **not** set `WLR_DRM_NO_MODIFIERS` on the open driver — it blanks the display.
+- **Cursor** `Bibata-Modern-Classic` (set in `config`) isn't in Fedora repos — install
+  separately or change it.
+
+Keybindings reference `way-sh`, `$screen-recorder`, `$launcher`, `$screenshot` — defined in
+`apps.conf`; adjust to your installed binaries.

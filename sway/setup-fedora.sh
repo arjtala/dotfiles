@@ -19,7 +19,9 @@ log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
 
 # 1. Packages (mirrors the Dependencies table in sway/README.md) ---------------
 log "Installing packages from the Fedora repos"
-sudo dnf install -y \
+# --skip-unavailable: tolerate packages a given Fedora release/repo set doesn't carry
+# (e.g. matugen on older releases) instead of aborting the whole transaction.
+sudo dnf install -y --skip-unavailable \
   sway swaybg swaylock swayidle sway-systemd \
   waybar mako gammastep wlogout \
   xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
@@ -32,6 +34,13 @@ sudo dnf install -y \
   fcitx5 fcitx5-configtool \
   adw-gtk3-theme papirus-icon-theme \
   qgnomeplatform-qt6 qgnomeplatform-qt5 qt6-qtwayland qt5-qtwayland
+
+# matugen isn't packaged on every Fedora release; flag alternatives if it got skipped.
+if ! command -v matugen >/dev/null; then
+  echo "  ! matugen not available from your repos (only needed for the Super+t wallpaper selector)."
+  echo "    Install via 'cargo install matugen', or grab a prebuilt binary from"
+  echo "    https://github.com/InioX/matugen/releases and drop it in ~/.local/bin."
+fi
 
 # 2. ghostty (terminal) — not in Fedora repos, packaged on COPR ---------------
 if ! command -v ghostty >/dev/null; then

@@ -114,7 +114,7 @@ On Fedora, run [`setup-fedora.sh`](setup-fedora.sh) to do all of this automatica
 | sway itself | `sway swaybg` | `sway swaybg` |
 | lock / idle | `swaylock swayidle` | `swaylock swayidle` |
 | portals + session¹ | `sway-systemd xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk` | `xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk` |
-| notifications | `mako` | `mako` |
+| notifications³ | `mako dunst` | `mako dunst` |
 | night light | `gammastep` | `gammastep` |
 | status bar | `waybar` | `waybar` |
 | launcher | `rofi` | `rofi-wayland` |
@@ -127,10 +127,9 @@ On Fedora, run [`setup-fedora.sh`](setup-fedora.sh) to do all of this automatica
 | polkit agent | `mate-polkit` | `mate-polkit` |
 | network applet | `network-manager-applet` | `network-manager-applet` |
 | media keys | `playerctl` | `playerctl` |
-| brightness | `brightnessctl` (or `light`) | `brightnessctl` |
-| audio | `pipewire wireplumber` | `pipewire wireplumber` |
+| brightness | `light` | `light` |
+| audio + `pactl` | `pipewire wireplumber pulseaudio-utils` | `pipewire wireplumber libpulse` |
 | autotiling | `python3-i3ipc` | `python-i3ipc` |
-| wallpaper theming | `matugen` | `matugen` (AUR) |
 | input method (opt) | `fcitx5 fcitx5-configtool` | `fcitx5` |
 | GTK dark theme | `adw-gtk3-theme` | `adw-gtk3` |
 | icons | `papirus-icon-theme` | `papirus-icon-theme` |
@@ -145,8 +144,15 @@ libadwaita apps**, screen-sharing, file pickers, and leaves new terminals withou
 `sudo dnf copr enable mineiro/ghostty && sudo dnf install ghostty`
 (or point `$term` in `apps.conf` at `alacritty` / `kitty` / `foot`).
 
+³ `mako` is the running notification daemon; `dunst` is installed **only** for its `dunstify`
+CLI, which the OSD / screenshot / recorder scripts call (it routes notifications to mako).
+Switch those scripts to `notify-send` if you'd rather not install dunst.
+
 ### Not packaged / per-machine
 
+- **matugen** (`Super+t` wallpaper selector): in Fedora repos only on recent releases
+  (absent on e.g. F42). `setup-fedora.sh` tries the repo, then `cargo install matugen`;
+  otherwise grab a prebuilt binary from <https://github.com/InioX/matugen/releases>.
 - **way-shell** (`way-sh` workspace switcher): build from source —
   <https://github.com/ldelossa/way-shell> (`make && sudo make install`, then
   `glib-compile-schemas /usr/share/glib-2.0/schemas`).

@@ -106,8 +106,10 @@ See also: [aerospace/README.md](../aerospace/README.md),
 
 Linux / Wayland only. Package names verified on **Fedora**; Arch is best-effort.
 
-On Fedora, run [`setup-fedora.sh`](setup-fedora.sh) to do all of this automatically
-(packages + ghostty COPR + way-shell build + sway session entry). Or install manually:
+On Fedora, run [`setup-fedora.sh`](setup-fedora.sh) to install most of this automatically
+(packages + ghostty COPR + way-shell build + sway session entry). matugen is best-effort: if
+it's absent from your repos and `cargo` is unavailable, the script skips it and the `Super+t`
+wallpaper selector needs a manual matugen install (see notes below). Or install manually:
 
 | Needed for | Fedora (dnf) | Arch (pacman) |
 | --- | --- | --- |

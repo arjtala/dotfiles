@@ -47,10 +47,12 @@ else
   sudo dnf install -y --skip-unavailable matugen || true
   if ! command -v matugen >/dev/null; then
     if command -v cargo >/dev/null; then
-      cargo install matugen
+      # --root ~/.local so the binary lands in ~/.local/bin (on the systemd/sway session
+      # PATH) rather than ~/.cargo/bin, which a clean session PATH won't include.
+      cargo install --root "$HOME/.local" matugen
     else
       echo "  ! matugen not in your repos and cargo is unavailable. Install it later via"
-      echo "    'cargo install matugen' or a prebuilt binary from"
+      echo "    'cargo install --root ~/.local matugen' or a prebuilt binary from"
       echo "    https://github.com/InioX/matugen/releases (drop in ~/.local/bin)."
       echo "    Only needed for the Super+t wallpaper selector — the rest of sway works without it."
     fi

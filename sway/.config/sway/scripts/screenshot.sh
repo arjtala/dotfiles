@@ -15,8 +15,8 @@ time=$(date +%Y-%m-%d-%I-%M-%S)
 file="Screenshot_${time}.png"
 
 # Icons
-icon1="$HOME/.config/dunst/icons/collections.svg"
-icon2="$HOME/.config/dunst/icons/timer.svg"
+icon1="camera-photo"
+icon2="alarm-symbolic"
 
 # Buttons
 layout=$(cat $theme | grep BUTTON | cut -d'=' -f2 | tr -d '[:blank:],*/')

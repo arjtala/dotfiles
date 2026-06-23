@@ -19,14 +19,14 @@ log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
 
 # 1. Packages (mirrors the Dependencies table in sway/README.md) ---------------
 log "Installing packages from the Fedora repos"
-# Notes: `dunst` is installed only for its `dunstify` CLI (used by the OSD/screenshot/
-# recorder scripts) — `mako` is the running notification daemon. `pulseaudio-utils`
-# provides `pactl` (volume/mute keys) and `light` drives the brightness keys; both are
-# referenced by keybindings.conf. matugen is handled separately below (not carried by
-# every Fedora release). --skip-unavailable tolerates remaining repo/version gaps.
+# Notes: `mako` is the notification daemon; `libnotify` provides `notify-send` (used by the
+# OSD/screenshot/recorder scripts). `pulseaudio-utils` provides `pactl` (volume/mute keys)
+# and `light` drives the brightness keys — both referenced by keybindings.conf. matugen is
+# handled separately below (not carried by every Fedora release). --skip-unavailable
+# tolerates remaining repo/version gaps.
 sudo dnf install -y --skip-unavailable \
   sway swaybg swaylock swayidle sway-systemd \
-  waybar mako dunst gammastep wlogout \
+  waybar mako libnotify gammastep wlogout \
   xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
   rofi grimshot grim slurp wf-recorder \
   wl-clipboard clipman \

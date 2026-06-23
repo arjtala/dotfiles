@@ -114,7 +114,7 @@ On Fedora, run [`setup-fedora.sh`](setup-fedora.sh) to do all of this automatica
 | sway itself | `sway swaybg` | `sway swaybg` |
 | lock / idle | `swaylock swayidle` | `swaylock swayidle` |
 | portals + session¹ | `sway-systemd xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk` | `xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk` |
-| notifications³ | `mako dunst` | `mako dunst` |
+| notifications³ | `mako libnotify` | `mako libnotify` |
 | night light | `gammastep` | `gammastep` |
 | status bar | `waybar` | `waybar` |
 | launcher | `rofi` | `rofi-wayland` |
@@ -144,9 +144,9 @@ libadwaita apps**, screen-sharing, file pickers, and leaves new terminals withou
 `sudo dnf copr enable mineiro/ghostty && sudo dnf install ghostty`
 (or point `$term` in `apps.conf` at `alacritty` / `kitty` / `foot`).
 
-³ `mako` is the running notification daemon; `dunst` is installed **only** for its `dunstify`
-CLI, which the OSD / screenshot / recorder scripts call (it routes notifications to mako).
-Switch those scripts to `notify-send` if you'd rather not install dunst.
+³ `mako` is the notification daemon; `libnotify` provides `notify-send`, which the OSD /
+screenshot / recorder scripts use to post notifications (the volume/brightness OSD updates
+in place via the `x-canonical-private-synchronous` hint).
 
 ### Not packaged / per-machine
 

@@ -47,8 +47,8 @@ else
   sudo dnf install -y --skip-unavailable matugen || true
   if ! command -v matugen >/dev/null; then
     if command -v cargo >/dev/null; then
-      # --root ~/.local so the binary lands in ~/.local/bin (on the systemd/sway session
-      # PATH) rather than ~/.cargo/bin, which a clean session PATH won't include.
+      # --root ~/.local so the binary lands in ~/.local/bin, which environment.d/90-sway.conf
+      # adds to the session PATH (cargo's default ~/.cargo/bin is not on a clean session PATH).
       cargo install --root "$HOME/.local" matugen
     else
       echo "  ! matugen not in your repos and cargo is unavailable. Install it later via"

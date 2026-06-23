@@ -153,7 +153,7 @@ in place via the `x-canonical-private-synchronous` hint).
 ### Not packaged / per-machine
 
 - **matugen** (`Super+t` wallpaper selector): in Fedora repos only on recent releases
-  (absent on e.g. F42). `setup-fedora.sh` tries the repo, then `cargo install matugen`;
+  (absent on e.g. F42). `setup-fedora.sh` tries the repo, then `cargo install --root ~/.local matugen`;
   otherwise grab a prebuilt binary from <https://github.com/InioX/matugen/releases>.
 - **way-shell** (`way-sh` workspace switcher): build from source —
   <https://github.com/ldelossa/way-shell> (`make && sudo make install`, then

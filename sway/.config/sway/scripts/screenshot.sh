@@ -32,18 +32,18 @@ fi
 
 # Notify and view screenshot
 notify_view() {
-	dunstify -u low --replace=699 -i "$icon1" "Copied to clipboard."
+	notify-send -u low -h string:x-canonical-private-synchronous:screenshot -i "$icon1" "Copied to clipboard."
 	if [[ -e "$dir/$file" ]]; then
-		dunstify -u low --replace=699 -i "$icon1" "Screenshot Saved."
+		notify-send -u low -h string:x-canonical-private-synchronous:screenshot -i "$icon1" "Screenshot Saved."
 	else
-		dunstify -u low --replace=699 -i "$icon1" "Screenshot Deleted."
+		notify-send -u low -h string:x-canonical-private-synchronous:screenshot -i "$icon1" "Screenshot Deleted."
 	fi
 }
 
 # countdown
 countdown() {
 	for sec in $(seq "$1" -1 1); do
-		dunstify -t 1000 --replace=699 -i "$icon2" "Taking shot in : $sec"
+		notify-send -t 1000 -h string:x-canonical-private-synchronous:screenshot -i "$icon2" "Taking shot in : $sec"
 		sleep 1
 	done
 }

@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 set -euox pipefail
 
-# CSDunstify - Send audio and brightness notifications for dunst
+# CSDunstify - Send audio and brightness notifications via notify-send (libnotify)
 
-# dependencies: dunstify, pactl, light (for brightness), Papirus (icons)
+# dependencies: notify-send, pactl, light (for brightness), Papirus (icons)
 
 ### How to use: ###
 # Pass the values via stdin and provide the notification type
@@ -19,7 +19,7 @@ set -euox pipefail
 
 notifyMuted() {
 	volume="$1"
-	dunstify -h string:x-canonical-private-synchronous:audio "Muted" -h int:value:"$volume" -t 1500 --icon audio-volume-muted
+	notify-send -h string:x-canonical-private-synchronous:audio "Muted" -h int:value:"$volume" -t 1500 --icon audio-volume-muted
 }
 
 notifyAudio() {
@@ -34,11 +34,11 @@ notifyAudio() {
 	if [ $volume -eq 0 ]; then
 		notifyMuted "$volume"
 	elif [ $volume -le 30 ]; then
-		dunstify -h string:x-canonical-private-synchronous:audio "Volume: " -h int:value:"$volume" -t 1500 --icon audio-volume-low
+		notify-send -h string:x-canonical-private-synchronous:audio "Volume: " -h int:value:"$volume" -t 1500 --icon audio-volume-low
 	elif [ $volume -le 70 ]; then
-		dunstify -h string:x-canonical-private-synchronous:audio "Volume: " -h int:value:"$volume" -t 1500 --icon audio-volume-medium
+		notify-send -h string:x-canonical-private-synchronous:audio "Volume: " -h int:value:"$volume" -t 1500 --icon audio-volume-medium
 	else
-		dunstify -h string:x-canonical-private-synchronous:audio "Volume: " -h int:value:"$volume" -t 1500 --icon audio-volume-high
+		notify-send -h string:x-canonical-private-synchronous:audio "Volume: " -h int:value:"$volume" -t 1500 --icon audio-volume-high
 	fi
 }
 
@@ -47,22 +47,22 @@ notifyPlayPause() {
 	status=$(playerctl status)
 
 	if [ "$status" = "Playing" ]; then
-		dunstify -h string:x-canonical-private-synchronous:media "Paused" -t 1500 --icon media-playback-pause
+		notify-send -h string:x-canonical-private-synchronous:media "Paused" -t 1500 --icon media-playback-pause
 	else
-		dunstify -h string:x-canonical-private-synchronous:media "Playing" -t 1500 --icon media-playback-start
+		notify-send -h string:x-canonical-private-synchronous:media "Playing" -t 1500 --icon media-playback-start
 	fi
 }
 
 notifyBrightness() {
 	brightness="$1"
 	if [ $brightness -eq 0 ]; then
-		dunstify -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-off-symbolic
+		notify-send -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-off-symbolic
 	elif [ $brightness -le 30 ]; then
-		dunstify -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-low-symbolic
+		notify-send -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-low-symbolic
 	elif [ $brightness -le 70 ]; then
-		dunstify -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-medium-symbolic
+		notify-send -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-medium-symbolic
 	else
-		dunstify -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-high-symbolic
+		notify-send -h string:x-canonical-private-synchronous:brightness "Brightness: " -h int:value:"$brightness" -t 1500 --icon display-brightness-high-symbolic
 	fi
 }
 

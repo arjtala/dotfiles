@@ -34,7 +34,7 @@ check_recording() {
 
 # Notify function
 notify_view() {
-	dunstify -u low --replace=699 -i "$icon1" "Recording started."
+	notify-send -u low -h string:x-canonical-private-synchronous:recorder -i "$icon1" "Recording started."
 }
 
 # Stop recording function
@@ -42,16 +42,16 @@ stop_recording() {
 	if check_recording; then
 		pkill -SIGINT wf-recorder # Send SIGINT to stop wf-recorder
 		rm "$pid_file"            # Remove pid file
-		dunstify -u low --replace=699 -i "$icon1" "Recording stopped."
+		notify-send -u low -h string:x-canonical-private-synchronous:recorder -i "$icon1" "Recording stopped."
 	else
-		dunstify -u low --replace=699 -i "$icon1" "No recording in progress."
+		notify-send -u low -h string:x-canonical-private-synchronous:recorder -i "$icon1" "No recording in progress."
 	fi
 }
 
 # countdown
 countdown() {
 	for sec in $(seq "$1" -1 1); do
-		dunstify -t 1000 --replace=699 -i "$icon2" "Recording starts in : $sec"
+		notify-send -t 1000 -h string:x-canonical-private-synchronous:recorder -i "$icon2" "Recording starts in : $sec"
 		sleep 1
 	done
 }

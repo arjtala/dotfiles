@@ -106,6 +106,9 @@ See also: [aerospace/README.md](../aerospace/README.md),
 
 Linux / Wayland only. Package names verified on **Fedora**; Arch is best-effort.
 
+On Fedora, run [`setup-fedora.sh`](setup-fedora.sh) to do all of this automatically
+(packages + ghostty COPR + way-shell build + sway session entry). Or install manually:
+
 | Needed for | Fedora (dnf) | Arch (pacman) |
 | --- | --- | --- |
 | sway itself | `sway swaybg` | `sway swaybg` |

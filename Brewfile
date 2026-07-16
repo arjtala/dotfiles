@@ -4,10 +4,10 @@
 #   brew bundle install --file=~/dotfiles/Brewfile
 #
 # After running, still needed:
-#   - oh-my-zsh: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-#   - pure prompt: clone into ~/dotfiles/zsh/.zsh/pure (already expected by .zshrc)
-#   - TPM (tmux plugin manager): git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-#   - Symlink configs into $HOME (ad-hoc per file/dir — see each app's README)
+#   - oh-my-zsh: git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
+#   - submodules: git -C ~/dotfiles submodule sync --recursive
+#                 git -C ~/dotfiles submodule update --init --recursive
+#   - symlinks: cd ~/dotfiles && stow --target="$HOME" <packages...>
 
 # Taps
 tap "nikitabobko/tap"              # AeroSpace
@@ -17,6 +17,9 @@ tap "FelixKratz/formulae"          # SketchyBar
 brew "zsh"
 brew "bash"                        # /opt/homebrew/bin/bash 5.x for scripts that need declare -g etc.
 brew "fzf"
+brew "stow"
+brew "coreutils"                   # gls used by bash/.aliases
+brew "gnu-sed"                     # gsed used by bash/.aliases
 
 # tmux + plugin deps
 brew "tmux"
@@ -26,6 +29,7 @@ brew "rust"                        # tmux-thumbs builds via cargo
 # Build tooling (LSP, Emacs native-comp, etc.)
 brew "cmake"
 brew "libgccjit"
+brew "sqlite"
 
 # Python / Node toolchains commonly used by editor tooling
 brew "node"

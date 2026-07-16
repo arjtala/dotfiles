@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -euox pipefail
 
 # CSDunstify - Send audio and brightness notifications via notify-send (libnotify)

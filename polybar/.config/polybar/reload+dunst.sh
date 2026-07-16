@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Source generated colors.
 source "${HOME}/.cache/wal/colors.sh"
@@ -42,4 +42,3 @@ polybar -c ${HOME}/.config/polybar/config_3 clock &
 polybar -c ${HOME}/.config/polybar/config_3 tray &
 
 echo "Bars launched..."
-

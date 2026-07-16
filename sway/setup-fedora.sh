@@ -26,11 +26,11 @@ log "Installing packages from the Fedora repos"
 # tolerates remaining repo/version gaps.
 sudo dnf install -y --skip-unavailable \
   sway swaybg swaylock swayidle sway-systemd \
-  waybar mako libnotify gammastep wlogout \
+  waybar mako libnotify gammastep wlogout jq htop pavucontrol \
   xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk \
   rofi grimshot grim slurp wf-recorder \
   wl-clipboard clipman \
-  mate-polkit network-manager-applet \
+  mate-polkit network-manager-applet blueman bind-utils net-tools \
   playerctl pulseaudio-utils light \
   pipewire wireplumber \
   python3-i3ipc Thunar \

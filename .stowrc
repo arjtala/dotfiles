@@ -1,0 +1,7 @@
+--ignore='\.claude'
+--ignore='setup-fedora\.sh'
+--ignore='.*\.(bak|BAK|old|OLD|pyo)'
+--ignore='backup'
+--ignore='history'
+--ignore='pluginsOLD'
+--ignore='tagged'

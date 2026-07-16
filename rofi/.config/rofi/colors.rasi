@@ -21,8 +21,14 @@
 
     /* aliases for launcher-fullscreen compatibility */
     background:         #282828;
+    surface:            @bg;
     surface-container:  #3c3836;
     primary:            #ebdbb2;
+    primary-container:  @bg2;
     on-primary:         #d79921;
+    secondary-fixed:    @bg1;
+    on-secondary-fixed: @fg;
+    error:              @red;
     on-error:           #cc241d;
+    on-surface:         @fg;
 }

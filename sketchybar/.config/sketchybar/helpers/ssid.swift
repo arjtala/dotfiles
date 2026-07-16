@@ -17,9 +17,15 @@ import CoreWLAN
 import Foundation
 
 let cachePath = ("~/.cache/sketchybar-ssid" as NSString).expandingTildeInPath
+let cacheDirectory = (cachePath as NSString).deletingLastPathComponent
 
 func emit(_ ssid: String) {
     print(ssid)
+    try? FileManager.default.createDirectory(
+        atPath: cacheDirectory,
+        withIntermediateDirectories: true,
+        attributes: nil
+    )
     try? ssid.write(toFile: cachePath, atomically: true, encoding: .utf8)
 }
 

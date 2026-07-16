@@ -1,6 +1,6 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 
-source ./monitor.sh
+source "$HOME/.config/i3/monitor.sh"
 feh --bg-fill ~/.wallpapers/inuse.png
 wal -R
 killall -q compton

@@ -108,10 +108,12 @@ no server restart needed. For Ghostty to pick up the new palette, `Cmd+Shift+,`
 | tmux-autoreload (bash 4+ `declare -g`) | `bash` | built-in | built-in |
 | tmux-thumbs (cargo build) | `rust` | `rust cargo` | `rust` |
 
-Manual one-off (TPM — not a package):
+TPM and the configured plugins are repository submodules. Initialize them from
+an existing checkout with:
 
 ```sh
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+git -C ~/dotfiles submodule sync --recursive
+git -C ~/dotfiles submodule update --init --recursive
 ```
 
 Then in a tmux session, `<prefix> I` to install plugins.

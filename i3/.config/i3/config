@@ -10,27 +10,27 @@ floating_modifier $super
 
 #autostart
 exec_always --no-startup-id ~/.config/polybar/launch.sh	HDMI-0 &
-exec_always --no-startup-id sh ~/.config/i3/reset.sh
+exec_always --no-startup-id ~/.config/i3/reset.sh
 exec --no-startup-id xrandr --output HDMI-0 --auto --primary
 exec --no-startup-id nm-applet
 # exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id xss-lock --transfer-sleep-lock -- betterlockscreen -l
 exec --no-startup-id xsettingsd &
-exec --no-statrup-id xrdb ~/.Xresources
+exec --no-startup-id xrdb ~/.Xresources
 # exec --no-startup-id feh --bg-fill ~/.wallpapers/inuse.png
 # exec --no-startup-id picom
 # exec --no-startup-id picom --experimental-backends &
 # exec --no-startup-id betterlockscreen -w dim
-exec --no-startup-id source ~/.fehbg
+exec --no-startup-id sh -c '[ -r "$HOME/.fehbg" ] && . "$HOME/.fehbg"'
 
 # start a terminal
 bindsym $super+Return exec alacritty
-bindsym $super+Shift+Return exec alacritty ranger
+bindsym $super+Shift+Return exec alacritty -e ranger
 
 # start dmenu (a program launcher)
 # bindsym $super+Shift+d exec i3-dmenu-desktop --dmenu="dmenu -i -fn 'Noto Sans:size=8'"
 bindsym $super+d exec rofi -show run -font "hack 8" -icon-theme "Papirus" -show-icons
-bindsym $super+c exec rofi -show window -lines 6 -separator-style solid -opacity "85" -font "hack 8" -width 35 -hide-scrollbar -icon-theme "Papirus" -show icons
+bindsym $super+c exec rofi -show window -lines 6 -separator-style solid -opacity "85" -font "hack 8" -width 35 -hide-scrollbar -icon-theme "Papirus" -show-icons
 
 # common apps keybinds
 bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
@@ -38,7 +38,7 @@ bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
 bindsym $super+Shift+l exec betterlockscreen --lock blur
 
 bindsym $super+Shift+w exec google-chrome
-bindsym $super+Shift+f exec thunar;workspace 3;focus
+bindsym $super+Shift+n exec thunar;workspace 3;focus
 bindsym $super+Shift+g exec emacs
 
 #change volume

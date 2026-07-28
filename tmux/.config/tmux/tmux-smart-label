@@ -5,7 +5,29 @@ set -euo pipefail
 mode="${1:-pane}"
 pane_path="${2:-}"
 pane_command="${3:-}"
-pane_title="${4:-}"
+pane_label_override="${4:-}"
+
+# The Meta workstation puts a telemetry wrapper in /usr/local/bin/git.  This
+# helper is UI plumbing, so use the real Git binary and avoid launching the
+# telemetry logger whenever a label is refreshed.  Keep an override for hosts
+# where Git lives elsewhere.
+if [ -n "${TMUX_SMART_LABEL_GIT:-}" ]; then
+  git_bin="$TMUX_SMART_LABEL_GIT"
+elif [ -x /usr/bin/git ]; then
+  git_bin=/usr/bin/git
+else
+  git_bin="$(command -v git 2>/dev/null || true)"
+fi
+
+tmux_bin="${TMUX_SMART_LABEL_TMUX:-tmux}"
+tmux_args=()
+if [ -n "${TMUX:-}" ]; then
+  tmux_args=(-S "${TMUX%%,*}")
+fi
+
+tmux_call() {
+  "$tmux_bin" "${tmux_args[@]}" "$@"
+}
 
 trim() {
   local value="${1:-}"
@@ -62,13 +84,17 @@ git_label() {
   local path="$2"
   local repo_root repo_name rel slash_count tail parent prev
 
-  repo_root="$(git -C "$path" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [ -z "$git_bin" ]; then
+    return 1
+  fi
+
+  repo_root="$("$git_bin" -C "$path" rev-parse --show-toplevel 2>/dev/null || true)"
   if [ -z "$repo_root" ]; then
     return 1
   fi
 
   repo_name="${repo_root##*/}"
-  rel="$(git -C "$path" rev-parse --show-prefix 2>/dev/null || true)"
+  rel="$("$git_bin" -C "$path" rev-parse --show-prefix 2>/dev/null || true)"
   rel="${rel%/}"
 
   if [ -z "$rel" ]; then
@@ -192,7 +218,7 @@ path_label() {
 pane_label() {
   local title
 
-  title="$(trim "$pane_title")"
+  title="$(trim "$pane_label_override")"
   if [ -n "$title" ]; then
     if path_like_title "$title"; then
       path_label pane "$title"
@@ -213,6 +239,44 @@ pane_label() {
   printf '%s' "${pane_command:-$pane_path}"
 }
 
+refresh_pane() {
+  local target="${1:-${TMUX_PANE:-}}"
+  local command_override="${2:-}"
+  local pane_active computed_pane_label computed_window_label
+
+  if [ -z "$target" ]; then
+    return 0
+  fi
+
+  pane_path="$(tmux_call display-message -p -t "$target" '#{pane_current_path}' 2>/dev/null || true)"
+  pane_command="$(tmux_call display-message -p -t "$target" '#{pane_current_command}' 2>/dev/null || true)"
+  pane_active="$(tmux_call display-message -p -t "$target" '#{pane_active}' 2>/dev/null || true)"
+  pane_label_override="$(tmux_call show-options -pqv -t "$target" @smart_label 2>/dev/null || true)"
+
+  if [ -n "$command_override" ]; then
+    pane_command="${command_override##*/}"
+  fi
+
+  computed_pane_label="$(pane_label)"
+  computed_window_label="$(path_label window "$pane_path")"
+
+  tmux_call set-option -pq -t "$target" @smart_pane_label "$computed_pane_label"
+  tmux_call set-option -pq -t "$target" @smart_window_label "$computed_window_label"
+
+  # A window's label follows its active pane, matching tmux automatic-rename.
+  if [ "$pane_active" = 1 ]; then
+    tmux_call rename-window -t "$target" "$computed_window_label"
+  fi
+}
+
+refresh_all() {
+  local target
+
+  while IFS= read -r target; do
+    refresh_pane "$target"
+  done < <(tmux_call list-panes -a -F '#{pane_id}')
+}
+
 case "$mode" in
   window)
     path_label window "$pane_path"
@@ -220,7 +284,13 @@ case "$mode" in
   pane)
     pane_label
     ;;
+  refresh)
+    refresh_pane "${2:-}" "${3:-}"
+    ;;
+  refresh-all)
+    refresh_all
+    ;;
   *)
-    printf '%s' "$pane_title"
+    printf '%s' "$pane_label_override"
     ;;
 esac

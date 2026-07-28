@@ -132,6 +132,29 @@ if [ -d "$HOME/.zsh/pure" ]; then
     prompt pure
 fi
 
+# Refresh cached tmux labels at shell state transitions, not during screen
+# redraws.  preexec supplies the command that is about to take over the pane;
+# precmd restores the repo-aware path label when the prompt returns.
+if [[ -n "${TMUX:-}" && -n "${TMUX_PANE:-}" && -x "$HOME/.config/tmux/tmux-smart-label" ]]; then
+    autoload -Uz add-zsh-hook
+
+    _tmux_smart_label_precmd() {
+        "$HOME/.config/tmux/tmux-smart-label" refresh "$TMUX_PANE" >/dev/null 2>&1 &!
+    }
+
+    _tmux_smart_label_preexec() {
+        local -a command_words
+        local command_name
+        command_words=(${(z)1})
+        command_name="${command_words[1]:-}"
+        command_name="${command_name:t}"
+        "$HOME/.config/tmux/tmux-smart-label" refresh "$TMUX_PANE" "$command_name" >/dev/null 2>&1 &!
+    }
+
+    add-zsh-hook precmd _tmux_smart_label_precmd
+    add-zsh-hook preexec _tmux_smart_label_preexec
+fi
+
 if [ -d "$CONDA_PREFIX" ]; then export DYLD_LIBRARY_PATH="$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH"; fi
 if [ -d "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
 # opam configuration

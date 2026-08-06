@@ -119,6 +119,8 @@ wallpaper selector needs a manual matugen install (see notes below). Or install 
 | notifications³ | `mako libnotify` | `mako libnotify` |
 | night light | `gammastep` | `gammastep` |
 | status bar | `waybar` | `waybar` |
+| status scripts | `jq bind-utils net-tools` | `jq bind net-tools` |
+| status actions | `htop pavucontrol blueman` | `htop pavucontrol blueman` |
 | launcher | `rofi` | `rofi-wayland` |
 | logout menu | `wlogout` | `wlogout` |
 | terminal² | `ghostty` | `ghostty` |

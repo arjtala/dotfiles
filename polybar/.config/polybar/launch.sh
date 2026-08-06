@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 export MONITOR=$(xrandr | grep connected | grep -v disconnected | grep -v eDP-1 | /usr/bin/awk 'END{print $1}')
 echo "Monitor ${MONITOR}"

@@ -1,15 +1,55 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 SIGNAL=6
-pidf="${XDG_RUNTIME_DIR:-/run/user/$UID}/idle_script.pid"
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$UID}"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/sway"
+pidf="$runtime_dir/idle_script.pid"
+logf="$state_dir/swayidle.log"
 LOCK_TIMEOUT=$((5 * 60))
 DPMS_TIMEOUT=$((10 * 60))
 
+mkdir -p "$state_dir"
+touch "$logf"
+chmod 600 "$logf"
+
+timestamp() {
+  date '+%Y-%m-%dT%H:%M:%S%z'
+}
+
+run_logged() {
+  local label="$1"
+  shift
+  local status
+
+  printf '%s %s start\n' "$(timestamp)" "$label"
+  set +e
+  "$@"
+  status=$?
+  set -e
+  printf '%s %s exit=%s\n' "$(timestamp)" "$label" "$status"
+  return "$status"
+}
+
+lock_timeout() {
+  run_logged lock-timeout "$HOME/.config/sway/scripts/swaylock.sh"
+}
+
+output_off() {
+  run_logged output-off swaymsg output '*' power off
+}
+
+output_on() {
+  run_logged output-on swaymsg output '*' power on
+}
+
 is_alive() {
   [[ -s "$pidf" ]] || return 1
-  local pid
+  local pid command
   pid="$(head -n1 "$pidf" || true)"
-  [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null
+  [[ "$pid" =~ ^[0-9]+$ ]] || return 1
+  kill -0 "$pid" 2>/dev/null || return 1
+  command="$(ps -p "$pid" -o comm=)"
+  [[ "${command##*/}" == "swayidle" ]]
 }
 
 on() {
@@ -25,26 +65,31 @@ on() {
   fi
 
   swayidle -w \
-    timeout "$LOCK_TIMEOUT" "$HOME/.config/sway/scripts/swaylock.sh" \
-    timeout "$DPMS_TIMEOUT" 'swaymsg "output * dpms off"' \
-    resume 'swaymsg "output * dpms on"' \
-    >/tmp/swayidle.log 2>&1 &
+    timeout "$LOCK_TIMEOUT" "$HOME/.config/sway/scripts/idle_script lock-timeout" \
+    timeout "$DPMS_TIMEOUT" "$HOME/.config/sway/scripts/idle_script output-off" \
+    resume "$HOME/.config/sway/scripts/idle_script output-on" \
+    before-sleep "$HOME/.config/sway/scripts/idle_script lock-timeout" \
+    after-resume "$HOME/.config/sway/scripts/idle_script output-on" \
+    >>"$logf" 2>&1 &
   echo "$!" >"$pidf"
-  pkill -RTMIN+"$SIGNAL" waybar || true
+  pkill -u "$UID" -RTMIN+"$SIGNAL" -x waybar || true
 }
 off() {
-  [[ -s "$pidf" ]] || exit 0
-  pid="$(head -n1 "$pidf" || true)"
-  if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
+  local pid
+  if is_alive; then
+    pid="$(head -n1 "$pidf")"
     kill "$pid"
   fi
-  : >"$pidf"
-  pkill -RTMIN+"$SIGNAL" waybar || true
+  rm -f "$pidf"
+  pkill -u "$UID" -RTMIN+"$SIGNAL" -x waybar || true
 }
 case "${1:-}" in
   on) on ;;
   off) off ;;
   toggle) is_alive && off || on ;;
   status) is_alive && echo running || echo stopped ;;
+  lock-timeout) lock_timeout ;;
+  output-off) output_off ;;
+  output-on) output_on ;;
   *) echo "usage: $0 {on|off|toggle|status}" ; exit 2 ;;
 esac

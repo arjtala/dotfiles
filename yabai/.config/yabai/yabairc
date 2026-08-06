@@ -2,7 +2,7 @@
 
 # bar settings
 yabai -m config status_bar                   off
-yabai -m config status_bar_text_font         "Helvetica Neue:Regualar:12.0"
+yabai -m config status_bar_text_font         "Helvetica Neue:Regular:12.0"
 yabai -m config status_bar_icon_font         "FuraMono Nerd Font:Regular:14.0"
 yabai -m config status_bar_background_color  0xff101010
 yabai -m config status_bar_foreground_color  0xfff0f0f0

@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 source "$CONFIG_DIR/colors.sh"
 
-ATHAN=$(/Users/arjangt/.cargo/bin/athan 2>/dev/null)
+ATHAN=$("$HOME/.cargo/bin/athan" 2>/dev/null)
 
 if [ -n "$ATHAN" ]; then
   sketchybar --set "$NAME" label="$ATHAN"

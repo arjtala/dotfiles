@@ -42,23 +42,25 @@ then
 else
     if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
 	if [ -d "$HOME/.local/homebrew/Cellar/libgccjit/13.1.0" ]; then
-		LDFLAGS="-L$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/lib";
-		CPPFLAGS="-I$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/include";
+			export LDFLAGS="-L$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/lib";
+			export CPPFLAGS="-I$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/include";
 	fi
 	if [ -d "/Applications/Emacs.app/" ]; then export PATH="/Applications/Emacs.app/Contents/MacOS:$PATH"; fi
 	if [ -d "/usr/local/opt/curl" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
     if [ -d "/opt/homebrew/opt/ruby" ]; then export PATH="/opt/homebrew/opt/ruby/bin:$PATH"; fi
-    if command -v gem >/dev/null 2>&1; then
-        export PATH="$(gem environment gempath):$PATH"
-    fi
+	    if command -v ruby >/dev/null 2>&1; then
+	        gem_bindir="$(ruby -rrubygems -e 'print Gem.bindir' 2>/dev/null)"
+	        if [ -n "$gem_bindir" ]; then export PATH="$gem_bindir:$PATH"; fi
+	        unset gem_bindir
+	    fi
 	if [ -d "$HOME/.rubies/ruby-3.1.2/" ]; then	export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH"; fi
 	if [ -d "$HOME/Library/Python/3.10/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.10/bin"; fi
 	if [ -d "$HOME/Library/Python/3.9/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.9/bin"; fi
 	if [ -d "/usr/local/opt" ]; then
 		PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
-		LDFLAGS="-L/usr/local/opt/curl/lib";
-		CPPFLAGS="-I/usr/local/opt/curl/include";
-		PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
+			export LDFLAGS="-L/usr/local/opt/curl/lib";
+			export CPPFLAGS="-I/usr/local/opt/curl/include";
+			export PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
 	fi
 	if [ -d "/usr/local/opt/grep/libexec/gnubin" ]; then PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"; fi
 fi

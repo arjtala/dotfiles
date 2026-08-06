@@ -50,34 +50,29 @@ countdown() {
 
 # take shots
 shotnow() {
-	grimshot save output "$dir/$file"
-	grimshot copy output "$dir/$file"
+	grimshot savecopy output "$dir/$file"
 	notify_view
 }
 
 shot5() {
 	countdown '3'
-	grimshot save output "$dir/$file"
-	grimshot copy output "$dir/$file"
+	grimshot savecopy output "$dir/$file"
 	notify_view
 }
 
 shot10() {
 	countdown '10'
-	grimshot save output "$dir/$file"
-	grimshot copy output "$dir/$file"
+	grimshot savecopy output "$dir/$file"
 	notify_view
 }
 
 shotwin() {
-	grimshot save active "$dir/$file"
-	grimshot copy active "$dir/$file"
+	grimshot savecopy active "$dir/$file"
 	notify_view
 }
 
 shotarea() {
-	grimshot save area "$dir/$file"
-	grimshot copy area "$dir/$file"
+	grimshot savecopy area "$dir/$file"
 	notify_view
 }
 

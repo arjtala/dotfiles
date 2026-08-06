@@ -2,8 +2,8 @@
 # Make bash more sane
 set -euo pipefail
 
-theme="~/.config/rofi/screen-recorder.rasi"
-rofi_command="rofi -theme $theme"
+theme="$HOME/.config/rofi/screen-recorder.rasi"
+rofi_command=(rofi -theme "$theme")
 dir="$HOME/Videos/Screen-Recorder"
 mkdir -p "$dir"
 
@@ -23,13 +23,20 @@ infive="靖 Record in 3s"
 inten="福 Record in 10s"
 stop=" Stop Recording"
 
-# Check if wf-recorder is active
+# Print the PID only when it still belongs to the recorder started here.
+recording_pid() {
+	local pid command
+	[[ -r "$pid_file" ]] || return 1
+	read -r pid <"$pid_file"
+	[[ "$pid" =~ ^[0-9]+$ ]] || return 1
+	kill -0 "$pid" 2>/dev/null || return 1
+	command=$(ps -p "$pid" -o comm=)
+	[[ "${command##*/}" == "wf-recorder" ]] || return 1
+	printf '%s\n' "$pid"
+}
+
 check_recording() {
-	if ps aux | grep -q '[w]f-recorder'; then
-		return 0 # wf-recorder is active
-	else
-		return 1 # wf-recorder is not active
-	fi
+	recording_pid >/dev/null
 }
 
 # Notify function
@@ -39,11 +46,13 @@ notify_view() {
 
 # Stop recording function
 stop_recording() {
-	if check_recording; then
-		pkill -SIGINT wf-recorder # Send SIGINT to stop wf-recorder
-		rm "$pid_file"            # Remove pid file
+	local pid
+	if pid=$(recording_pid); then
+		kill -INT "$pid"
+		rm -f "$pid_file"
 		notify-send -u low -h string:x-canonical-private-synchronous:recorder -i "$icon1" "Recording stopped."
 	else
+		rm -f "$pid_file"
 		notify-send -u low -h string:x-canonical-private-synchronous:recorder -i "$icon1" "No recording in progress."
 	fi
 }
@@ -60,7 +69,7 @@ countdown() {
 recordnow() {
 	if check_recording; then
 		# Recording is already active, offer to stop
-		chosen="$(echo -e "Stop Recording" | $rofi_command -p 'Recording in progress' -dmenu)"
+		chosen="$(printf '%s\n' "Stop Recording" | "${rofi_command[@]}" -p 'Recording in progress' -dmenu)"
 		case $chosen in
 		"Stop Recording")
 			stop_recording
@@ -87,7 +96,7 @@ record10() {
 recordarea() {
 	if check_recording; then
 		# Recording is already active, offer to stop
-		chosen="$(echo -e "Stop Recording" | $rofi_command -p 'Recording in progress' -dmenu)"
+		chosen="$(printf '%s\n' "Stop Recording" | "${rofi_command[@]}" -p 'Recording in progress' -dmenu)"
 		case $chosen in
 		"Stop Recording")
 			stop_recording
@@ -103,7 +112,7 @@ recordarea() {
 # Variable passed to rofi
 options="$screen\n$area\n$infive\n$inten\n$stop"
 
-chosen="$(echo -e "$options" | $rofi_command -p 'Start Recording' -dmenu -selected-row 0)"
+chosen="$(printf '%b\n' "$options" | "${rofi_command[@]}" -p 'Start Recording' -dmenu -selected-row 0)"
 case $chosen in
 $screen)
 	recordnow

@@ -1,6 +1,11 @@
 .DS_Store
 \#*.*\#
 *~
+*.bak
+*.BAK
+*.old
+*.OLD
+*.pyo
 *.key
 key.txt
 STATE.md

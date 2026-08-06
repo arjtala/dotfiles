@@ -1,6 +1,7 @@
 set nocompatible              " required
-filetype off                  " required
 
+if isdirectory(expand('~/.vim/bundle/Vundle.vim'))
+filetype off                  " required by Vundle
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
@@ -25,9 +26,9 @@ Plugin 'mileszs/ack.vim'
 let g:ackprg = 'ag --nogroup --nocolor --column'
 
 call vundle#end()            " required
+endif
 filetype plugin indent on    " required
 
-autocmd! bufwritepost ~/.zshrc	!source ~/.zshrc
 set nocp
 set nu
 "execute pathogen#infect()
@@ -85,7 +86,9 @@ set guifont=ProggyCleanTT\ 12
 filetype plugin indent on
 set nocompatible
 colo delek
-colors zenburn
+if !empty(globpath(&runtimepath, 'colors/zenburn.vim'))
+  colorscheme zenburn
+endif
 "set term=builtin_ansi
 syntax on
 set showmode
@@ -149,8 +152,6 @@ set noswapfile        " don't create swap file
 
 set history=50        " keep 50 lines of command line history
 set incsearch         " do incremental searching
-
-map <C-f> :FufFile /home/bohoomil/<CR>
 
 set tags+=ftags
 

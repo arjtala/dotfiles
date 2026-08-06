@@ -75,7 +75,7 @@ selection-foreground = ${THM_FG}
 EOF
 
 # perl -i -pe works on both mac and linux (unlike GNU vs BSD sed)
-perl -i -pe "s|^theme = Oasis .*|theme = $THEME_NAME|" \
+perl -i -pe "s|^theme = .*|theme = $THEME_NAME|" \
   "$REPO/ghostty/.config/ghostty/config"
 perl -i -pe "s|\@oasis_flavor '.*'|\@oasis_flavor '$FLAVOR'|" \
   "$REPO/tmux/.tmux.conf"

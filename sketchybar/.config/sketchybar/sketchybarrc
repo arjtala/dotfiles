@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Gruvbox SketchyBar config — matched to waybar layout
 # Left:   workspaces, front_app, clock

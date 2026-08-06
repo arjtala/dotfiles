@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 get_active_ip() {
   # Try to get IP from various common network interfaces

@@ -9,7 +9,6 @@ else
 	# echo %{F#f00} %{F-}
 fi
 
-external="$($HOME/.config/waybar/scripts/pub-ip.sh)"
-printf '{\"text\":\"%s\", \"tooltip\":\"%s\"}' "$VPN" "$external" \
-    | sed 's/$/\\n/g' \
-    | tr -d '\n'
+external="$("$HOME/.config/waybar/scripts/pub-ip.sh")"
+jq -cn --arg text "$VPN" --arg tooltip "$external" \
+    '{text: $text, tooltip: $tooltip}'

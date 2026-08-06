@@ -85,7 +85,7 @@ plugins=(git mercurial)
 
 export ZSH_DISABLE_COMPFIX=true
 fpath=(${fpath:#/usr/share/zsh/site-functions})
-source $ZSH/oh-my-zsh.sh
+[[ -r "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 # User configuration
 
@@ -132,11 +132,33 @@ if [ -d "$HOME/.zsh/pure" ]; then
     prompt pure
 fi
 
+# Refresh cached tmux labels at shell state transitions, not during screen
+# redraws.  preexec supplies the command that is about to take over the pane;
+# precmd restores the repo-aware path label when the prompt returns.
+if [[ -n "${TMUX:-}" && -n "${TMUX_PANE:-}" && -x "$HOME/.config/tmux/tmux-smart-label" ]]; then
+    autoload -Uz add-zsh-hook
+
+    _tmux_smart_label_precmd() {
+        "$HOME/.config/tmux/tmux-smart-label" refresh "$TMUX_PANE" >/dev/null 2>&1 &!
+    }
+
+    _tmux_smart_label_preexec() {
+        local -a command_words
+        local command_name
+        command_words=(${(z)1})
+        command_name="${command_words[1]:-}"
+        command_name="${command_name:t}"
+        "$HOME/.config/tmux/tmux-smart-label" refresh "$TMUX_PANE" "$command_name" >/dev/null 2>&1 &!
+    }
+
+    add-zsh-hook precmd _tmux_smart_label_precmd
+    add-zsh-hook preexec _tmux_smart_label_preexec
+fi
+
 if [ -d "$CONDA_PREFIX" ]; then export DYLD_LIBRARY_PATH="$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH"; fi
-if [ -f "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if [ -d "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
 # opam configuration
-[[ ! -r /home/arjangt/.opam/opam-init/init.zsh ]] || source /home/arjangt/.opam/opam-init/init.zsh  > /dev/null 2> /dev/null
+[[ ! -r "$HOME/.opam/opam-init/init.zsh" ]] || source "$HOME/.opam/opam-init/init.zsh" > /dev/null 2>&1
 if [ -f "$HOME/.fzf.zsh" ]; then source "$HOME/.fzf.zsh"; fi
 
 # Copy input to clipboard using OSC 52 (limit 74994 bytes)
@@ -149,14 +171,15 @@ clip() { # limit copy to 74994 bytes (OSC 52 limit)
 # Linux-only: Wayland/Sway env (stale sockets after sway restart, wlroots cursor fix)
 if [[ "$OSTYPE" == linux-gnu* ]]; then
     if [ -n "$TMUX" ]; then
-        export SWAYSOCK=$( (setopt nonomatch; ls -t /run/user/1000/sway-ipc.*.sock 2>/dev/null | head -1) )
-        local _wd=$( (setopt nonomatch; ls /run/user/1000/wayland-* 2>/dev/null | grep -v lock | head -1) )
+        local _runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$UID}"
+        export SWAYSOCK=$( (setopt nonomatch; ls -t "$_runtime_dir"/sway-ipc.*.sock 2>/dev/null | head -1) )
+        local _wd=$( (setopt nonomatch; ls "$_runtime_dir"/wayland-* 2>/dev/null | grep -v lock | head -1) )
         if [ -n "$_wd" ]; then export WAYLAND_DISPLAY=$(basename "$_wd"); fi
     fi
     export WLR_NO_HARDWARE_CURSORS=1
 fi
 # PATH setup (kept before conda init so conda can prepend correctly)
-if [ -d "$HOME/.cargo" ]; then
+if [ -r "$HOME/.cargo/env" ]; then
 	source "$HOME/.cargo/env";
 fi
 if [ -d "/usr/local/sbin" ]; then export PATH="/usr/local/sbin:$PATH"; fi
@@ -170,11 +193,15 @@ if [ -d "$HOME/.local/homebrew" ]; then
     export PATH="$HOME/.local/homebrew/bin:$HOME/.local/homebrew/sbin:${PATH}";
 fi
 if type brew &> /dev/null; then
-	export DYLD_LIBRARY_PATH="$(brew --prefix sqlite)/lib:/usr/lib";
-	export LDFLAGS="-L$(brew --prefix sqlite)/lib"
-	export CPPFLAGS="-I$(brew --prefix sqlite)/include"
-	export PKG_CONFIG_PATH="$(brew --prefix sqlite)/lib/pkgconfig"
-    export PATH="$(brew --prefix sqlite)/bin:$PATH";
+	typeset sqlite_prefix
+	if sqlite_prefix="$(brew --prefix sqlite 2>/dev/null)"; then
+		export DYLD_LIBRARY_PATH="$sqlite_prefix/lib:/usr/lib";
+		export LDFLAGS="-L$sqlite_prefix/lib"
+		export CPPFLAGS="-I$sqlite_prefix/include"
+		export PKG_CONFIG_PATH="$sqlite_prefix/lib/pkgconfig"
+		export PATH="$sqlite_prefix/bin:$PATH";
+	fi
+	unset sqlite_prefix
 fi
 if [ -d "$HOME/.local/conda/bin" ]; then
 	export PATH="$HOME/.local/conda/bin:${PATH}";
@@ -198,15 +225,15 @@ if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-if [ -f "/Users/arjangt/miniforge3/bin/conda" ]; then
-    __conda_setup="$('/Users/arjangt/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ -f "$HOME/miniforge3/bin/conda" ]; then
+    __conda_setup="$("$HOME/miniforge3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
         eval "$__conda_setup"
     else
-        if [ -f "/Users/arjangt/miniforge3/etc/profile.d/conda.sh" ]; then
-            . "/Users/arjangt/miniforge3/etc/profile.d/conda.sh"
+        if [ -f "$HOME/miniforge3/etc/profile.d/conda.sh" ]; then
+            . "$HOME/miniforge3/etc/profile.d/conda.sh"
         else
-            export PATH="/Users/arjangt/miniforge3/bin:$PATH"
+            export PATH="$HOME/miniforge3/bin:$PATH"
         fi
     fi
 elif [ -f "/usr/bin/conda" ]; then
@@ -214,8 +241,8 @@ elif [ -f "/usr/bin/conda" ]; then
     if [ $? -eq 0 ]; then
         eval "$__conda_setup"
     else
-        if [ -f "/usr/etc/profile.d/conda.sh" ]; then
-            . "/usr/etc/profile.d/conda.sh"
+        if [ -f "/etc/profile.d/conda.sh" ]; then
+            . "/etc/profile.d/conda.sh"
         else
             export PATH="/usr/bin:$PATH"
         fi

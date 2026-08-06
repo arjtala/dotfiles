@@ -29,7 +29,7 @@
     "clock": {
         "format": "  {:%H:%M   %a, %d %b %Y}",
         "timezone": "America/Los_Angeles",
-        "tooltip": "true",
+        "tooltip": true,
         "tooltip-format": " <tt><span size='11pt'>{calendar}</span></tt> ",
         "calendar": {
             "mode": "month",
@@ -63,7 +63,7 @@
         "tooltip": false,
         "warning": 70,
         "critical": 85,
-        "on-click": "kitty -e 'htop'"
+        "on-click": "ghostty -e htop"
     },
     "memory": {
         "interval": 3,
@@ -72,7 +72,7 @@
         "tooltip": false,
         "warning": 70,
         "critical": 85,
-        "on-click": "kitty -e 'htop'"
+        "on-click": "ghostty -e htop"
     },
     "disk": {
         "interval": 120,
@@ -83,7 +83,7 @@
         "format": "",
         "format-disabled": "",
         "format-connected": " {num_connections}",
-        "on-click": "blueberry"
+        "on-click": "blueman-manager"
     },
     "custom/nvidia": {
         "format": "󰏔  {}",
@@ -136,7 +136,7 @@
     },
     "custom/vpn": {
         "format": "{}",
-        "interval": 5,
+        "interval": 60,
         "return-type": "json",
         "exec": "$HOME/.config/waybar/scripts/vpn.sh 2> /dev/null",
         "tooltip": true

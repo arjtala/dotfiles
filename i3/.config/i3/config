@@ -3,7 +3,7 @@ set $super Mod4
 set $alt Mod1
 
 # set font
-font JetBrainsMono Nerd Font 10
+font pango:JetBrainsMono Nerd Font 10
 
 # Use Mouse+$super to drag floating windows to their wanted position
 floating_modifier $super
@@ -38,7 +38,6 @@ bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
 bindsym $super+Shift+l exec betterlockscreen --lock blur
 
 bindsym $super+Shift+w exec google-chrome
-bindsym $super+Shift+f exec thunar;workspace 3;focus
 bindsym $super+Shift+g exec emacs
 
 #change volume

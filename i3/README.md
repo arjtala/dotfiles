@@ -36,7 +36,10 @@ See also: [sway/README.md](../sway/README.md),
 | --- | --- |
 | `Super + v` | Split vertical |
 | `Super + h` | Split horizontal |
-| `Super + s` | Toggle split layout |
+| `Super + z` | Stacking layout |
+| `Super + x` | Tabbed layout |
+| `Super + a` | Toggle split layout |
+| `Super + s` | Toggle split layout (legacy alias for `Super + a`) |
 | `Super + Shift + f` | Toggle fullscreen |
 | `Super + Space` | Toggle floating / tiling |
 
@@ -44,7 +47,7 @@ See also: [sway/README.md](../sway/README.md),
 
 | Key | Action |
 | --- | --- |
-| `Super + r` | Enter resize mode (`Return` to exit) |
+| `Super + r` | Enter resize mode (`Return` / `Esc` to exit) |
 
 ## Apps
 

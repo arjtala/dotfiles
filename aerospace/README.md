@@ -12,14 +12,16 @@ See also: [sway/README.md](../sway/README.md), [i3/README.md](../i3/README.md).
 | Key | Action |
 | --- | --- |
 | `Cmd + ← / ↓ / ↑ / →` | Focus window in that direction |
-| `Cmd + /` | Focus previous workspace (back-and-forth) |
+| `Cmd + /` | Previous workspace (back-and-forth) |
 
 ## Move windows
 
 | Key | Action |
 | --- | --- |
-| `Cmd + Shift + ← / ↓ / ↑ / →` | Move focused window |
 | `Cmd + Shift + h / j / k / l` | Move focused window (vi-style) |
+
+`Cmd + Shift + <arrow>` is intentionally unbound — macOS uses those four for
+"select to start/end of line/document".
 
 ## Workspaces
 
@@ -36,8 +38,8 @@ See also: [sway/README.md](../sway/README.md), [i3/README.md](../i3/README.md).
 | --- | --- |
 | `Cmd + Ctrl + V` | Split: vertical (join-with down) |
 | `Cmd + \` | Split: horizontal (join-with right) |
-| `Cmd + Ctrl + Z` | Accordion layout, horizontal |
-| `Cmd + Ctrl + X` | Accordion layout, vertical |
+| `Cmd + Ctrl + Z` | Accordion vertical (= i3/sway "stacking") |
+| `Cmd + Ctrl + X` | Accordion horizontal (= i3/sway "tabbed") |
 | `Cmd + Ctrl + A` | Toggle tiles layout, horizontal / vertical |
 | `Cmd + Shift + F` | Toggle fullscreen |
 | `Cmd + Ctrl + Space` | Toggle floating / tiling |

@@ -48,10 +48,8 @@ cmd-up = 'focus up'
 cmd-right = 'focus right'
 
 # ──── Move windows (sway: $super+Shift+arrows / hjkl) ────
-cmd-shift-left = 'move left'
-cmd-shift-down = 'move down'
-cmd-shift-up = 'move up'
-cmd-shift-right = 'move right'
+# NOTE: cmd-shift-<arrow> is deliberately NOT bound — those four are the macOS
+# "select to start/end of line/document" text shortcuts. hjkl covers move instead.
 cmd-shift-h = 'move left'
 cmd-shift-j = 'move down'
 cmd-shift-k = 'move up'
@@ -64,8 +62,11 @@ cmd-backslash = 'join-with right'
 
 # ──── Layout (sway: $super+z/$super+x/$super+a) ────
 # ctrl variants to preserve cmd-z (undo), cmd-x (cut), cmd-a (select-all)
-cmd-ctrl-z = 'layout accordion horizontal'
-cmd-ctrl-x = 'layout accordion vertical'
+# Per AeroSpace docs: v_accordion == i3/sway "stacking", h_accordion == i3/sway "tabbed".
+# Use the single-token forms: 'accordion <orientation>' is a toggle chain that preserves
+# the current orientation on first press, so both keys would otherwise do the same thing.
+cmd-ctrl-z = 'layout v_accordion'
+cmd-ctrl-x = 'layout h_accordion'
 cmd-ctrl-a = 'layout tiles horizontal vertical'
 
 # ──── Fullscreen (sway: $super+Shift+f) ────
@@ -77,7 +78,7 @@ cmd-ctrl-space = 'layout floating tiling'
 
 # ──── Workspace back_and_forth (sway: $super+slash) ────
 # cmd-tab can't be overridden (macOS app switcher) — use cmd-slash
-cmd-slash = 'focus-back-and-forth'
+cmd-slash = 'workspace-back-and-forth'
 
 # ──── Workspaces (sway: $super+1-9) ────
 cmd-1 = 'workspace 1'

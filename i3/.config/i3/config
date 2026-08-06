@@ -85,7 +85,11 @@ bindsym $super+v split v
 # enter fullscreen mode for the focused container
 bindsym $super+Shift+f fullscreen toggle
 
-# change container layout split
+# Switch the current container between different layout styles (matches sway)
+bindsym $super+z layout stacking
+bindsym $super+x layout tabbed
+bindsym $super+a layout toggle split
+# legacy alias for $super+a
 bindsym $super+s layout toggle split
 
 # toggle tiling / floating
@@ -134,6 +138,7 @@ mode "resize" {
         bindsym Up resize shrink height 5 px or 5 ppt
         bindsym Right resize grow width 5 px or 5 ppt
         bindsym Return mode "default"
+        bindsym Escape mode "default"
 }
 bindsym $super+r mode "resize"
 

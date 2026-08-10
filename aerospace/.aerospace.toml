@@ -27,8 +27,20 @@ inner.horizontal = 5
 inner.vertical = 5
 outer.left = 3
 outer.bottom = 3
-outer.top = 3
+# Reserve room for sketchybar: 31px bar height + 3px gap.
+# The macOS menu bar is set to auto-hide (_HIHideMenuBar=1), so macOS reserves
+# no space at the top and windows would otherwise tile underneath the bar.
+outer.top = 34
 outer.right = 3
+
+# ──────────────────────────────────────────────
+# Multi-monitor: pin workspaces to displays
+# ──────────────────────────────────────────────
+# 'built-in' = MacBook Pro screen, 'secondary' = external HDMI display.
+# When the HDMI monitor is unplugged, these fall back to the built-in one.
+[workspace-to-monitor-force-assignment]
+9 = 'secondary'
+10 = 'secondary'
 
 # ──────────────────────────────────────────────
 # Main mode

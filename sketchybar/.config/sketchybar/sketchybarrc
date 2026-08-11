@@ -117,7 +117,7 @@ sketchybar --add item battery right \
 # VPN — br_green when connected, br_red when disconnected
 sketchybar --add item vpn right \
   --set vpn \
-    update_freq=5 \
+    update_freq=120 \
     script="$PLUGIN_DIR/vpn.sh"
 
 # Network — br_aqua (matches waybar)
@@ -150,7 +150,7 @@ sketchybar --add item memory right \
     icon="󰍛 " \
     icon.color=$BR_BLUE \
     label.color=$BR_BLUE \
-    update_freq=3 \
+    update_freq=30 \
     script="$PLUGIN_DIR/memory.sh"
 
 # CPU — br_green (matches waybar)
@@ -159,7 +159,7 @@ sketchybar --add item cpu right \
     icon=" " \
     icon.color=$BR_GREEN \
     label.color=$BR_GREEN \
-    update_freq=3 \
+    update_freq=30 \
     script="$PLUGIN_DIR/cpu.sh"
 
 ##### Force initial update #####

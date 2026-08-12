@@ -63,13 +63,15 @@ cmd-down = 'focus down'
 cmd-up = 'focus up'
 cmd-right = 'focus right'
 
-# ──── Move windows (sway: $super+Shift+arrows / hjkl) ────
-# NOTE: cmd-shift-<arrow> is deliberately NOT bound — those four are the macOS
-# "select to start/end of line/document" text shortcuts. hjkl covers move instead.
-cmd-shift-h = 'move left'
-cmd-shift-j = 'move down'
-cmd-shift-k = 'move up'
-cmd-shift-l = 'move right'
+# ──── Move windows (sway: $super+Shift+arrows) ────
+# NOTE: this shadows the macOS "select to start/end of line/document" text
+# shortcuts system-wide — an accepted trade for sway muscle memory. Reverted
+# the Aug 6 decision to use hjkl instead: unbound, these keys fall through to
+# the terminal, which echoes the raw escape tail (ESC [ 1 ; 10 C -> "0C").
+cmd-shift-left = 'move left'
+cmd-shift-down = 'move down'
+cmd-shift-up = 'move up'
+cmd-shift-right = 'move right'
 
 # ──── Split orientation (sway: $super+v splitv) ────
 # ctrl-v instead of cmd-v to preserve paste

@@ -27,10 +27,14 @@ inner.horizontal = 5
 inner.vertical = 5
 outer.left = 3
 outer.bottom = 3
-# Reserve room for sketchybar: 31px bar height + 3px gap.
-# The macOS menu bar is set to auto-hide (_HIHideMenuBar=1), so macOS reserves
-# no space at the top and windows would otherwise tile underneath the bar.
-outer.top = 34
+# Reserve room for sketchybar (31px tall) — must be per-monitor.
+# The macOS menu bar is auto-hidden (_HIHideMenuBar=1), so on an external
+# display macOS reserves nothing at the top and the full 31px + 3px gap is
+# needed, or windows tile underneath the bar.
+# The built-in display has a notch: macOS already excludes a 32px safe area
+# (NSScreen.safeAreaInsets.top), which the bar draws into, so only the normal
+# 3px gap is needed there. Using 34 on both stacks the two and leaves a hole.
+outer.top = [{ monitor.'built-in' = 3 }, 34]
 outer.right = 3
 
 # ──────────────────────────────────────────────

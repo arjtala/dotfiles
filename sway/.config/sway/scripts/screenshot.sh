@@ -11,7 +11,7 @@ dir="$HOME/Pictures/Screenshots"
 mkdir -p "$dir"
 
 # Define the filename format
-time=$(date +%Y-%m-%d-%I-%M-%S)
+time=$(date +%Y-%m-%d-%H-%M-%S)
 file="Screenshot_${time}.png"
 
 # Icons

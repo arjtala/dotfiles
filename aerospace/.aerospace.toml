@@ -19,6 +19,10 @@ default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
 
 # Matches sway: focus_follows_mouse yes
+# Briefly disabled during the Aug 2026 focus-oscillation hunt, on the theory
+# that warping the cursor on every focus change could re-trigger focus and loop.
+# Cleared: the oscillation was stale AeroSpace state and survived disabling
+# this. Restarting AeroSpace is the fix for that class of symptom.
 on-focus-changed = ['move-mouse window-lazy-center']
 
 # Matches sway: gaps inner 5, outer 3
@@ -42,6 +46,11 @@ outer.right = 3
 # ──────────────────────────────────────────────
 # 'built-in' = MacBook Pro screen, 'secondary' = external HDMI display.
 # When the HDMI monitor is unplugged, these fall back to the built-in one.
+# Briefly suspected during the Aug 2026 focus hunt: undocked, 'secondary'
+# matches nothing, and ws 10 looked like an attractor that swallowed focus.
+# Disabling it changed nothing -- focus still drifted to ws 10 -- and after
+# restarting AeroSpace the pin tested clean while undocked (ws 7 stays on 7,
+# ws 9 -> 9, ws 10 -> 10). The attractor was stale AeroSpace state, not this.
 [workspace-to-monitor-force-assignment]
 9 = 'secondary'
 10 = 'secondary'
@@ -52,16 +61,36 @@ outer.right = 3
 [mode.main.binding]
 
 # Launch terminal — sway: $super+Return exec ghostty
+# '-n' (new instance) spawns a separate Ghostty PROCESS per window, which for a
+# while was blamed for windows vanishing from their workspace. It was not the
+# cause: the vanishing was stale AeroSpace state and stopped after restarting
+# AeroSpace, with '-na' still in place. Keep '-na' -- the alternatives do not
+# work here:
+#   open -a Ghostty      -> only focuses, never creates a window (verified)
+#   ghostty +new-window  -> listed in +help, but errors "not supported on this
+#                           platform" on macOS
+#   osascript 'new window' (Ghostty.sdef has a real AppleScript dictionary)
+#                        -> creates the window in the existing process, but it
+#                           registered with AeroSpace late and on the wrong
+#                           workspace. Worth revisiting; not obviously better.
+# Real cost of '-na': closing a window leaves its instance running without one,
+# so processes accumulate (8 PIDs for 4 windows after a few launches). If
+# AeroSpace starts misbehaving again, check the PID count and restart AeroSpace
+# before changing any of this.
 cmd-enter = 'exec-and-forget open -na Ghostty'
 
 # Close window — sway: $super+Shift+q kill
 cmd-shift-q = 'close'
 
 # ──── Focus (sway: $super+arrows / hjkl) ────
-cmd-left = 'focus left'
-cmd-down = 'focus down'
-cmd-up = 'focus up'
-cmd-right = 'focus right'
+# --boundaries workspace is REQUIRED. The default (all-monitors-outer-frame)
+# lets directional focus land on windows that other workspaces have parked
+# off-screen, silently teleporting you to that workspace. Measured at 5/15
+# traversals on an accordion workspace; 0/15 with this flag.
+cmd-left = 'focus --boundaries workspace --boundaries-action stop left'
+cmd-down = 'focus --boundaries workspace --boundaries-action stop down'
+cmd-up = 'focus --boundaries workspace --boundaries-action stop up'
+cmd-right = 'focus --boundaries workspace --boundaries-action stop right'
 
 # ──── Move windows (sway: $super+Shift+arrows) ────
 # NOTE: this shadows the macOS "select to start/end of line/document" text

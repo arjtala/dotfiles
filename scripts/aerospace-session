@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# aerospace-session — save and restore which workspace each window lives on.
+#
+# Usage:  ./scripts/aerospace-session save
+#         ./scripts/aerospace-session restore
+#         ./scripts/aerospace-session show
+#
+# AeroSpace forgets its window->workspace mapping when the app restarts, and it
+# has no built-in session persistence. Restarting AeroSpace does not restart
+# your apps, though: the windows stay alive and AeroSpace identifies them by
+# system CGWindowIDs, not by its own counters. So the IDs recorded by 'save'
+# are still valid after the restart and 'restore' can put everything back.
+#
+# LIMITS — this restores workspace membership only:
+#   - tiling tree shape (splits, accordion, sizes) is NOT captured
+#   - floating/fullscreen state is NOT captured; on-window-detected rules in
+#     .aerospace.toml will re-apply on their own for matching apps
+#   - windows closed between save and restore are skipped with a warning
+# The IDs are only meaningful for one AeroSpace lifetime + the same set of
+# windows, so a snapshot goes stale as soon as you quit or open apps.
+
+set -euo pipefail
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/aerospace"
+SNAPSHOT="$STATE_DIR/session.tsv"
+
+command -v aerospace >/dev/null || { echo "aerospace CLI not found" >&2; exit 1; }
+
+save() {
+  mkdir -p "$STATE_DIR"
+  # Column 1 is what restore consumes; the trailing columns are for humans
+  # reading the file later, since a bare window ID is unidentifiable.
+  {
+    echo "# focused	$(aerospace list-workspaces --focused)"
+    aerospace list-windows --all \
+      --format '%{window-id}	%{workspace}	%{app-name}	%{window-title}'
+  } > "$SNAPSHOT"
+
+  local n
+  n=$(grep -cv '^#' "$SNAPSHOT" || true)
+  echo "Saved $n windows to $SNAPSHOT"
+}
+
+restore() {
+  [[ -f "$SNAPSHOT" ]] || { echo "No snapshot at $SNAPSHOT — run 'save' first" >&2; exit 1; }
+
+  local live focused=""
+  # Restoring a window that no longer exists makes aerospace error out, so
+  # check each ID against the current window list rather than trusting the file.
+  live="$(aerospace list-windows --all --format '%{window-id}')"
+
+  local moved=0 skipped=0
+  while IFS=$'\t' read -r id ws app title; do
+    [[ -z "${id:-}" ]] && continue
+    # Header line is "# focused<TAB><workspace>", so the whole marker lands in
+    # $id and the workspace in $ws. Any other comment line is just skipped.
+    if [[ "$id" == "# focused" ]]; then
+      focused="$ws"
+      continue
+    fi
+    [[ "$id" == \#* ]] && continue
+    if ! grep -qx "$id" <<<"$live"; then
+      echo "  skip  $id ($app — window is gone)"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if aerospace move-node-to-workspace --window-id "$id" "$ws" 2>/dev/null; then
+      moved=$((moved + 1))
+    else
+      echo "  fail  $id ($app) -> ws $ws"
+      skipped=$((skipped + 1))
+    fi
+  done < "$SNAPSHOT"
+
+  [[ -n "$focused" ]] && aerospace workspace "$focused"
+  echo "Restored $moved windows, skipped $skipped"
+}
+
+show() {
+  [[ -f "$SNAPSHOT" ]] || { echo "No snapshot at $SNAPSHOT" >&2; exit 1; }
+  column -t -s$'\t' < "$SNAPSHOT"
+}
+
+case "${1:-}" in
+  save)    save ;;
+  restore) restore ;;
+  show)    show ;;
+  *)       echo "Usage: $0 {save|restore|show}"; exit 1 ;;
+esac

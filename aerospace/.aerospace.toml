@@ -4,8 +4,12 @@
 
 start-at-login = true
 
-# Notify SketchyBar on workspace change
-after-startup-command = ['exec-and-forget sketchybar']
+# Notify SketchyBar and remember window placement. The guard listens for
+# AeroSpace's own focus/detection events; it does not poll Accessibility.
+after-startup-command = [
+  'exec-and-forget sketchybar',
+  'exec-and-forget /usr/bin/env AEROSPACE_BIN=/opt/homebrew/bin/aerospace /Users/arjangt/dotfiles/scripts/aerospace-workspace-guard daemon',
+]
 exec-on-workspace-change = ['/bin/bash', '-c',
 'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
 ]

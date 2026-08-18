@@ -60,6 +60,17 @@ See also: [sway/README.md](../sway/README.md), [i3/README.md](../i3/README.md).
 | `Cmd + Shift + Q` | Close focused window |
 | `Cmd + Shift + R` | Reload AeroSpace config |
 
+## Workspace recovery
+
+`scripts/aerospace-workspace-guard` is started with AeroSpace. It remembers
+window placement from AeroSpace's focus events and restores a live window when
+the same CGWindowID is detected again on the wrong workspace. This works around
+transient macOS Accessibility failures without polling the Accessibility API.
+
+Use `scripts/aerospace-workspace-guard show` to inspect the current boot's
+remembered placement. Corrections and reconnects are logged in
+`~/.local/state/aerospace/workspace-guard.log`.
+
 ## Dependencies
 
 macOS only. See the root [Brewfile](../Brewfile) for a full one-shot:

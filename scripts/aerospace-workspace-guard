@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# Preserve workspace placement when AeroSpace temporarily loses a live window.
+#
+# AeroSpace identifies a window by its CGWindowID.  Under Accessibility API
+# failures, the same ID can disappear from AeroSpace's model and later be
+# emitted as a newly detected window on the currently focused workspace.  This
+# daemon remembers the last focused workspace for each ID and puts a re-detected
+# ID back there.  State is scoped to the current boot because CGWindowIDs are
+# not stable across WindowServer sessions.
+
+set -u
+
+AEROSPACE_BIN="${AEROSPACE_BIN:-$(command -v aerospace 2>/dev/null || true)}"
+STATE_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/aerospace"
+BOOT_ID="$(sysctl -n kern.boottime 2>/dev/null | sed -E 's/^\{ sec = ([0-9]+),.*/\1/')"
+STATE_DIR="$STATE_ROOT/workspace-guard-${BOOT_ID:-unknown}"
+LOCK_FILE="$STATE_ROOT/workspace-guard-${BOOT_ID:-unknown}.lock"
+LOG_FILE="$STATE_ROOT/workspace-guard.log"
+FORMAT="%{window-id}"$'\t'"%{workspace}"
+EVENT_TYPE_RE='"_event":"([^"]+)"'
+WINDOW_ID_RE='"windowId":([0-9]+)'
+WORKSPACE_RE='"workspace":"([^"]*)"'
+
+log() {
+  printf '%s  %s\n' "$(date '+%F %T')" "$*" >> "$LOG_FILE"
+}
+
+lookup_workspace() {
+  local window_id="$1" workspace
+  [[ -f "$STATE_DIR/$window_id" ]] || return 1
+  IFS= read -r workspace < "$STATE_DIR/$window_id" || return 1
+  printf '%s\n' "$workspace"
+}
+
+remember_workspace() {
+  local window_id="$1" workspace="$2"
+  [[ "$window_id" =~ ^[0-9]+$ && -n "$workspace" ]] || return 0
+  printf '%s\n' "$workspace" > "$STATE_DIR/$window_id"
+}
+
+restore_or_remember() {
+  local window_id="$1" detected_workspace="$2" remembered_workspace
+  [[ "$window_id" =~ ^[0-9]+$ && -n "$detected_workspace" ]] || return 0
+
+  if remembered_workspace="$(lookup_workspace "$window_id")"; then
+    if [[ "$remembered_workspace" != "$detected_workspace" ]]; then
+      if "$AEROSPACE_BIN" move-node-to-workspace --window-id "$window_id" "$remembered_workspace" >/dev/null 2>&1; then
+        log "restored window $window_id: workspace $detected_workspace -> $remembered_workspace"
+      else
+        log "failed to restore window $window_id: workspace $detected_workspace -> $remembered_workspace"
+      fi
+    fi
+  else
+    remember_workspace "$window_id" "$detected_workspace"
+  fi
+}
+
+seed_current_windows() {
+  local snapshot window_id workspace
+  snapshot="$("$AEROSPACE_BIN" list-windows --all --format "$FORMAT" 2>/dev/null)" || return 1
+
+  while IFS=$'\t' read -r window_id workspace; do
+    [[ -n "$window_id" ]] || continue
+    restore_or_remember "$window_id" "$workspace"
+  done <<< "$snapshot"
+}
+
+handle_event() {
+  local event="$1" event_type window_id workspace
+  [[ "$event" =~ $EVENT_TYPE_RE ]] || return 0
+  event_type="${BASH_REMATCH[1]}"
+  case "$event_type" in
+    window-detected)
+      [[ "$event" =~ $WINDOW_ID_RE ]] || return 0
+      window_id="${BASH_REMATCH[1]}"
+      [[ "$event" =~ $WORKSPACE_RE ]] || return 0
+      workspace="${BASH_REMATCH[1]}"
+      restore_or_remember "$window_id" "$workspace"
+      ;;
+    focus-changed)
+      [[ "$event" =~ $WINDOW_ID_RE ]] || return 0
+      window_id="${BASH_REMATCH[1]}"
+      [[ "$event" =~ $WORKSPACE_RE ]] || return 0
+      workspace="${BASH_REMATCH[1]}"
+      remember_workspace "$window_id" "$workspace"
+      ;;
+  esac
+}
+
+run_daemon() {
+  local event
+  [[ -n "$AEROSPACE_BIN" ]] || { echo "aerospace CLI not found" >&2; exit 1; }
+  mkdir -p "$STATE_DIR"
+
+  # shlock uses the PID in the lock file and safely replaces stale locks.
+  if ! /usr/bin/shlock -p "$$" -f "$LOCK_FILE"; then
+    exit 0
+  fi
+  trap 'rm -f -- "$LOCK_FILE"' EXIT
+  trap 'exit 0' HUP INT TERM
+
+  log "guard started (pid $$, state $STATE_DIR)"
+  while true; do
+    if ! seed_current_windows; then
+      sleep 2
+      continue
+    fi
+
+    while IFS= read -r event; do
+      handle_event "$event"
+    done < <("$AEROSPACE_BIN" subscribe --no-send-initial focus-changed window-detected 2>/dev/null)
+
+    log "AeroSpace subscription disconnected; retrying"
+    sleep 1
+  done
+}
+
+show_state() {
+  local path workspace
+  local -a state_files
+  shopt -s nullglob
+  state_files=("$STATE_DIR"/*)
+  if (( ${#state_files[@]} == 0 )); then
+    echo "No workspace state recorded for this boot"
+    return
+  fi
+  for path in "${state_files[@]}"; do
+    IFS= read -r workspace < "$path" || continue
+    printf '%s\t%s\n' "${path##*/}" "$workspace"
+  done | sort -n | column -t -s $'\t'
+}
+
+case "${1:-}" in
+  daemon) run_daemon ;;
+  seed)
+    mkdir -p "$STATE_DIR"
+    [[ -n "$AEROSPACE_BIN" ]] || { echo "aerospace CLI not found" >&2; exit 1; }
+    seed_current_windows
+    ;;
+  show) show_state ;;
+  *) echo "Usage: $0 {daemon|seed|show}" >&2; exit 1 ;;
+esac

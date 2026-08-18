@@ -194,6 +194,32 @@ esc = 'mode main'
 # Window rules (sway: for_window)
 # ──────────────────────────────────────────────
 
+# Windows intermittently drop out of AeroSpace's tracking and are then
+# re-detected as brand new windows, which lands them on whichever workspace
+# happens to be focused. That single mechanism is behind both "my windows
+# vanished" and "windows turned up on the wrong workspace" -- nothing is ever
+# actually moved.
+#
+# Root cause is machine load, not AeroSpace. Measured Aug 2026: load average
+# ~270 on 12 cores, ~143 runnable threads, santa.daemon holding ~2.5 cores
+# continuously for 11 days (667 CPU-hours), WindowServer pinned above 50%, and
+# ~115 browser content processes. Under that, Accessibility API queries time
+# out: in 79 of 102 observed disappearances the window's title had already gone
+# empty in the poll immediately before it vanished -- AX degrading, not a window
+# closing. Outages ran from ~30 seconds to 39 minutes. It hits every app, not
+# just Ghostty (Finder 14, Emacs 10, WhatsApp, Chrome, Safari, Firefox).
+#
+# So no config change can prevent this. What this rule does is make the recovery
+# land correctly. Verified: at 20:35:23 a Ghostty window was re-detected while
+# ws 10 was focused and still came back to ws 3.
+#
+# Trade: if one of these windows is deliberately moved elsewhere, the next
+# dropout drags it back to 3.
+[[on-window-detected]]
+  if.app-name-regex-substring = 'Ghostty'
+  if.window-title-regex-substring = 'arjangt-fedora|arjangt-login|devvm'
+  run = 'move-node-to-workspace 3'
+
 [[on-window-detected]]
   if.app-id = 'com.apple.systempreferences'
   run = 'layout floating'

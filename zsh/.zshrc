@@ -225,49 +225,58 @@ if [ -d "$HOME/.local/bin" ]; then export PATH="$HOME/.local/bin:$PATH"; fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
+# Deferred rather than eager: `conda shell.zsh hook` costs ~380ms and the
+# `conda activate base` it emits costs ~310ms more, on every single shell.
+# Both now land on the first `conda` call instead.  Safe here because base's
+# prefix is /usr, so activating it never changed PATH or `python` anyway; the
+# only delta is that CONDA_PREFIX/CONDA_DEFAULT_ENV stay unset until first use.
 if [ -f "$HOME/miniforge3/bin/conda" ]; then
-    __conda_setup="$("$HOME/miniforge3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
-    if [ $? -eq 0 ]; then
-        eval "$__conda_setup"
-    else
-        if [ -f "$HOME/miniforge3/etc/profile.d/conda.sh" ]; then
-            . "$HOME/miniforge3/etc/profile.d/conda.sh"
-        else
-            export PATH="$HOME/miniforge3/bin:$PATH"
-        fi
-    fi
+    _CONDA_BIN="$HOME/miniforge3/bin/conda"; _CONDA_SH="$HOME/miniforge3/etc/profile.d/conda.sh"
 elif [ -f "/usr/bin/conda" ]; then
-    __conda_setup="$('/usr/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-    if [ $? -eq 0 ]; then
-        eval "$__conda_setup"
-    else
-        if [ -f "/etc/profile.d/conda.sh" ]; then
-            . "/etc/profile.d/conda.sh"
-        else
-            export PATH="/usr/bin:$PATH"
-        fi
-    fi
+    _CONDA_BIN="/usr/bin/conda"; _CONDA_SH="/etc/profile.d/conda.sh"
 fi
-unset __conda_setup
-# <<< conda initialize <<<
 
-# Fix for system conda: env bins are placed mid-PATH (replacing /usr/bin)
-# instead of being prepended. Wrap conda to move the env bin to the front.
-if (( $+functions[conda] )); then
-    functions[__wrapped_conda]=$functions[conda]
-    conda() {
-        __wrapped_conda "$@"
-        local ret=$?
-        if [[ -n "$CONDA_PREFIX" && "$CONDA_PREFIX" != "/usr" && -d "$CONDA_PREFIX/bin" && "$PATH" != "$CONDA_PREFIX/bin:"* ]]; then
-            local conda_bin="$CONDA_PREFIX/bin"
-            PATH=":$PATH:"
-            PATH="${PATH//":$conda_bin:"/":"}"
-            PATH="${PATH#:}"
-            PATH="${PATH%:}"
-            export PATH="$conda_bin:$PATH"
-        fi
-        return $ret
+if [ -n "$_CONDA_BIN" ]; then
+    # Fix for system conda: env bins are placed mid-PATH (replacing /usr/bin)
+    # instead of being prepended. Wrap conda to move the env bin to the front.
+    # Must run *after* the hook has defined the real conda, otherwise the
+    # functions[__wrapped_conda] capture below grabs the lazy stub instead.
+    __conda_install_path_fix() {
+        (( $+functions[__wrapped_conda] )) && return 0
+        (( $+functions[conda] )) || return 0
+        functions[__wrapped_conda]=$functions[conda]
+        conda() {
+            __wrapped_conda "$@"
+            local ret=$?
+            if [[ -n "$CONDA_PREFIX" && "$CONDA_PREFIX" != "/usr" && -d "$CONDA_PREFIX/bin" && "$PATH" != "$CONDA_PREFIX/bin:"* ]]; then
+                local conda_bin="$CONDA_PREFIX/bin"
+                PATH=":$PATH:"
+                PATH="${PATH//":$conda_bin:"/":"}"
+                PATH="${PATH#:}"
+                PATH="${PATH%:}"
+                export PATH="$conda_bin:$PATH"
+            fi
+            return $ret
+        }
     }
+
+    __conda_real_init() {
+        # Drop the stub first, so a failed hook falls through to the real
+        # binary on PATH rather than recursing back into this function.
+        unfunction conda 2>/dev/null
+        local __conda_setup
+        if __conda_setup="$("$_CONDA_BIN" 'shell.zsh' 'hook' 2>/dev/null)"; then
+            eval "$__conda_setup"
+        elif [ -f "$_CONDA_SH" ]; then
+            . "$_CONDA_SH"
+        else
+            export PATH="${_CONDA_BIN:h}:$PATH"
+        fi
+        __conda_install_path_fix
+    }
+
+    conda() { __conda_real_init; conda "$@" }
 fi
+# <<< conda initialize <<<
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin"

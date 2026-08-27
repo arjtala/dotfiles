@@ -54,6 +54,12 @@ theme = Woodland Dusk
 app-notifications = no-clipboard-copy
 clipboard-paste-protection = false
 
+# Stay resident after the last window closes. The default (true) tears the
+# process down, so the next $super+Return pays a full cold start — GTK,
+# libadwaita CSS, and EGL/OpenGL context setup — instead of reusing the
+# running instance. Linux-only knob.
+quit-after-last-window-closed = false
+
 # No titlebar — use AeroSpace accordion layout (Cmd+Ctrl+Z)
 # for tabbed window switching instead of native tabs
 macos-titlebar-style = hidden

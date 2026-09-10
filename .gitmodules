@@ -1,7 +1,7 @@
 [submodule "emacs/.config/emacs"]
 	path = emacs/.config/emacs
 	url = git@github.com:arjtala/dotfiles_emacs.git
-	branch = master
+	branch = simplify
 
 [submodule "alacritty/.config/alacritty/themes"]
 	path = alacritty/.config/alacritty/themes

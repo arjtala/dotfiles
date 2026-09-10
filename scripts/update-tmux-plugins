@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+# Update selected tmux plugin submodules and stage their reproducible gitlinks.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PLUGIN_PREFIX="tmux/.tmux/plugins/"
+ROLL_BACK=false
+PLUGIN_PATHS=()
+SELECTED_PATHS=()
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./scripts/update-tmux-plugins PLUGIN [PLUGIN ...]
+  ./scripts/update-tmux-plugins --all
+  ./scripts/update-tmux-plugins --list
+
+PLUGIN may be a short name such as tmux-yank or its repository-relative path.
+Updates follow the branches configured in .gitmodules. Successful updates are
+validated and staged as submodule gitlinks for review; no commit is created.
+EOF
+}
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+load_plugin_paths() {
+  local key path
+
+  while read -r key path; do
+    case "$path" in
+      "$PLUGIN_PREFIX"*) PLUGIN_PATHS+=("$path") ;;
+    esac
+  done < <(
+    git -C "$REPO_ROOT" config -f .gitmodules \
+      --get-regexp '^submodule\..*\.path$'
+  )
+
+  ((${#PLUGIN_PATHS[@]} > 0)) || die "no tmux plugin submodules found"
+}
+
+list_plugins() {
+  local path
+
+  for path in "${PLUGIN_PATHS[@]}"; do
+    printf '%s\n' "${path##*/}"
+  done
+}
+
+select_plugin() {
+  local requested="$1"
+  local path selected
+
+  for path in "${PLUGIN_PATHS[@]}"; do
+    if [[ "$requested" == "$path" || "$requested" == "${path##*/}" ]]; then
+      for selected in "${SELECTED_PATHS[@]}"; do
+        [[ "$selected" == "$path" ]] && return
+      done
+      SELECTED_PATHS+=("$path")
+      return
+    fi
+  done
+
+  die "unknown tmux plugin '$requested' (use --list)"
+}
+
+require_clean_plugin() {
+  local path="$1"
+  local plugin_dir="$REPO_ROOT/$path"
+  local status
+
+  git -C "$REPO_ROOT" diff --quiet -- "$path" ||
+    die "$path already differs from its recorded gitlink"
+  git -C "$REPO_ROOT" diff --cached --quiet -- "$path" ||
+    die "$path already has a staged gitlink change"
+
+  git -C "$REPO_ROOT" submodule update --init --recursive --checkout -- "$path"
+  status="$(git -C "$plugin_dir" status --porcelain \
+    --untracked-files=all --ignore-submodules=none)"
+  [[ -z "$status" ]] || {
+    printf '%s\n' "$status" >&2
+    die "$path has local changes"
+  }
+}
+
+validate_plugin() {
+  local path="$1"
+  local plugin_dir="$REPO_ROOT/$path"
+  local entrypoint
+  local entrypoints=()
+
+  git -C "$plugin_dir" fsck --connectivity-only --no-dangling
+
+  shopt -s nullglob
+  entrypoints=("$plugin_dir"/*.tmux)
+  shopt -u nullglob
+  if [[ "${path##*/}" == "tpm" ]]; then
+    entrypoints+=("$plugin_dir/tpm")
+  fi
+
+  ((${#entrypoints[@]} > 0)) || die "$path has no plugin entrypoint"
+  for entrypoint in "${entrypoints[@]}"; do
+    [[ -x "$entrypoint" ]] || die "$entrypoint is not executable"
+    bash -n "$entrypoint"
+  done
+
+  [[ -z "$(git -C "$plugin_dir" status --porcelain \
+    --untracked-files=all --ignore-submodules=none)" ]] ||
+    die "$path is dirty after validation"
+}
+
+restore_recorded_gitlinks() {
+  local exit_status=$?
+
+  trap - EXIT
+  if [[ "$ROLL_BACK" == true ]]; then
+    printf '\nUpdate failed; restoring selected plugins to recorded gitlinks.\n' >&2
+    git -C "$REPO_ROOT" submodule update --init --recursive --checkout -- \
+      "${SELECTED_PATHS[@]}" >&2 || true
+  fi
+  exit "$exit_status"
+}
+
+main() {
+  local argument path
+
+  git -C "$REPO_ROOT" rev-parse --show-toplevel >/dev/null
+  load_plugin_paths
+
+  case "${1:-}" in
+    -h|--help)
+      usage
+      return
+      ;;
+    --list)
+      (($# == 1)) || die "--list does not accept plugin names"
+      list_plugins
+      return
+      ;;
+    --all)
+      (($# == 1)) || die "--all cannot be combined with plugin names"
+      SELECTED_PATHS=("${PLUGIN_PATHS[@]}")
+      ;;
+    "")
+      usage >&2
+      exit 2
+      ;;
+    *)
+      for argument in "$@"; do
+        [[ "$argument" != -* ]] || die "unknown option '$argument'"
+        select_plugin "$argument"
+      done
+      ;;
+  esac
+
+  for path in "${SELECTED_PATHS[@]}"; do
+    require_clean_plugin "$path"
+  done
+
+  ROLL_BACK=true
+  trap restore_recorded_gitlinks EXIT
+
+  for path in "${SELECTED_PATHS[@]}"; do
+    printf 'Updating %s...\n' "${path##*/}"
+    git -C "$REPO_ROOT" submodule sync -- "$path"
+    git -C "$REPO_ROOT" submodule update --init --remote --checkout -- "$path"
+    git -C "$REPO_ROOT/$path" submodule sync --recursive
+    git -C "$REPO_ROOT/$path" submodule update --init --recursive --checkout
+    validate_plugin "$path"
+  done
+
+  git -C "$REPO_ROOT" add -- "${SELECTED_PATHS[@]}"
+  git -C "$REPO_ROOT" diff --cached --check -- "${SELECTED_PATHS[@]}"
+
+  ROLL_BACK=false
+  trap - EXIT
+
+  printf '\nValidated and staged:\n'
+  git -C "$REPO_ROOT" diff --cached --submodule=short --stat -- \
+    "${SELECTED_PATHS[@]}"
+  printf '\nReview with:\n  git diff --cached --submodule=log -- tmux/.tmux/plugins\n'
+}
+
+main "$@"

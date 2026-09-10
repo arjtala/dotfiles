@@ -63,14 +63,6 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 | `prefix + /` | fzf scrollback search with preview | tmux-fuzzback |
 | — | Auto-reload on `.tmux.conf` save (needs `entr`) | tmux-autoreload |
 
-## TPM (plugin manager)
-
-| Key | Action |
-| --- | --- |
-| `prefix + I` | Install plugins declared in config |
-| `prefix + U` | Update plugins |
-| `prefix + Alt + u` | Remove plugins no longer in config |
-
 ## Custom
 
 | Key | Action |
@@ -108,12 +100,33 @@ no server restart needed. For Ghostty to pick up the new palette, `Cmd+Shift+,`
 | tmux-autoreload (bash 4+ `declare -g`) | `bash` | built-in | built-in |
 | tmux-thumbs (cargo build) | `rust` | `rust cargo` | `rust` |
 
-TPM and the configured plugins are repository submodules. Initialize them from
-an existing checkout with:
+## Plugin management
+
+TPM loads the configured plugins, but Git submodules are the source of truth
+for their versions. Do not use TPM's install, update, or remove commands: they
+mutate the submodule working trees without recording reproducible versions in
+this repository.
+
+Initialize the plugins from an existing checkout with:
 
 ```sh
 git -C ~/dotfiles submodule sync --recursive
 git -C ~/dotfiles submodule update --init --recursive
 ```
 
-Then in a tmux session, `<prefix> I` to install plugins.
+Start tmux, or reload `.tmux.conf`, after initialization. To update one or more
+plugins, name them explicitly:
+
+```sh
+./scripts/update-tmux-plugins tmux-yank tmux-fuzzback
+```
+
+Use `./scripts/update-tmux-plugins --list` to see valid names. `--all` is
+available when a deliberate full refresh is wanted. The updater follows each
+submodule's branch from `.gitmodules`, checks Git object integrity and plugin
+entrypoint syntax, then stages only the resulting gitlinks. Review them before
+committing:
+
+```sh
+git diff --cached --submodule=log -- tmux/.tmux/plugins
+```

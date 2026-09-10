@@ -50,7 +50,9 @@ each README's `## Dependencies` section.
   package directories. Stow may fold an entire source directory into one
   symlink, in which case files already inside it remain visible. Use
   `stow --restow <packages...>` after changing the selected packages.
-- In tmux: `<prefix> I` to install plugins.
+- tmux plugins are included in the recursive submodule checkout; start tmux or
+  reload `.tmux.conf` after stowing the package. See
+  [tmux/README.md](tmux/README.md#plugin-management) before updating plugins.
 
 The legacy Vim config uses Vundle, which is not a tracked submodule. To use it:
 

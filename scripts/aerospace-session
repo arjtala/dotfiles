@@ -6,37 +6,69 @@
 #         ./scripts/aerospace-session show
 #
 # AeroSpace forgets its window->workspace mapping when the app restarts, and it
-# has no built-in session persistence. Restarting AeroSpace does not restart
-# your apps, though: the windows stay alive and AeroSpace identifies them by
-# system CGWindowIDs, not by its own counters. So the IDs recorded by 'save'
-# are still valid after the restart and 'restore' can put everything back.
+# has no built-in session persistence. Window IDs are used when they still
+# exist; if an app has recreated its windows with new IDs, restore falls back
+# to unique app-name + window-title matches. If those matches leave only one
+# saved and one live window for an app, that final pair is matched too.
 #
 # LIMITS — this restores workspace membership only:
 #   - tiling tree shape (splits, accordion, sizes) is NOT captured
 #   - floating/fullscreen state is NOT captured; on-window-detected rules in
 #     .aerospace.toml will re-apply on their own for matching apps
 #   - windows closed between save and restore are skipped with a warning
-# The IDs are only meaningful for one AeroSpace lifetime + the same set of
-# windows, so a snapshot goes stale as soon as you quit or open apps.
+#   - changed titles and duplicate app/title pairs cannot be matched safely
 
 set -euo pipefail
+umask 077
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/aerospace"
 SNAPSHOT="$STATE_DIR/session.tsv"
 
-command -v aerospace >/dev/null || { echo "aerospace CLI not found" >&2; exit 1; }
+secure_existing_state() {
+  if [[ -d "$STATE_DIR" ]]; then
+    chmod 700 "$STATE_DIR"
+  fi
+  if [[ -f "$SNAPSHOT" ]]; then
+    chmod 600 "$SNAPSHOT"
+  fi
+}
 
 save() {
+  local focused windows tmp n
+
+  if ! focused="$(aerospace list-workspaces --focused)"; then
+    echo "Failed to query the focused AeroSpace workspace; snapshot was not changed" >&2
+    return 1
+  fi
+  if ! windows="$(aerospace list-windows --all \
+      --format $'%{window-id}\t%{workspace}\t%{app-name}\t%{window-title}')"; then
+    echo "Failed to query AeroSpace windows; snapshot was not changed" >&2
+    return 1
+  fi
+
   mkdir -p "$STATE_DIR"
+  chmod 700 "$STATE_DIR"
+  tmp="$(mktemp "$STATE_DIR/.session.tsv.XXXXXX")"
+
   # Column 1 is what restore consumes; the trailing columns are for humans
   # reading the file later, since a bare window ID is unidentifiable.
-  {
-    echo "# focused	$(aerospace list-workspaces --focused)"
-    aerospace list-windows --all \
-      --format '%{window-id}	%{workspace}	%{app-name}	%{window-title}'
-  } > "$SNAPSHOT"
+  if ! printf '# focused\t%s\n' "$focused" > "$tmp"; then
+    rm -f -- "$tmp"
+    echo "Failed to write snapshot; previous snapshot was not changed" >&2
+    return 1
+  fi
+  if [[ -n "$windows" ]] && ! printf '%s\n' "$windows" >> "$tmp"; then
+    rm -f -- "$tmp"
+    echo "Failed to write snapshot; previous snapshot was not changed" >&2
+    return 1
+  fi
 
-  local n
+  if ! chmod 600 "$tmp" || ! mv -f "$tmp" "$SNAPSHOT"; then
+    rm -f -- "$tmp"
+    echo "Failed to install snapshot; previous snapshot was not changed" >&2
+    return 1
+  fi
+
   n=$(grep -cv '^#' "$SNAPSHOT" || true)
   echo "Saved $n windows to $SNAPSHOT"
 }
@@ -44,12 +76,27 @@ save() {
 restore() {
   [[ -f "$SNAPSHOT" ]] || { echo "No snapshot at $SNAPSHOT — run 'save' first" >&2; exit 1; }
 
-  local live focused=""
-  # Restoring a window that no longer exists makes aerospace error out, so
-  # check each ID against the current window list rather than trusting the file.
-  live="$(aerospace list-windows --all --format '%{window-id}')"
+  local focused="" live
+  local -a live_ids=() live_apps=() live_titles=() live_claimed=()
+  local live_id live_app live_title
+  if ! live="$(aerospace list-windows --all \
+      --format $'%{window-id}\t%{app-name}\t%{window-title}')"; then
+    echo "Failed to query AeroSpace windows; nothing was restored" >&2
+    return 1
+  fi
+  if [[ -n "$live" ]]; then
+    while IFS=$'\t' read -r live_id live_app live_title; do
+      [[ -n "$live_id" ]] || continue
+      live_ids+=("$live_id")
+      live_apps+=("$live_app")
+      live_titles+=("$live_title")
+      live_claimed+=(0)
+    done <<< "$live"
+  fi
 
-  local moved=0 skipped=0
+  local -a saved_ids=() saved_workspaces=() saved_apps=() saved_titles=()
+  local -a resolved_live=() match_kind=()
+  local id ws app title
   while IFS=$'\t' read -r id ws app title; do
     [[ -z "${id:-}" ]] && continue
     # Header line is "# focused<TAB><workspace>", so the whole marker lands in
@@ -59,27 +106,129 @@ restore() {
       continue
     fi
     [[ "$id" == \#* ]] && continue
-    if ! grep -qx "$id" <<<"$live"; then
-      echo "  skip  $id ($app — window is gone)"
+    saved_ids+=("$id")
+    saved_workspaces+=("$ws")
+    saved_apps+=("$app")
+    saved_titles+=("$title")
+    resolved_live+=(-1)
+    match_kind+=("")
+  done < "$SNAPSHOT"
+
+  local s other l candidate saved_matches live_matches prior_app_matches
+
+  # Pass 1: the saved ID and app still identify the same live window.
+  for s in "${!saved_ids[@]}"; do
+    for l in "${!live_ids[@]}"; do
+      if [[ "${live_claimed[$l]}" == 0 &&
+            "${live_ids[$l]}" == "${saved_ids[$s]}" &&
+            "${live_apps[$l]}" == "${saved_apps[$s]}" ]]; then
+        resolved_live[$s]=$l
+        match_kind[$s]="id"
+        live_claimed[$l]=1
+        break
+      fi
+    done
+  done
+
+  # Pass 2: pair exact app/title matches only when each side is unique.
+  for s in "${!saved_ids[@]}"; do
+    (( resolved_live[$s] < 0 )) || continue
+    saved_matches=0
+    live_matches=0
+    candidate=-1
+    for other in "${!saved_ids[@]}"; do
+      if [[ "${resolved_live[$other]}" == -1 &&
+            "${saved_apps[$other]}" == "${saved_apps[$s]}" &&
+            "${saved_titles[$other]}" == "${saved_titles[$s]}" ]]; then
+        saved_matches=$((saved_matches + 1))
+      fi
+    done
+    for l in "${!live_ids[@]}"; do
+      if [[ "${live_claimed[$l]}" == 0 &&
+            "${live_apps[$l]}" == "${saved_apps[$s]}" &&
+            "${live_titles[$l]}" == "${saved_titles[$s]}" ]]; then
+        candidate=$l
+        live_matches=$((live_matches + 1))
+      fi
+    done
+    if (( saved_matches == 1 && live_matches == 1 )); then
+      resolved_live[$s]=$candidate
+      match_kind[$s]="title"
+      live_claimed[$candidate]=1
+    fi
+  done
+
+  # Pass 3: after at least one strong match for an app, pair its sole remaining
+  # saved/live windows. This handles a browser window whose active-tab title
+  # changed while avoiding app-only guesses with no corroborating match.
+  for s in "${!saved_ids[@]}"; do
+    (( resolved_live[$s] < 0 )) || continue
+    saved_matches=0
+    live_matches=0
+    prior_app_matches=0
+    candidate=-1
+    for other in "${!saved_ids[@]}"; do
+      if [[ "${saved_apps[$other]}" == "${saved_apps[$s]}" ]]; then
+        if (( resolved_live[$other] < 0 )); then
+          saved_matches=$((saved_matches + 1))
+        else
+          prior_app_matches=$((prior_app_matches + 1))
+        fi
+      fi
+    done
+    for l in "${!live_ids[@]}"; do
+      if [[ "${live_claimed[$l]}" == 0 &&
+            "${live_apps[$l]}" == "${saved_apps[$s]}" ]]; then
+        candidate=$l
+        live_matches=$((live_matches + 1))
+      fi
+    done
+    if (( prior_app_matches > 0 && saved_matches == 1 && live_matches == 1 )); then
+      resolved_live[$s]=$candidate
+      match_kind[$s]="remaining"
+      live_claimed[$candidate]=1
+    fi
+  done
+
+  local moved=0 rematched=0 skipped=0 target_id
+  for s in "${!saved_ids[@]}"; do
+    l="${resolved_live[$s]}"
+    if (( l < 0 )); then
+      echo "  skip  ${saved_ids[$s]} (${saved_apps[$s]} — no unambiguous matching window)"
       skipped=$((skipped + 1))
       continue
     fi
-    if aerospace move-node-to-workspace --window-id "$id" "$ws" 2>/dev/null; then
+
+    target_id="${live_ids[$l]}"
+    case "${match_kind[$s]}" in
+      title)
+        echo "  match ${saved_ids[$s]} -> $target_id (${saved_apps[$s]} — ${saved_titles[$s]})"
+        ;;
+      remaining)
+        echo "  match ${saved_ids[$s]} -> $target_id (${saved_apps[$s]} — only unmatched window; title is now: ${live_titles[$l]})"
+        ;;
+    esac
+    if aerospace move-node-to-workspace \
+        --window-id "$target_id" "${saved_workspaces[$s]}" 2>/dev/null; then
       moved=$((moved + 1))
+      [[ "${match_kind[$s]}" == "id" ]] || rematched=$((rematched + 1))
     else
-      echo "  fail  $id ($app) -> ws $ws"
+      echo "  fail  $target_id (${saved_apps[$s]}) -> ws ${saved_workspaces[$s]}"
       skipped=$((skipped + 1))
     fi
-  done < "$SNAPSHOT"
+  done
 
   [[ -n "$focused" ]] && aerospace workspace "$focused"
-  echo "Restored $moved windows, skipped $skipped"
+  echo "Restored $moved windows ($rematched matched by app/title), skipped $skipped"
 }
 
 show() {
   [[ -f "$SNAPSHOT" ]] || { echo "No snapshot at $SNAPSHOT" >&2; exit 1; }
   column -t -s$'\t' < "$SNAPSHOT"
 }
+
+secure_existing_state
+command -v aerospace >/dev/null || { echo "aerospace CLI not found" >&2; exit 1; }
 
 case "${1:-}" in
   save)    save ;;

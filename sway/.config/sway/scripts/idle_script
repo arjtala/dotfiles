@@ -13,7 +13,7 @@ touch "$logf"
 chmod 600 "$logf"
 
 timestamp() {
-  date '+%Y-%m-%dT%H:%M:%S%z'
+  date '+%Y-%m-%dT%H:%M:%S.%3N%z'
 }
 
 run_logged() {

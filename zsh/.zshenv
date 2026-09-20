@@ -64,3 +64,4 @@ else
 	fi
 	if [ -d "/usr/local/opt/grep/libexec/gnubin" ]; then PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"; fi
 fi
+. "$HOME/.cargo/env"

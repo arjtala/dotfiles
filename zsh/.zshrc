@@ -87,6 +87,12 @@ export ZSH_DISABLE_COMPFIX=true
 fpath=(${fpath:#/usr/share/zsh/site-functions})
 [[ -r "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
+# Keep history even when Oh My Zsh is not installed.
+HISTFILE="${HISTFILE:-$HOME/.zsh_history}"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt APPEND_HISTORY SHARE_HISTORY EXTENDED_HISTORY HIST_IGNORE_DUPS
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"

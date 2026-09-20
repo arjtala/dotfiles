@@ -31,6 +31,7 @@ default_floating_border pixel 3
 # gaps
 gaps inner  5
 gaps outer  3
+output eDP-1 scale 1.4
 
 #-----------------------#
 # set GTK+ and QT theme #

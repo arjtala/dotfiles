@@ -61,7 +61,6 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 | `prefix + u` | fzf pick URL from visible pane | tmux-fzf-url |
 | `prefix + F` | On-screen copy hints (vimium-style) | tmux-thumbs |
 | `prefix + /` | fzf scrollback search with preview | tmux-fuzzback |
-| — | Auto-reload on `.tmux.conf` save (needs `entr`) | tmux-autoreload |
 
 ## Custom
 
@@ -96,8 +95,6 @@ no server restart needed. For Ghostty to pick up the new palette, `Cmd+Shift+,`
 | --- | --- | --- | --- |
 | tmux itself | `tmux` | `tmux` | `tmux` |
 | tmux-fzf-url, tmux-fuzzback | `fzf` | `fzf` | `fzf` |
-| tmux-autoreload (file watcher) | `entr` | `entr` | `entr` |
-| tmux-autoreload (bash 4+ `declare -g`) | `bash` | built-in | built-in |
 | tmux-thumbs (cargo build) | `rust` | `rust cargo` | `rust` |
 
 ## Plugin management

@@ -9,14 +9,16 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 
 ##### Bar Appearance #####
-# Position bottom, height ~31 to match waybar
+# Position top, height ~31 to match waybar.
+# Window layering avoids reserving a second row for the native menu bar,
+# while keeping its revealed menus above SketchyBar.
 sketchybar --bar \
   position=top \
   height=31 \
   color=$BG \
   border_width=0 \
   shadow=off \
-  topmost=off \
+  topmost=window \
   y_offset=0 \
   margin=0 \
   corner_radius=0 \

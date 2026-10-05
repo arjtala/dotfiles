@@ -1,0 +1,26 @@
+#!/bin/bash
+# Apply macOS desktop preferences that Stow cannot install.
+set -euo pipefail
+
+[[ "$(uname -s)" == Darwin ]] || { echo 'macOS only' >&2; exit 1; }
+
+# Area capture to a file: Ctrl+Shift+4. Leave Cmd+Shift+4 to AeroSpace.
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 30 \
+  '<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>52</integer><integer>21</integer><integer>393216</integer></array><key>type</key><string>standard</string></dict></dict>'
+/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+
+# Apply the menu-bar setting live, rather than only writing its preference.
+# A false/true transition refreshes a session with a stale auto-hide state.
+osascript <<'APPLESCRIPT'
+tell application "System Events"
+  tell dock preferences
+    set autohide menu bar to false
+    set autohide menu bar to true
+  end tell
+end tell
+APPLESCRIPT
+
+if command -v sketchybar >/dev/null 2>&1; then
+  sketchybar --reload
+fi
+echo 'Applied menu-bar auto-hide and Ctrl+Shift+4 area capture.'

@@ -2,13 +2,16 @@
 # i3/sway $super → cmd (alt/option reserved for Emacs Meta key)
 # Keys that clash with macOS essentials (v/z/x/a/space) use ctrl instead
 
+config-version = 2
 start-at-login = true
+# Preserve the workspaces previously inferred from the number-key bindings.
+persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 
 # Notify SketchyBar and remember window placement. The guard listens for
 # AeroSpace's own focus/detection events; it does not poll Accessibility.
 after-startup-command = [
   'exec-and-forget sketchybar',
-  'exec-and-forget /usr/bin/env AEROSPACE_BIN=/opt/homebrew/bin/aerospace /Users/arjangt/dotfiles/scripts/aerospace-workspace-guard daemon',
+  'exec-and-forget "$HOME/dotfiles/scripts/aerospace-workspace-guard" daemon',
 ]
 exec-on-workspace-change = ['/bin/bash', '-c',
 'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
@@ -22,7 +25,7 @@ enable-normalization-opposite-orientation-for-nested-containers = true
 default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
 
-# Matches sway: focus_follows_mouse yes
+# Move the mouse to the focused window (mouse follows focus).
 # Briefly disabled during the Aug 2026 focus-oscillation hunt, on the theory
 # that warping the cursor on every focus change could re-trigger focus and loop.
 # Cleared: the oscillation was stale AeroSpace state and survived disabling

@@ -14,6 +14,23 @@ README:
 AeroSpace, sway, and i3 share the same window-management scheme so muscle
 memory carries across platforms — see each file for the small deltas.
 
+## Branches
+
+`main` is the personal setup and pins the Emacs submodule's `simplify` branch.
+The `meta` branches in both repositories preserve the company workstation
+setup separately. The dotfiles `meta` branch tracks the Emacs `meta` branch.
+
+To restore that setup in this checkout:
+
+```sh
+git switch meta
+git submodule update --init --recursive
+git -C emacs/.config/emacs switch meta
+```
+
+To return to the personal setup, use `main` and `simplify`, respectively.
+Stowed files follow the checked-out branch; restart affected apps afterward.
+
 ## New machine setup
 
 ```sh

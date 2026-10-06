@@ -7,14 +7,9 @@ pane_path="${2:-}"
 pane_command="${3:-}"
 pane_label_override="${4:-}"
 
-# The Meta workstation puts a telemetry wrapper in /usr/local/bin/git.  This
-# helper is UI plumbing, so use the real Git binary and avoid launching the
-# telemetry logger whenever a label is refreshed.  Keep an override for hosts
-# where Git lives elsewhere.
+# Use the configured Git binary, or the shell's normal PATH lookup.
 if [ -n "${TMUX_SMART_LABEL_GIT:-}" ]; then
   git_bin="$TMUX_SMART_LABEL_GIT"
-elif [ -x /usr/bin/git ]; then
-  git_bin=/usr/bin/git
 else
   git_bin="$(command -v git 2>/dev/null || true)"
 fi

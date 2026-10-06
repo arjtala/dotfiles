@@ -19,49 +19,31 @@ else
   export LANGUAGE=en_US.UTF-8
 fi
 
-if [[ -d /opt/facebook ]]; then
-    export META_CLAUDE_USE_ANTHROPIC_DIRECT=0
-    export META_CLAUDE_USE_AI_GATEWAY=1
-fi
 if [[ "$HOST" == *"ip-10-0-1-5"* ]];
 then
 	if [ -d "$HOME/.local/share/info" ]; then export INFOPATH=$HOME/.local/share/info; fi
 fi
-if [[ "$HOST" == *"facebook"* ]];
-then
-  export TERMINAL=xterm-256color
-  export TERM=xterm-256color
-  if [[ -t 1 ]]; then  echo "Loading FB specific settings..."; fi
-	if [[ -z "${LOCAL_ADMIN_SCRIPTS}" ]]; then LOCAL_ADMIN_SCRIPTS="/usr/facebook/ops/rc/"; fi
-    local fb_master_zshrc="${LOCAL_ADMIN_SCRIPTS}/master.zshrc"
-    local fb_prompt_file="${LOCAL_ADMIN_SCRIPTS}/scm-prompt"
-    if [ -f "$fb_master_zshrc" ]; then source "$fb_master_zshrc"; fi
-    if [ -f "$fb_prompt_file" ]; then source "$fb_prompt_file"; fi
-  if [[ -t 1 ]]; then echo "Setting proxy alias..."; fi
-  alias with-proxy='env http_proxy=fwdproxy:8080 https_proxy=fwdproxy:8080 no_proxy=.fbcdn.net,.facebook.com,.thefacebook.com,.tfbnw.net,.fb.com,.fburl.com,.facebook.net,.sb.fbsbx.com,localhost RSYNC_PROXY=fwdproxy:8080 HTTP_PROXY=http://fwdproxy:8080 HTTPS_PROXY=http://fwdproxy:8080';
-else
-    if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
-	if [ -d "$HOME/.local/homebrew/Cellar/libgccjit/13.1.0" ]; then
-			export LDFLAGS="-L$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/lib";
-			export CPPFLAGS="-I$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/include";
-	fi
-	if [ -d "/Applications/Emacs.app/" ]; then export PATH="/Applications/Emacs.app/Contents/MacOS:$PATH"; fi
-	if [ -d "/usr/local/opt/curl" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
-    if [ -d "/opt/homebrew/opt/ruby" ]; then export PATH="/opt/homebrew/opt/ruby/bin:$PATH"; fi
-	    if command -v ruby >/dev/null 2>&1; then
-	        gem_bindir="$(ruby -rrubygems -e 'print Gem.bindir' 2>/dev/null)"
-	        if [ -n "$gem_bindir" ]; then export PATH="$gem_bindir:$PATH"; fi
-	        unset gem_bindir
-	    fi
-	if [ -d "$HOME/.rubies/ruby-3.1.2/" ]; then	export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH"; fi
-	if [ -d "$HOME/Library/Python/3.10/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.10/bin"; fi
-	if [ -d "$HOME/Library/Python/3.9/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.9/bin"; fi
-	if [ -d "/usr/local/opt" ]; then
-		PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
-			export LDFLAGS="-L/usr/local/opt/curl/lib";
-			export CPPFLAGS="-I/usr/local/opt/curl/include";
-			export PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
-	fi
-	if [ -d "/usr/local/opt/grep/libexec/gnubin" ]; then PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"; fi
+if [[ -t 1 ]]; then  echo "Loading local settings..."; fi
+if [ -d "$HOME/.local/homebrew/Cellar/libgccjit/13.1.0" ]; then
+    export LDFLAGS="-L$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/lib";
+    export CPPFLAGS="-I$HOME/.local/homebrew/Cellar/libgccjit/13.1.0/include";
 fi
+if [ -d "/Applications/Emacs.app/" ]; then export PATH="/Applications/Emacs.app/Contents/MacOS:$PATH"; fi
+if [ -d "/usr/local/opt/curl" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
+if [ -d "/opt/homebrew/opt/ruby" ]; then export PATH="/opt/homebrew/opt/ruby/bin:$PATH"; fi
+if command -v ruby >/dev/null 2>&1; then
+    gem_bindir="$(ruby -rrubygems -e 'print Gem.bindir' 2>/dev/null)"
+    if [ -n "$gem_bindir" ]; then export PATH="$gem_bindir:$PATH"; fi
+    unset gem_bindir
+fi
+if [ -d "$HOME/.rubies/ruby-3.1.2/" ]; then	export PATH="$HOME/.rubies/ruby-3.1.2/bin:$PATH"; fi
+if [ -d "$HOME/Library/Python/3.10/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.10/bin"; fi
+if [ -d "$HOME/Library/Python/3.9/bin" ]; then export PATH="$PATH:$HOME/Library/Python/3.9/bin"; fi
+if [ -d "/usr/local/opt" ]; then
+    PATH="/usr/local/opt/findutils/libexec/gnubin:$PATH";
+    export LDFLAGS="-L/usr/local/opt/curl/lib";
+    export CPPFLAGS="-I/usr/local/opt/curl/include";
+    export PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig";
+fi
+if [ -d "/usr/local/opt/grep/libexec/gnubin" ]; then PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"; fi
 . "$HOME/.cargo/env"

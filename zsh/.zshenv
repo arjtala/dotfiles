@@ -1,3 +1,22 @@
+# Prefer the active Homebrew installation, including in Emacs shell buffers.
+if command -v brew >/dev/null 2>&1 && brew_prefix="$(brew --prefix 2>/dev/null)"; then
+  export PATH="$brew_prefix/bin:$PATH"
+fi
+unset brew_prefix
+
+# Work-only config lives in a private repo cloned to ~/.config/work.
+# Keep the UUIDs in sync with my/apple-work-machine-uuids in
+# emacs/.config/emacs/my-machine.el.
+apple_work_machine_uuids=(93B3CC6E-3CEE-5FDE-A086-8C46BE01A8C6)
+if [[ "$OSTYPE" == darwin* && -r "$HOME/.config/work/zsh/work.zsh" ]]; then
+  machine_uuid="$(/usr/sbin/ioreg -rd1 -c IOPlatformExpertDevice 2>/dev/null |
+    awk -F'"' '/IOPlatformUUID/ { print toupper($4) }')"
+  if [[ -n "$machine_uuid" ]] && (( ${apple_work_machine_uuids[(Ie)$machine_uuid]} )); then
+    source "$HOME/.config/work/zsh/work.zsh"
+  fi
+fi
+unset apple_work_machine_uuids machine_uuid
+
 # emacs M-x shell
 if [[ "dumb" == $TERM ]] ; then
   alias l='cat'

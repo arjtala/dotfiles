@@ -161,7 +161,6 @@ if [[ -n "${TMUX:-}" && -n "${TMUX_PANE:-}" && -x "$HOME/.config/tmux/tmux-smart
     add-zsh-hook preexec _tmux_smart_label_preexec
 fi
 
-if [ -d "$CONDA_PREFIX" ]; then export DYLD_LIBRARY_PATH="$CONDA_PREFIX/lib:$DYLD_LIBRARY_PATH"; fi
 if [ -d "/usr/local/opt/curl/bin" ]; then export PATH="/usr/local/opt/curl/bin:$PATH"; fi
 # opam configuration
 [[ ! -r "$HOME/.opam/opam-init/init.zsh" ]] || source "$HOME/.opam/opam-init/init.zsh" > /dev/null 2>&1
@@ -201,7 +200,7 @@ fi
 if type brew &> /dev/null; then
 	typeset sqlite_prefix
 	if sqlite_prefix="$(brew --prefix sqlite 2>/dev/null)"; then
-		export DYLD_LIBRARY_PATH="$sqlite_prefix/lib:/usr/lib";
+		# Compiler flags only: DYLD_LIBRARY_PATH breaks Conda's bundled libraries.
 		export LDFLAGS="-L$sqlite_prefix/lib"
 		export CPPFLAGS="-I$sqlite_prefix/include"
 		export PKG_CONFIG_PATH="$sqlite_prefix/lib/pkgconfig"
@@ -240,6 +239,8 @@ if [ -f "$HOME/miniforge3/bin/conda" ]; then
     _CONDA_BIN="$HOME/miniforge3/bin/conda"; _CONDA_SH="$HOME/miniforge3/etc/profile.d/conda.sh"
 elif [ -f "/usr/bin/conda" ]; then
     _CONDA_BIN="/usr/bin/conda"; _CONDA_SH="/etc/profile.d/conda.sh"
+elif [ -f "$HOME/.conda/bin/conda" ]; then
+    _CONDA_BIN="$HOME/.conda/bin/conda"; _CONDA_SH="$HOME/.conda/etc/profile.d/conda.sh"
 fi
 
 if [ -n "$_CONDA_BIN" ]; then

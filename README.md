@@ -36,40 +36,67 @@ Stowed files follow the checked-out branch; restart affected apps afterward.
 ```sh
 git clone --recurse-submodules git@github.com:arjtala/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+./setup
 ```
 
 The recursive clone requires GitHub SSH access because the Emacs submodule is
-private.
+private. On macOS, install [Homebrew](https://brew.sh) first.
 
-For an existing checkout, initialize any missing dependencies with:
+`./setup` is safe to re-run. Run it as your normal user; package steps use
+`sudo` where needed. It:
+
+1. Syncs and initializes submodules (Emacs config, tmux plugins).
+2. Installs packages:
+   - **macOS:** `brew bundle install` from the [Brewfile](Brewfile).
+   - **Fedora:** `stow zsh tmux fzf emacs`, then
+     [`sway/setup-fedora.sh`](sway/setup-fedora.sh) for the sway stack.
+   - **Arch / other:** nothing — install the deps listed in each README's
+     `## Dependencies` section, including GNU Stow.
+3. Clones `oh-my-zsh` into `~/.oh-my-zsh` if missing (directly, so its
+   installer does not replace `.zshrc`).
+4. Links packages into `$HOME` with GNU Stow:
+   - **macOS:** `zsh tmux emacs ghostty aerospace sketchybar`
+   - **Linux:** `zsh tmux emacs ghostty sway waybar rofi way-shell gtk3 gtk4 Thunar`
+
+   Pass package names to link a different set, e.g. `./setup zsh tmux`.
+5. **macOS only:** builds any missing SketchyBar helper apps, applies the
+   desktop preferences in [`scripts/macos-desktop-setup`](scripts/macos-desktop-setup),
+   and starts AeroSpace if it isn't running (it then starts at login and launches
+   SketchyBar). Approve AeroSpace under System Settings → Privacy & Security →
+   Accessibility on first launch.
+
+### SketchyBar helpers (macOS)
+
+The Wi-Fi name and calendar items read their data through small helper apps
+(`sketchybar/.config/sketchybar/helpers/`), because macOS only grants
+Location and Calendars access to bundled apps. They are built per machine and
+not tracked. `./setup` builds missing ones (needs `swiftc`, from
+`xcode-select --install`) and then lists them; approve each one's permission
+prompt once:
 
 ```sh
-git submodule sync --recursive
-git submodule update --init --recursive
+open -W ~/.config/sketchybar/helpers/ssid.app       # Location
+open -W ~/.config/sketchybar/helpers/calendar.app   # Calendars
+sketchybar --reload
 ```
 
-**macOS:**
+To rebuild after editing a helper, run
+`sh ~/.config/sketchybar/helpers/build.sh <ssid|calendar>`. Rebuild only the
+one you changed: rebuilding re-signs the app, so macOS may ask to approve it
+again.
 
-```sh
-brew bundle install --file=~/dotfiles/Brewfile
-```
+### Stow notes
 
-**Fedora / Arch:** no one-shot equivalent — install per-tool deps listed in
-each README's `## Dependencies` section.
+The repository's `.stowrc` supplies common ignore rules when Stow traverses
+package directories. Stow refuses to replace existing real files; `./setup`
+stops with Stow's conflict list, so move those files aside and re-run. Stow may
+fold an entire source directory into one symlink, in which case files already
+inside it remain visible. To link packages by hand, use
+`stow --target="$HOME" --restow <packages...>` from `~/dotfiles`.
 
-**Everywhere, still needed:**
-
-- `oh-my-zsh` (clone it directly so its installer does not replace `.zshrc`):
-  `git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh`
-- Symlink the packages needed on this machine with GNU Stow, for example:
-  `stow --target="$HOME" zsh tmux ghostty`.
-  The repository's `.stowrc` supplies common ignore rules when Stow traverses
-  package directories. Stow may fold an entire source directory into one
-  symlink, in which case files already inside it remain visible. Use
-  `stow --restow <packages...>` after changing the selected packages.
-- tmux plugins are included in the recursive submodule checkout; start tmux or
-  reload `.tmux.conf` after stowing the package. See
-  [tmux/README.md](tmux/README.md#plugin-management) before updating plugins.
+tmux plugins are included in the recursive submodule checkout; start tmux or
+reload `.tmux.conf` after linking the package. See
+[tmux/README.md](tmux/README.md#plugin-management) before updating plugins.
 
 The legacy Vim config uses Vundle, which is not a tracked submodule. To use it:
 

@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+#
+# Set up this machine from the dotfiles checkout. Safe to re-run.
+#
+#   ./setup                # default packages for this OS (below)
+#   ./setup zsh tmux       # link only these packages; the other steps still run
+#
+# Every OS:  submodules, oh-my-zsh, GNU Stow links
+# macOS:     Brewfile, SketchyBar helper apps, desktop prefs
+#            (scripts/macos-desktop-setup)
+# Fedora:    sway packages via sway/setup-fedora.sh, plus stow and shell tools
+# Arch:      no package installs; see each README's "Dependencies" table
+#
+# Run as your normal user; package steps sudo where needed.
+
+set -euo pipefail
+
+DOTFILES="$(cd "$(dirname "$0")" && pwd)"
+cd "$DOTFILES"   # stow reads .stowrc from the working directory
+
+log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
+die() { echo "$*" >&2; exit 1; }
+
+[ "$(id -u)" -ne 0 ] || die "Run as your normal user; it will sudo when needed."
+
+COMMON=(zsh tmux emacs ghostty)
+MACOS=(aerospace sketchybar)
+SWAY=(sway waybar rofi way-shell gtk3 gtk4 Thunar)
+
+case "$(uname -s)" in
+  Darwin) os=macos; packages=("${COMMON[@]}" "${MACOS[@]}") ;;
+  Linux)  os=linux; packages=("${COMMON[@]}" "${SWAY[@]}") ;;
+  *)      die "Unsupported OS: $(uname -s)" ;;
+esac
+[ $# -eq 0 ] || packages=("$@")
+
+has() { command -v "$1" >/dev/null 2>&1; }
+wants() {   # wants PACKAGE — is it in the set being linked?
+  local p
+  for p in "${packages[@]}"; do [ "$p" = "$1" ] && return 0; done
+  return 1
+}
+
+# 1. Submodules (Emacs config, tmux plugins) ---------------------------------
+log "Updating submodules"
+git submodule sync --recursive
+git submodule update --init --recursive
+
+# 2. Packages ------------------------------------------------------------------
+if [ "$os" = macos ]; then
+  has brew || die "Install Homebrew first (https://brew.sh), then re-run."
+  log "Installing Homebrew packages (Brewfile)"
+  brew bundle install --file="$DOTFILES/Brewfile"
+elif has dnf; then
+  log "Installing stow and shell tools"
+  sudo dnf install -y stow zsh tmux fzf emacs
+  if wants sway; then
+    log "Installing sway packages (sway/setup-fedora.sh)"
+    bash "$DOTFILES/sway/setup-fedora.sh"
+  fi
+else
+  log "No package installer for this distro; install each README's Dependencies"
+fi
+has stow || die "GNU Stow is required; install it and re-run."
+
+# 3. oh-my-zsh (cloned directly so its installer does not replace .zshrc) ------
+if wants zsh && [ ! -d "$HOME/.oh-my-zsh" ]; then
+  log "Cloning oh-my-zsh"
+  git clone https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
+fi
+
+# 4. Links ---------------------------------------------------------------------
+# Stow refuses to replace existing real files; move any it reports, then re-run.
+log "Linking: ${packages[*]}"
+stow --target="$HOME" --restow "${packages[@]}"
+
+# 5. macOS extras --------------------------------------------------------------
+approve=()
+started_aerospace=false
+if [ "$os" = macos ]; then
+  # Build only missing helpers: rebuilding re-signs the app, which can drop
+  # the permission already granted to it (see sketchybar helpers/build.sh).
+  if wants sketchybar; then
+    helpers="$DOTFILES/sketchybar/.config/sketchybar/helpers"
+    if has swiftc; then
+      for helper in ssid calendar; do
+        if [ ! -d "$helpers/$helper.app" ]; then
+          log "Building SketchyBar helper: $helper.app"
+          sh "$helpers/build.sh" "$helper"
+          approve+=("$helpers/$helper.app")
+        fi
+      done
+    else
+      log "Skipping SketchyBar helpers: swiftc not found (xcode-select --install)"
+    fi
+  fi
+
+  log "Applying macOS desktop preferences"
+  bash "$DOTFILES/scripts/macos-desktop-setup"
+
+  # First launch only; after that the config starts it at login, and it
+  # starts SketchyBar (see aerospace/README.md).
+  if wants aerospace && [ -d /Applications/AeroSpace.app ] && ! pgrep -xq AeroSpace; then
+    log "Starting AeroSpace (it starts SketchyBar)"
+    open -a AeroSpace
+    started_aerospace=true
+  fi
+fi
+
+log "Done"
+if [ "$started_aerospace" = true ]; then
+  echo "Approve AeroSpace in System Settings → Privacy & Security → Accessibility."
+fi
+if [ ${#approve[@]} -gt 0 ]; then
+  echo "Approve each new SketchyBar helper's permission prompt once:"
+  for app in "${approve[@]}"; do echo "  open -W $app"; done
+  echo "then: sketchybar --reload"
+fi

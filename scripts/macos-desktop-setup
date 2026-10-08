@@ -20,7 +20,8 @@ tell application "System Events"
 end tell
 APPLESCRIPT
 
-if command -v sketchybar >/dev/null 2>&1; then
+# Only a running bar can reload; on a fresh Mac AeroSpace starts it later.
+if command -v sketchybar >/dev/null 2>&1 && pgrep -xq sketchybar; then
   sketchybar --reload
 fi
 echo 'Applied menu-bar auto-hide and Ctrl+Shift+4 area capture.'

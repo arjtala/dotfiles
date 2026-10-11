@@ -1,0 +1,29 @@
+#waybar-popup {
+    background-color: transparent;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 13px;
+    color: #ebdbb2;
+}
+#popup-panel {
+    background-color: #282828;
+    border: 1px solid #d79921;
+    border-radius: 8px;
+}
+#waybar-popup .heading { color: #fabd2f; font-weight: bold; }
+#waybar-popup .weekday { color: #fabd2f; }
+#waybar-popup .day { color: #ebdbb2; }
+#waybar-popup .muted { color: #a89984; }
+#waybar-popup .today { color: #fb4934; font-weight: bold; }
+#waybar-popup button {
+    background: transparent;
+    color: #ebdbb2;
+    border: none;
+    box-shadow: none;
+    text-shadow: none;
+    padding: 4px 10px;
+    min-height: 20px;
+}
+#waybar-popup button:hover, #waybar-popup button:focus { background: #3c3836; }
+#waybar-popup .prayer-row { padding: 6px; border-radius: 4px; }
+#waybar-popup .current { background: #3c3836; }
+#waybar-popup .current label, #waybar-popup .overnight { color: #8ec07c; font-weight: bold; }

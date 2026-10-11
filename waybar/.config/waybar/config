@@ -30,7 +30,8 @@
     "clock": {
         "format": "  {:%H:%M   %a, %d %b %Y}",
         "timezone": "America/Los_Angeles",
-        "tooltip": true,
+        "on-click": "python3 $HOME/.config/waybar/scripts/popup.py calendar",
+        "tooltip": false,
         "tooltip-format": " <tt><span size='11pt'>{calendar}</span></tt> ",
         "calendar": {
             "mode": "month",
@@ -97,6 +98,7 @@
         "interval": 60,
         "tooltip": false,
         "exec": "zsh -lc athan",
+        "on-click": "python3 $HOME/.config/waybar/scripts/popup.py prayers",
         "icon-size": 10,
         "spacing": 10
     },

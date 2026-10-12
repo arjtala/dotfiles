@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Month calendar and prayer-time popups for the clock and athan items.
 
-    popup.py calendar toggle|today|scroll
+    popup.py calendar toggle|today|prev|next
     popup.py prayers toggle|refresh
 
 The SketchyBar counterpart of waybar/.config/waybar/scripts/popup.py.
@@ -22,28 +22,41 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-import time
 from zoneinfo import ZoneInfo
 
 SELF = str(Path(__file__).resolve())
 CONFIG_DIR = Path(os.environ.get('CONFIG_DIR') or Path(__file__).resolve().parent.parent)
 CACHE = Path.home() / '.cache'
 MONTH_FILE = CACHE / 'sketchybar-month'
-SCROLL_FILE = CACHE / 'sketchybar-month-scroll'
-SCROLL_GAP = 0.3  # seconds; one trackpad swipe sends a burst of events
 ATHAN = Path.home() / '.cargo/bin/athan'
 PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 WEEKS = 6  # the most a month can span
-GAP = 3  # columns between days, which today's brackets sit in; 39pt apart, as in Waybar
+GAP = 3  # columns between days; day columns 39pt apart, as in Waybar
 WIDTH = 7 * 2 + 8 * GAP  # columns of popup text: one calendar row
-# JetBrains Mono advances 0.6 em, so 7.8pt at the 13pt label font.  Every
-# popup label is given this width outright: SketchyBar leaves leading
-# spaces out of a label's measured width but still draws them, so a label
-# that starts with spaces is clipped at the right.
-LABEL_WIDTH = math.ceil(WIDTH * 13 * 0.6) + 2
+# JetBrains Mono advances 0.6 em, so 7.8pt at the 13pt label font, in bold
+# as in regular.  Every popup label is given its width outright: SketchyBar
+# leaves leading spaces out of a label's measured width but still draws
+# them, so a label that starts with spaces is clipped at the right.
+CHAR = 13 * 0.6
+LABEL_WIDTH = math.ceil(WIDTH * CHAR) + 2
+LABEL_PAD = 4  # label.padding_left on every popup row
+TODAY_WIDTH = math.ceil(2 * CHAR)  # icon.width holding today's two digits
+PAD = 12  # padding either side of every popup row
+ROW = PAD + LABEL_PAD + LABEL_WIDTH + PAD  # a popup row's full width
+ARROW = 36  # width of each month arrow
+# SketchyBar lays a vertical popup out 4pt wider than its rows add up to;
+# measured, not documented.  The title row is widened to match the grid.
+GRID_SLACK = 4
+RADIUS = 6  # popup corner radius
+# A popup is a single row or a single column, and every click target is an
+# item of its own.  So the calendar is two popups: the clock's is one
+# horizontal row, `‹ October 2026 ›', and the title's opens below it with
+# the grid.  They are the same width and colour, and overlap by the corner
+# radius, so they read as one panel.
 CAL = 'clock'
+TITLE = f'{CAL}.p.title'
+GRID_ITEMS = ['weekdays'] + [f'week{i}' for i in range(WEEKS)] + ['hint']
 PRAYERS = 'athan'
-CAL_ITEMS = ['header', 'weekdays'] + [f'week{i}' for i in range(WEEKS)] + ['hint']
 PRAYER_ITEMS = (['heading', 'date'] + [f'row{i}' for i in range(len(PRAYER_NAMES) + 1)]
                 + ['overnight', 'next', 'error'])
 
@@ -63,20 +76,36 @@ def shift_month(first, delta):
 
 
 def week_text(days, today=None):
-    """Return one week as monospace text, with TODAY bracketed in place.
+    """Return one week as monospace text, with TODAY's cell left blank.
 
     DAYS is seven day numbers, 0 for a day outside the month.  Each number
-    takes two columns and each gap `GAP', so the brackets take the gap
-    columns touching today and every row stays `WIDTH' columns wide.
+    takes two columns and each gap `GAP', so every row is `WIDTH' columns.
+    Today is blank because it is drawn separately, in red; see
+    `today_padding'.
     """
-    gaps = [' ' * GAP] * 8
-    cells = []
-    for index, day in enumerate(days):
-        cells.append(f'{day:>2}' if day else '  ')
-        if day and day == today:
-            gaps[index] = gaps[index][:-1] + '['
-            gaps[index + 1] = ']' + gaps[index + 1][1:]
-    return ''.join(gap + cell for gap, cell in zip(gaps, cells)) + gaps[7]
+    cells = [f'{day:>2}' if day and day != today else '  ' for day in days]
+    gap = ' ' * GAP
+    return gap + gap.join(cells) + gap
+
+
+def today_column(days, today):
+    """Return the column TODAY's two digits start at in DAYS' row, or None."""
+    if today not in days or not today:
+        return None
+    return GAP + days.index(today) * (2 + GAP)
+
+
+def today_padding(column):
+    """Return (icon.padding_left, label.padding_left) for today at COLUMN.
+
+    A popup row has one label colour, so today's number is the row's icon,
+    drawn in red, and the label holds the rest of the week.  The icon is
+    pushed right to today's column, and the label pulled back left by the
+    icon's width, so it starts where every other row's does.  Only by the
+    width: an icon with a fixed width advances the row by that width
+    alone, its padding moving the digits within it.
+    """
+    return LABEL_PAD + round(column * CHAR), LABEL_PAD - TODAY_WIDTH
 
 
 def weekday_text():
@@ -86,9 +115,9 @@ def weekday_text():
 
 
 def month_rows(first, today):
-    """Return the weeks of FIRST's month as (text, holds_today) pairs, Monday first."""
+    """Return FIRST's month as (text, today's column or None) pairs, Monday first."""
     current = today.day if (today.year, today.month) == (first.year, first.month) else None
-    return [(week_text(week, current), current in week)
+    return [(week_text(week, current), today_column(week, current))
             for week in calendar.Calendar().monthdayscalendar(first.year, first.month)]
 
 
@@ -155,27 +184,58 @@ def is_open(item):
         return False
 
 
-def create(parent, names, scroll=False):
-    """Replace PARENT's popup items with fresh, empty ones called NAMES."""
-    args = ['--remove', f'/{parent}\\.p\\..*/']
-    for name in names:
-        item = f'{parent}.p.{name}'
-        args += ['--add', 'item', item, f'popup.{parent}',
-                 '--set', item, 'icon.drawing=off', f'label.width={LABEL_WIDTH}',
-                 'padding_left=12', 'padding_right=12']
-        if scroll:
-            args += [f'script={SELF} calendar scroll',
-                     '--subscribe', item, 'mouse.scrolled']
+def row_settings(item, parent):
+    """Return the arguments adding ITEM as an empty full-width row of PARENT's popup."""
+    return ['--add', 'item', item, f'popup.{parent}',
+            '--set', item, 'icon.drawing=off', f'label.width={LABEL_WIDTH}',
+            f'label.padding_left={LABEL_PAD}', 'label.padding_right=0',
+            f'padding_left={PAD}', f'padding_right={PAD}']
+
+
+def create_prayers():
+    args = ['--remove', f'/{PRAYERS}\\.p\\..*/']
+    for name in PRAYER_ITEMS:
+        args += row_settings(f'{PRAYERS}.p.{name}', PRAYERS)
     bar(*args)
 
 
-def show_label(parent, name, text, color, **extra):
-    args = ['--set', f'{parent}.p.{name}', 'drawing=on', f'label={text}', f'label.color={color}']
+def create_calendar():
+    palette = colors()
+    panel = [f'popup.background.color={palette["BG1"]}',
+             f'popup.background.corner_radius={RADIUS}', 'popup.background.border_width=0']
+    args = ['--remove', f'/{CAL}\\.[pg]\\..*/',
+            '--set', CAL, 'popup.horizontal=on', *panel]
+    for name, glyph, width in (('prev', '‹', ARROW), ('title', '', ROW + GRID_SLACK - 2 * ARROW),
+                               ('next', '›', ARROW)):
+        item = f'{CAL}.p.{name}'
+        args += ['--add', 'item', item, f'popup.{CAL}',
+                 '--set', item, 'icon.drawing=off', f'label={glyph}', f'label.width={width}',
+                 'label.align=center', 'label.padding_left=0', 'label.padding_right=0',
+                 'padding_left=0', 'padding_right=0', f'label.color={palette["FG"]}',
+                 f'click_script={SELF} calendar {"today" if name == "title" else name}']
+    # Centred under the title is centred under the row, the arrows being
+    # equal; raised by the corner radius to hide the seam.
+    args += ['--set', TITLE, 'popup.align=center', f'popup.y_offset=-{RADIUS}', *panel]
+    for name in GRID_ITEMS:
+        args += row_settings(f'{CAL}.g.{name}', TITLE)
+    bar(*args)
+
+
+def close(parent):
+    bar('--set', parent, 'popup.drawing=off')
+    if parent == CAL:
+        # Its own call: before the calendar first opens there is no title,
+        # and an unknown item would fail the whole command.
+        bar('--set', TITLE, 'popup.drawing=off')
+
+
+def show(item, text, color, **extra):
+    args = ['--set', item, 'drawing=on', f'label={text}', f'label.color={color}']
     return args + [f'{key}={value}' for key, value in extra.items()]
 
 
-def hide(parent, name):
-    return ['--set', f'{parent}.p.{name}', 'drawing=off']
+def hide(item):
+    return ['--set', item, 'drawing=off']
 
 
 def read_month(today):
@@ -193,26 +253,40 @@ def write_month(first):
 def render_calendar(first):
     palette = colors()
     today = date.today()
-    title = first.strftime('%B %Y').center(WIDTH).rstrip()
-    args = show_label(CAL, 'header', title, palette['BR_YELLOW'],
-                      click_script=f'{SELF} calendar today')
-    args += show_label(CAL, 'weekdays', weekday_text(), palette['FG2'])
+    bold = 'JetBrainsMono Nerd Font:Bold:13.0'
+    grid = f'{CAL}.g'
+    args = show(TITLE, first.strftime('%B %Y'), palette['BR_YELLOW'], **{'label.font': bold})
+    args += show(f'{grid}.weekdays', weekday_text(), palette['BR_YELLOW'])
     weeks = month_rows(first, today)
     for index in range(WEEKS):
-        if index < len(weeks):
-            text, holds_today = weeks[index]
-            args += show_label(CAL, f'week{index}', text,
-                               palette['BR_YELLOW'] if holds_today else palette['FG'])
+        if index >= len(weeks):
+            args += hide(f'{grid}.week{index}')
+            continue
+        text, column = weeks[index]
+        if column is None:
+            extra = {'icon.drawing': 'off', 'label.padding_left': LABEL_PAD,
+                     'label.width': LABEL_WIDTH}
         else:
-            args += hide(CAL, f'week{index}')
-    hint = 'scroll for months' if first == today.replace(day=1) else 'click title: today'
-    args += show_label(CAL, 'hint', hint.center(WIDTH).rstrip(), palette['BG2'])
+            icon_pad, label_pad = today_padding(column)
+            # SketchyBar sizes the panel counting the icon's width but not
+            # the label's negative padding, so the label gives the width
+            # back.  It only loses trailing spaces: a row ends in a gap.
+            extra = {'icon.drawing': 'on', 'icon': f'{today.day:>2}',
+                     'icon.font': bold, 'icon.color': palette['BR_RED'],
+                     'icon.width': TODAY_WIDTH, 'icon.padding_left': icon_pad,
+                     'icon.padding_right': 0, 'label.padding_left': label_pad,
+                     'label.width': LABEL_WIDTH - TODAY_WIDTH}
+        args += show(f'{grid}.week{index}', text, palette['FG'], **extra)
+    if first == today.replace(day=1):
+        args += hide(f'{grid}.hint')
+    else:
+        args += show(f'{grid}.hint', 'click title for today'.center(WIDTH).rstrip(), palette['FG2'])
     bar(*args)
 
 
 def render_prayers():
     palette = colors()
-    args = show_label(PRAYERS, 'heading', 'Prayer times', palette['BR_PURPLE'])
+    args = show(f'{PRAYERS}.p.heading', 'Prayer times', palette['BR_PURPLE'])
     try:
         result = subprocess.run([str(ATHAN), '--all', '--json'],
                                 capture_output=True, text=True, timeout=10)
@@ -223,54 +297,43 @@ def render_prayers():
         rows = prayer_rows(data, now)
         _, current_date, following = prayer_state(data, now)
     except (OSError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired) as error:
-        args += hide(PRAYERS, 'date')
-        args += [arg for i in range(len(PRAYER_NAMES) + 1) for arg in hide(PRAYERS, f'row{i}')]
-        args += hide(PRAYERS, 'overnight') + hide(PRAYERS, 'next')
-        args += show_label(PRAYERS, 'error', str(error), palette['FG2'])
+        args += hide(f'{PRAYERS}.p.date')
+        args += [arg for i in range(len(PRAYER_NAMES) + 1) for arg in hide(f'{PRAYERS}.p.row{i}')]
+        args += hide(f'{PRAYERS}.p.overnight') + hide(f'{PRAYERS}.p.next')
+        args += show(f'{PRAYERS}.p.error', str(error), palette['FG2'])
         bar(*args)
         return
-    args += show_label(PRAYERS, 'date', now.strftime('%A, %B ') + str(now.day), palette['FG2'])
+    args += show(f'{PRAYERS}.p.date', now.strftime('%A, %B ') + str(now.day), palette['FG2'])
     style_colors = {'current': palette['BR_PURPLE'], 'muted': palette['FG2'], None: palette['FG']}
     for index in range(len(PRAYER_NAMES) + 1):
         if index < len(rows):
             text, style = rows[index]
-            args += show_label(PRAYERS, f'row{index}', text, style_colors[style])
+            args += show(f'{PRAYERS}.p.row{index}', text, style_colors[style])
         else:
-            args += hide(PRAYERS, f'row{index}')
+            args += hide(f'{PRAYERS}.p.row{index}')
     if current_date != now.date():
-        args += show_label(PRAYERS, 'overnight', '● Isha · yesterday', palette['BR_PURPLE'])
+        args += show(f'{PRAYERS}.p.overnight', '● Isha · yesterday', palette['BR_PURPLE'])
     else:
-        args += hide(PRAYERS, 'overnight')
-    args += show_label(PRAYERS, 'next', following, palette['FG2'])
-    args += hide(PRAYERS, 'error')
+        args += hide(f'{PRAYERS}.p.overnight')
+    args += show(f'{PRAYERS}.p.next', following, palette['FG2'])
+    args += hide(f'{PRAYERS}.p.error')
     bar(*args)
 
 
-def toggle(parent, other, names, render, scroll=False):
+def toggle(parent, other, create, render, child=None):
+    """Close PARENT's popup if open, else fill it in and open it, closing OTHER's."""
     if is_open(parent):
-        bar('--set', parent, 'popup.drawing=off')
+        close(parent)
         return
-    create(parent, names, scroll)
+    create()
     render()
-    bar('--set', other, 'popup.drawing=off', '--set', parent, 'popup.drawing=on')
+    close(other)
+    bar('--set', parent, 'popup.drawing=on')
+    if child:
+        bar('--set', child, 'popup.drawing=on')
 
 
-def scroll():
-    """Move one month per swipe, however many events the swipe sends."""
-    if os.environ.get('SENDER') != 'mouse.scrolled':
-        return
-    delta = int(os.environ.get('SCROLL_DELTA') or 0)
-    try:
-        last = float(SCROLL_FILE.read_text())
-    except (OSError, ValueError):
-        last = 0.0
-    now = time.time()
-    if not delta or now - last < SCROLL_GAP:
-        return
-    CACHE.mkdir(exist_ok=True)
-    SCROLL_FILE.write_text(str(now))
-    # Natural scrolling: swiping up (a positive delta) reveals what comes later.
-    first = shift_month(read_month(date.today()), 1 if delta > 0 else -1)
+def show_month(first):
     write_month(first)
     render_calendar(first)
 
@@ -278,21 +341,17 @@ def scroll():
 def main():
     panel, action = sys.argv[1:3]
     if panel == 'calendar':
+        today = date.today()
         if action == 'toggle':
-            def render():
-                first = date.today().replace(day=1)
-                write_month(first)
-                render_calendar(first)
-            toggle(CAL, PRAYERS, CAL_ITEMS, render, scroll=True)
+            toggle(CAL, PRAYERS, create_calendar, lambda: show_month(today.replace(day=1)),
+                   child=TITLE)
         elif action == 'today':
-            first = date.today().replace(day=1)
-            write_month(first)
-            render_calendar(first)
-        elif action == 'scroll':
-            scroll()
+            show_month(today.replace(day=1))
+        elif action in ('prev', 'next'):
+            show_month(shift_month(read_month(today), -1 if action == 'prev' else 1))
     elif panel == 'prayers':
         if action == 'toggle':
-            toggle(PRAYERS, CAL, PRAYER_ITEMS, render_prayers)
+            toggle(PRAYERS, CAL, create_prayers, render_prayers)
         elif action == 'refresh' and is_open(PRAYERS):
             render_prayers()
 

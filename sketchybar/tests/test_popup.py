@@ -15,19 +15,31 @@ class MonthTests(unittest.TestCase):
         # 7.8pt per column at the 13pt label font; a narrower label clips.
         self.assertGreaterEqual(popup.LABEL_WIDTH, popup.WIDTH * 7.8)
 
-    def test_today_is_bracketed_without_moving_the_columns(self):
+    def test_today_is_left_blank_without_moving_the_columns(self):
         plain = popup.week_text([5, 6, 7, 8, 9, 10, 11])
         marked = popup.week_text([5, 6, 7, 8, 9, 10, 11], today=8)
         self.assertEqual(plain, '    5    6    7    8    9   10   11   ')
-        self.assertEqual(marked, '    5    6    7  [ 8]   9   10   11   ')
+        self.assertEqual(marked, '    5    6    7         9   10   11   ')
         self.assertEqual(len(plain), popup.WIDTH)
         self.assertEqual(len(marked), popup.WIDTH)
 
-    def test_today_at_either_end_of_the_week(self):
-        self.assertEqual(popup.week_text([12, 13, 14, 15, 16, 17, 18], 12),
-                         '  [12]  13   14   15   16   17   18   ')
-        self.assertEqual(popup.week_text([12, 13, 14, 15, 16, 17, 18], 18),
-                         '   12   13   14   15   16   17  [18]  ')
+    def test_today_column_is_where_its_digits_start(self):
+        days = [12, 13, 14, 15, 16, 17, 18]
+        text = popup.week_text(days)
+        for day in days:
+            self.assertEqual(popup.today_column(days, day), text.index(str(day)))
+        self.assertIsNone(popup.today_column(days, 19))
+        self.assertIsNone(popup.today_column([0, 0, 0, 1, 2, 3, 4], 0))
+
+    def test_today_padding_puts_the_digits_in_their_column(self):
+        for column in (3, 8, 33):
+            icon_pad, label_pad = popup.today_padding(column)
+            # The label starts where an unmarked row's does.  A fixed-width
+            # icon advances the row by its width alone (seen on screen: also
+            # counting its padding put the label 27pt too far left)...
+            self.assertEqual(popup.TODAY_WIDTH + label_pad, popup.LABEL_PAD)
+            # ...and the icon within half a point of its column.
+            self.assertLessEqual(abs(icon_pad - popup.LABEL_PAD - column * 7.8), 0.5)
 
     def test_weekday_names_sit_over_their_days(self):
         names = popup.weekday_text()
@@ -39,16 +51,15 @@ class MonthTests(unittest.TestCase):
         self.assertEqual(popup.week_text([0, 0, 0, 1, 2, 3, 4]),
                          '                   1    2    3    4   ')
 
-    def test_month_starts_on_monday_and_marks_today(self):
+    def test_month_starts_on_monday_and_locates_today(self):
         rows = popup.month_rows(date(2026, 10, 1), date(2026, 10, 12))
-        self.assertEqual(rows[0], ('                   1    2    3    4   ', False))
-        self.assertEqual(rows[2], ('  [12]  13   14   15   16   17   18   ', True))
-        self.assertEqual([holds for _, holds in rows].count(True), 1)
+        self.assertEqual(rows[0], ('                   1    2    3    4   ', None))
+        self.assertEqual(rows[2], ('        13   14   15   16   17   18   ', 3))
+        self.assertEqual(sum(column is not None for _, column in rows), 1)
 
     def test_another_month_marks_nothing(self):
         rows = popup.month_rows(date(2026, 11, 1), date(2026, 10, 12))
-        self.assertFalse(any(holds for _, holds in rows))
-        self.assertNotIn('[', ''.join(text for text, _ in rows))
+        self.assertTrue(all(column is None for _, column in rows))
 
     def test_shift_month_crosses_years(self):
         self.assertEqual(popup.shift_month(date(2026, 12, 1), 1), date(2027, 1, 1))

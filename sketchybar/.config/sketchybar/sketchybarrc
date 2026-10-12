@@ -90,8 +90,8 @@ sketchybar --add item front_app left \
 ##### Clock (center) #####
 # Format: "Mon, 23 Mar 2026    14:30" (icon between date and time)
 # Click the clock for a month calendar and athan for today's prayer times,
-# as in Waybar; plugins/popup.py fills both in. Moving the pointer away
-# closes them. Scroll over the calendar to change month.
+# as in Waybar; plugins/popup.py fills both in. Clicking away closes them.
+# The calendar's month arrows sit either side of its title.
 popup_style=(
   popup.align=left
   popup.background.color=$BG1

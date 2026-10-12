@@ -89,9 +89,9 @@ again.
 
 Click the clock for a month calendar, or athan for today's prayer times, as in
 Waybar (`waybar/README.md`). Clicking an item again closes its popup, clicking
-the other switches, and moving the pointer away closes it. Scroll over the
-calendar to change month; click its title to return to today. Today is
-bracketed, `[12]`, since a popup row has one colour.
+the other switches, and clicking away closes it. The `‹` and `›` either side
+of the calendar's title change month, and clicking the title returns to today. A popup
+row has one label colour, so today's number is drawn in red as the row's icon.
 
 `plugins/popup.py` fills both in, using SketchyBar's own popups, so nothing
 else runs and no permission is needed. The prayer rules match the Waybar

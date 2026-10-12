@@ -5,3 +5,4 @@
 --ignore='history'
 --ignore='pluginsOLD'
 --ignore='tagged'
+--ignore='^tests$'

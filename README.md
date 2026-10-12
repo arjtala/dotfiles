@@ -85,6 +85,20 @@ To rebuild after editing a helper, run
 one you changed: rebuilding re-signs the app, so macOS may ask to approve it
 again.
 
+### SketchyBar popups (macOS)
+
+Click the clock for a month calendar, or athan for today's prayer times, as in
+Waybar (`waybar/README.md`). Clicking an item again closes its popup, clicking
+the other switches, and moving the pointer away closes it. Scroll over the
+calendar to change month; click its title to return to today. Today is
+bracketed, `[12]`, since a popup row has one colour.
+
+`plugins/popup.py` fills both in, using SketchyBar's own popups, so nothing
+else runs and no permission is needed. The prayer rules match the Waybar
+popup, from `~/.cargo/bin/athan --all --json`; the open popup refreshes with
+the athan item each minute. Tests:
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s sketchybar/tests`.
+
 ### Stow notes
 
 The repository's `.stowrc` supplies common ignore rules when Stow traverses

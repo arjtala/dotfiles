@@ -65,6 +65,21 @@ private. On macOS, install [Homebrew](https://brew.sh) first.
    SketchyBar). Approve AeroSpace under System Settings → Privacy & Security →
    Accessibility on first launch.
 
+### Fedora / NVIDIA recovery
+
+The Sway installer registers **Sway (NVIDIA)** before attempting optional tool
+installs and builds. To repair just the login entry without reinstalling packages:
+
+```sh
+./scripts/sway-session-setup --nvidia
+./scripts/sway-doctor
+```
+
+The doctor is read-only and reports missing tools, text-only boot overrides,
+NVIDIA DRM settings, and session-entry problems. See the
+[Sway recovery guide](sway/README.md#fedora--nvidia-recovery) for boot arguments,
+the RTX 5090 driver requirement, and troubleshooting commands.
+
 ### SketchyBar helpers (macOS)
 
 The Wi-Fi name and calendar items read their data through small helper apps
@@ -98,6 +113,50 @@ else runs and no permission is needed. The prayer rules match the Waybar
 popup, from `~/.cargo/bin/athan --all --json`; the open popup refreshes with
 the athan item each minute. Tests:
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s sketchybar/tests`.
+
+### YubiKey for sudo and Swaylock (Fedora)
+
+Run in a local terminal as your normal user, with the key plugged in:
+
+```sh
+./scripts/setup-yubikey passwordless
+# Alternatively, require both the key and your password:
+# ./scripts/setup-yubikey two-factor
+```
+
+The script installs Fedora's FIDO PAM tools, registers the key, and requires a
+second touch to test it before changing `sudo` and `swaylock`. Other users keep
+their existing policy. `passwordless` allows touch instead of a password, with
+the original password authentication as fallback; `two-factor` requires both.
+Existing key mappings or YubiKey PAM rules cause the helper to stop for review.
+It uses a fixed `pam://dotfiles-local` origin so hostname changes do not break it.
+
+Original PAM files are saved under `/var/backups/dotfiles-pam-TIMESTAMP/`.
+Test `sudo -k; sudo true` in another terminal before testing the lock screen.
+For touch-only Swaylock, press Enter, then touch the key; the helper removes
+Swaylock's ignore-empty-password flag. Unplug the key to use password fallback.
+GNOME/GDM authentication is not modified. To restore the previous policy, copy
+the saved `sudo` and `swaylock` files back into `/etc/pam.d/` with sudo.
+
+To skip the physical key for sudo in SSH sessions, after enrollment run:
+
+```sh
+sudo python3 -I scripts/yubikey-ssh.py --install
+```
+
+This uses local Unix-password authentication for SSH, and leaves local sudo,
+Swaylock, and SSH login authentication unchanged. The helper uses systemd's
+process-session metadata (`Remote=yes`, service `sshd` or `tailscaled`), not spoofable SSH
+environment variables. If detection fails, the existing YubiKey rule applies.
+A tmux server retains the session where it started; use a fresh SSH shell to
+test, or start a separate tmux server inside SSH. Test `sudo -k; sudo true`
+both locally and over SSH. Backups are in `/var/backups/dotfiles-yubikey-ssh-*/`;
+restore the saved `sudo` file to `/etc/pam.d/sudo` to undo the skip.
+The remote branch bypasses both the custom key rule and authselect's shared
+`pam_u2f` rule. It retains PAM environment setup, authentication failure delay,
+and the existing account/session checks; a wrong password fails immediately.
+Installation validates this machine's local-password profile and refuses
+unrecognized authentication policy. Re-review it if that policy changes.
 
 ### Stow notes
 

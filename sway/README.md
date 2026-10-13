@@ -102,6 +102,21 @@ See also: [aerospace/README.md](../aerospace/README.md),
 | `Super + Shift + r` | Reload config |
 | `Super + Shift + e` | Exit sway (with confirm dialog) |
 
+## Display scaling
+
+Find connected output names with `swaymsg -t get_outputs`. For example, to make
+the UI 150% on this workstation's 4K monitor:
+
+```sh
+swaymsg output HDMI-A-2 scale 1.5
+```
+
+Use `1` for 100%, `1.25` for 125%, or `2` for 200%. This applies immediately;
+to persist it, add `output HDMI-A-2 scale 1.5` to `~/.config/sway/config` and
+reload with Super+Shift+r. The current `output * scale 1.5` applies to every
+output. Higher scale makes UI elements larger; fractional scales
+may make some XWayland apps look softer.
+
 ## Dependencies
 
 Linux / Wayland only. Package names verified on **Fedora**; Arch is best-effort.
@@ -160,7 +175,7 @@ in place via the `x-canonical-private-synchronous` hint).
 - **way-shell** (`way-sh` workspace switcher): build from source —
   <https://github.com/ldelossa/way-shell> (`make && sudo make install`, then
   `glib-compile-schemas /usr/share/glib-2.0/schemas`).
-- **NVIDIA**: the session entry must launch `sway --unsupported-gpu` (edit `sway.desktop`), and
+- **NVIDIA**: run `../scripts/sway-session-setup --nvidia` to register **Sway (NVIDIA)**, and
   `environment.d/90-sway.conf` carries the wlroots/NVIDIA vars (`GBM_BACKEND=nvidia-drm`, …).
   Do **not** set `WLR_DRM_NO_MODIFIERS` on the open driver — it blanks the display.
 - **Cursor** `Bibata-Modern-Classic` (set in `config`) isn't in Fedora repos — install
@@ -168,3 +183,84 @@ in place via the `x-canonical-private-synchronous` hint).
 
 Keybindings reference `way-sh`, `$screen-recorder`, `$launcher`, `$screenshot` — defined in
 `apps.conf`; adjust to your installed binaries.
+
+### Fonts and Rofi
+
+All Rofi themes use **JetBrainsMono Nerd Font**, also the first font in Waybar's
+font stack. The launcher inherits its font and Papirus-Dark icons from
+`rofi/config.rasi` instead of overriding them with Hack. Install fonts independently:
+
+```sh
+# From the repository root; downloads a pinned, checksum-verified Nerd Fonts release:
+./scripts/install-sway-fonts
+stow --target="$HOME" --restow rofi
+# Sway's GTK interface font (Fedora):
+sudo dnf install rsms-inter-vf-fonts
+```
+
+`setup-fedora.sh` runs both steps automatically. The Nerd Font is installed under
+`~/.local/share/fonts` (or `$XDG_DATA_HOME/fonts`) and includes the icon glyphs used
+by Waybar. Papirus-Dark application icons come from `papirus-icon-theme`, not the
+font. The Rofi themes and their `colors.rasi` imports are tracked in this repo.
+Reopen Rofi after installation; reload Sway to pick up launcher-command changes
+and restart Waybar to refresh its font cache. Bibata remains a separate optional
+cursor installation; `sway-doctor` reports it when absent.
+
+## Fedora / NVIDIA recovery
+
+Run these from the repository root. Registering the session is independent of the
+package installer, so a failed optional build doesn't require repeating setup:
+
+```sh
+./scripts/sway-session-setup --nvidia
+./scripts/sway-doctor
+```
+
+The session helper installs `/usr/share/wayland-sessions/sway-nvidia.desktop`,
+leaving the distro's `sway.desktop` alone. Select **Sway (NVIDIA)** at GDM's gear
+menu. It launches `sway --unsupported-gpu`; the flag belongs in the session launch
+command, not in the Sway config. The helper is safe to rerun.
+
+### RTX 5090 and boot settings
+
+The RTX 5090 (Blackwell) requires NVIDIA's **open kernel modules**, together with
+the matching NVIDIA userspace driver. “Open” here does not mean Nouveau. See
+[NVIDIA's kernel-module documentation](https://download.nvidia.com/XFree86/Linux-x86_64/570.144/README/kernel_open.html).
+Use the Fedora driver packaging appropriate to your configured repository.
+Check `nvidia-smi` before debugging Sway; it should list the GPU.
+
+The boot arguments that recovered this workstation were:
+
+```text
+3 nvidia-drm.modeset=1 nvidia-drm.fbdev=1
+```
+
+The standalone `3` deliberately boots into text mode. Once logged in, start the
+graphical login screen with `sudo systemctl start graphical.target`. For normal
+boots, remove `3` and keep the two NVIDIA arguments. To persist this on Fedora
+with grubby (changes boot entries, taking effect on subsequent boots):
+
+```sh
+sudo grubby --update-kernel=ALL --remove-args="rhgb quiet 3 systemd.unit=multi-user.target nvidia-rtx.modeset nvidia-rtx.fbdev nvidia-drm.modeset=0 nvidia-drm.fbdev=0" --args="nvidia-drm.modeset=1 nvidia-drm.fbdev=1"
+systemctl get-default
+# Only if the default above is not graphical.target:
+sudo systemctl set-default graphical.target
+```
+
+Setup does not change boot entries automatically. The doctor inspects the current
+boot, so it will continue reporting `3` until you boot without it.
+
+### GNOME works but Sway returns to the login screen
+
+Log out, switch to a TTY with Ctrl+Alt+F3, and run as your normal user (no sudo):
+
+```sh
+sway --unsupported-gpu -d > ~/sway.log 2>&1
+# After Sway exits:
+tail -n 80 ~/sway.log
+journalctl -b -u gdm --no-pager -n 80
+```
+
+Avoid `WLR_DRM_NO_MODIFIERS=1` and `WLR_DRM_NO_ATOMIC=1` on this workstation;
+the former previously broke NVIDIA scan-out. The legacy `sway/environment` file
+and `environment.d/90-sway.conf` must agree about these overrides.

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Register a distinct session without editing the distro's sway.desktop.
+set -euo pipefail
+
+case "${1:-}" in
+  --nvidia) ;;
+  "")
+    detected=false
+    for vendor in /sys/bus/pci/devices/*/vendor; do
+      if [ "$(cat "$vendor" 2>/dev/null)" = 0x10de ]; then
+        detected=true
+        break
+      fi
+    done
+    if [ "$detected" = false ]; then
+      echo "No NVIDIA hardware detected; keeping the stock Sway session."
+      exit 0
+    fi
+    ;;
+  *) echo "Usage: $0 [--nvidia]" >&2; exit 2 ;;
+esac
+
+command -v sway >/dev/null || { echo "Install sway first." >&2; exit 1; }
+entry="$(mktemp)"
+trap 'rm -f "$entry"' EXIT
+cat > "$entry" <<'EOF'
+[Desktop Entry]
+Name=Sway (NVIDIA)
+Comment=Sway with NVIDIA driver support enabled
+Exec=sway --unsupported-gpu
+TryExec=sway
+Type=Application
+DesktopNames=sway;wlroots
+EOF
+sudo install -Dm644 "$entry" /usr/share/wayland-sessions/sway-nvidia.desktop
+echo "Registered Sway (NVIDIA). Log out and select it from the login screen."

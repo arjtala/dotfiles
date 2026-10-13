@@ -18,7 +18,7 @@ configuration {
   active:         @on-primary;
   urgent:         @on-error;
 
-  font: "IBM Plex Sans Medium 11";
+  font: "JetBrainsMono Nerd Font 11";
 }
 
 /*****----- Main Window -----*****/

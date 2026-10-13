@@ -44,7 +44,19 @@ wants() {   # wants PACKAGE — is it in the set being linked?
 # 1. Submodules (Emacs config, tmux plugins) ---------------------------------
 log "Updating submodules"
 git submodule sync --recursive
-git submodule update --init --recursive
+# Keep an initialized Emacs checkout on its configured branch. A normal submodule
+# update checks out the pinned commit detached, even with branch= in .gitmodules.
+while read -r key path; do
+  if [ "$path" = emacs/.config/emacs ] && [ -e "$path/.git" ]; then
+    continue
+  fi
+  git submodule update --init --recursive -- "$path"
+done < <(git config -f .gitmodules --get-regexp '^submodule\..*\.path$')
+emacs_path=emacs/.config/emacs
+emacs_branch="$(git config -f .gitmodules --get "submodule.$emacs_path.branch")"
+log "Selecting Emacs branch: $emacs_branch (no pull or reset)"
+git -C "$emacs_path" switch "$emacs_branch"
+git -C "$emacs_path" submodule update --init --recursive
 
 # 2. Packages ------------------------------------------------------------------
 if [ "$os" = macos ]; then
@@ -73,6 +85,15 @@ fi
 # Stow refuses to replace existing real files; move any it reports, then re-run.
 log "Linking: ${packages[*]}"
 stow --target="$HOME" --restow "${packages[@]}"
+
+if wants emacs; then
+  for legacy in "$HOME/.emacs" "$HOME/.emacs.el" "$HOME/.emacs.d"; do
+    if [ -e "$legacy" ] || [ -L "$legacy" ]; then
+      echo "  ! $legacy takes precedence over ~/.config/emacs."
+      echo "    Close Emacs and move it to a backup if you want to use this repo's XDG config."
+    fi
+  done
+fi
 
 # 5. macOS extras --------------------------------------------------------------
 approve=()

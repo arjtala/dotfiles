@@ -45,7 +45,10 @@ private. On macOS, install [Homebrew](https://brew.sh) first.
 `./setup` is safe to re-run. Run it as your normal user; package steps use
 `sudo` where needed. It:
 
-1. Syncs and initializes submodules (Emacs config, tmux plugins).
+1. Syncs and initializes submodules (Emacs config, tmux plugins), then selects
+   Emacs's branch from `.gitmodules` (`simplify` on `main`). Existing Emacs
+   checkouts are preserved without pulling or resetting; conflicting local edits
+   cause setup to stop. Other submodules use their pinned commits.
 2. Installs packages:
    - **macOS:** `brew bundle install` from the [Brewfile](Brewfile).
    - **Fedora:** `stow zsh tmux fzf emacs`, then
@@ -159,6 +162,13 @@ Installation validates this machine's local-password profile and refuses
 unrecognized authentication policy. Re-review it if that policy changes.
 
 ### Stow notes
+
+Emacs uses `~/.config/emacs` only when the legacy `~/.emacs`, `~/.emacs.el`, and
+`~/.emacs.d` paths are absent. Even a cache-only `.emacs.d` takes precedence.
+Close Emacs and rename any legacy paths to backups before restarting; setup
+warns about them but does not move your existing files automatically. To verify
+in Emacs, evaluate `user-init-file` and `user-emacs-directory` with `M-:`.
+For an explicit one-off launch, use `emacs --init-directory="$HOME/.config/emacs"`.
 
 The repository's `.stowrc` supplies common ignore rules when Stow traverses
 package directories. Stow refuses to replace existing real files; `./setup`

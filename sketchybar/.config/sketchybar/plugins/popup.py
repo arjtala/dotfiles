@@ -57,6 +57,9 @@ CAL = 'clock'
 TITLE = f'{CAL}.p.title'
 GRID_ITEMS = ['weekdays'] + [f'week{i}' for i in range(WEEKS)] + ['hint']
 PRAYERS = 'athan'
+SPOTIFY = 'spotify'  # filled in by plugins/spotify.py
+# Each popup's second level, opened and closed with it.
+CHILDREN = {CAL: TITLE, SPOTIFY: f'{SPOTIFY}.c.play'}
 PRAYER_ITEMS = (['heading', 'date'] + [f'row{i}' for i in range(len(PRAYER_NAMES) + 1)]
                 + ['overnight', 'next', 'error'])
 
@@ -223,10 +226,10 @@ def create_calendar():
 
 def close(parent):
     bar('--set', parent, 'popup.drawing=off')
-    if parent == CAL:
-        # Its own call: before the calendar first opens there is no title,
-        # and an unknown item would fail the whole command.
-        bar('--set', TITLE, 'popup.drawing=off')
+    if parent in CHILDREN:
+        # Its own call: before a popup first opens its second level does
+        # not exist, and an unknown item would fail the whole command.
+        bar('--set', CHILDREN[parent], 'popup.drawing=off')
 
 
 def show(item, text, color, **extra):
@@ -320,17 +323,19 @@ def render_prayers():
     bar(*args)
 
 
-def toggle(parent, other, create, render, child=None):
-    """Close PARENT's popup if open, else fill it in and open it, closing OTHER's."""
+def toggle(parent, create, render):
+    """Close PARENT's popup if open, else fill it in and open it, closing the others."""
     if is_open(parent):
         close(parent)
         return
     create()
     render()
-    close(other)
+    for other in (CAL, PRAYERS, SPOTIFY):
+        if other != parent:
+            close(other)
     bar('--set', parent, 'popup.drawing=on')
-    if child:
-        bar('--set', child, 'popup.drawing=on')
+    if parent in CHILDREN:
+        bar('--set', CHILDREN[parent], 'popup.drawing=on')
 
 
 def show_month(first):
@@ -343,15 +348,14 @@ def main():
     if panel == 'calendar':
         today = date.today()
         if action == 'toggle':
-            toggle(CAL, PRAYERS, create_calendar, lambda: show_month(today.replace(day=1)),
-                   child=TITLE)
+            toggle(CAL, create_calendar, lambda: show_month(today.replace(day=1)))
         elif action == 'today':
             show_month(today.replace(day=1))
         elif action in ('prev', 'next'):
             show_month(shift_month(read_month(today), -1 if action == 'prev' else 1))
     elif panel == 'prayers':
         if action == 'toggle':
-            toggle(PRAYERS, CAL, create_prayers, render_prayers)
+            toggle(PRAYERS, create_prayers, render_prayers)
         elif action == 'refresh' and is_open(PRAYERS):
             render_prayers()
 

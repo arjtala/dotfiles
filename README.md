@@ -55,7 +55,7 @@ private. On macOS, install [Homebrew](https://brew.sh) first.
 3. Clones `oh-my-zsh` into `~/.oh-my-zsh` if missing (directly, so its
    installer does not replace `.zshrc`).
 4. Links packages into `$HOME` with GNU Stow:
-   - **macOS:** `zsh tmux emacs ghostty aerospace sketchybar`
+   - **macOS:** `zsh tmux emacs ghostty aerospace sketchybar spotify-player`
    - **Linux:** `zsh tmux emacs ghostty sway waybar rofi way-shell gtk3 gtk4 Thunar`
 
    Pass package names to link a different set, e.g. `./setup zsh tmux`.
@@ -98,6 +98,18 @@ else runs and no permission is needed. The prayer rules match the Waybar
 popup, from `~/.cargo/bin/athan --all --json`; the open popup refreshes with
 the athan item each minute. Tests:
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s sketchybar/tests`.
+
+The Spotify item shows the playing track and elapsed/duration; click it for the
+whole title, a progress bar and `⏮ ⏯ ⏭`. It reads
+[spotify_player](https://github.com/aome510/spotify_player)
+(`brew install spotify_player`, Premium only), whose config is the
+`spotify-player` package: its event hook updates the bar at once, and with
+music on another device the item polls every 15 seconds. Log spotify_player in
+once with `spotify_player authenticate` — until then the item stays hidden
+rather than opening a login window from the background. spotify_player uses
+your own Spotify developer app's client ID (`client_id` in its `app.toml`),
+since the shared default is rate-limited; register
+`http://127.0.0.1:8989/login` as one of the app's redirect URIs.
 
 ### Stow notes
 

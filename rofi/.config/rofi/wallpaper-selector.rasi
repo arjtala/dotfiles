@@ -30,7 +30,6 @@ configuration {
     window-thumbnail:            true;  /* Habilita a exibição de miniaturas */
     window-format:               "{w} · {c} · {t}";
 	  dpi:						 1;
-    font:                        "JetBrains Mono Nerd Font 10";
 }
 
 /* ---- Window ---- */

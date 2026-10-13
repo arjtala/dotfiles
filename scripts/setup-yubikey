@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Enroll and verify a FIDO key before changing sudo/Swaylock PAM rules.
+# Run in a local terminal as your normal user: ./scripts/setup-yubikey passwordless
+# Or: ./scripts/setup-yubikey two-factor
+set -euo pipefail
+mode="${1:-}"
+case "$mode" in
+  passwordless|two-factor) ;;
+  *) echo "Usage: $0 {passwordless|two-factor}" >&2; exit 2 ;;
+esac
+[ "$(id -u)" -ne 0 ] || { echo "Run as your normal user." >&2; exit 1; }
+sudo dnf install -y pam-u2f pamu2fcfg yubikey-manager pamtester
+origin=pam://dotfiles-local
+registration="$(mktemp)"
+trap 'rm -f "$registration"' EXIT
+chmod 600 "$registration"
+echo "Touch your YubiKey to register it for this machine."
+pamu2fcfg -u "$(id -un)" -o "$origin" -i "$origin" > "$registration"
+[ -s "$registration" ] || { echo "Registration failed; PAM unchanged." >&2; exit 1; }
+
+# Run from the user's terminal: sudo can prompt there, and pamtester can request
+# a second touch. Registration data contains a public key, not a private key.
+sudo python3 "$(dirname "$0")/yubikey-pam.py" "$mode" "$(id -un)" "$registration"
+
+if [ "$mode" = passwordless ]; then
+  locker="$(dirname "$0")/../sway/.config/sway/scripts/swaylock.sh"
+  # -e ignores an empty password, preventing Enter from starting a touch-only
+  # PAM attempt. This only affects future invocations of the locker.
+  python3 - "$locker" <<'PY'
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+path.write_text(path.read_text().replace('swaylock -e -f ', 'swaylock -f '))
+PY
+fi
+echo "Configured sudo and Swaylock. Test sudo -k; sudo true in another terminal."
+if [ "$mode" = passwordless ]; then
+  echo "For touch-only Swaylock, press Enter then touch the key. Password fallback works with the key unplugged."
+else
+  echo "Both the key and your password are required for sudo and Swaylock."
+fi

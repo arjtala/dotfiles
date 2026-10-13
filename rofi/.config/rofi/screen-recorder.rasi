@@ -56,7 +56,7 @@ textbox-prompt-colon {
     background-color:         @background-alt;
     text-color:               @accent;
     padding:                  8px 12px 8px 12px;
-    font:			                "Iosevka Nerd Font 10";
+    font:			                "JetBrainsMono Nerd Font 10";
 }
 
 entry {

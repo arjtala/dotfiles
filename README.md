@@ -45,7 +45,10 @@ private. On macOS, install [Homebrew](https://brew.sh) first.
 `./setup` is safe to re-run. Run it as your normal user; package steps use
 `sudo` where needed. It:
 
-1. Syncs and initializes submodules (Emacs config, tmux plugins).
+1. Syncs and initializes submodules (Emacs config, tmux plugins), then selects
+   Emacs's branch from `.gitmodules` (`simplify` on `main`). Existing Emacs
+   checkouts are preserved without pulling or resetting; conflicting local edits
+   cause setup to stop. Other submodules use their pinned commits.
 2. Installs packages:
    - **macOS:** `brew bundle install` from the [Brewfile](Brewfile).
    - **Fedora:** `stow zsh tmux fzf emacs`, then
@@ -64,6 +67,21 @@ private. On macOS, install [Homebrew](https://brew.sh) first.
    and starts AeroSpace if it isn't running (it then starts at login and launches
    SketchyBar). Approve AeroSpace under System Settings → Privacy & Security →
    Accessibility on first launch.
+
+### Fedora / NVIDIA recovery
+
+The Sway installer registers **Sway (NVIDIA)** before attempting optional tool
+installs and builds. To repair just the login entry without reinstalling packages:
+
+```sh
+./scripts/sway-session-setup --nvidia
+./scripts/sway-doctor
+```
+
+The doctor is read-only and reports missing tools, text-only boot overrides,
+NVIDIA DRM settings, and session-entry problems. See the
+[Sway recovery guide](sway/README.md#fedora--nvidia-recovery) for boot arguments,
+the RTX 5090 driver requirement, and troubleshooting commands.
 
 ### SketchyBar helpers (macOS)
 
@@ -111,7 +129,58 @@ your own Spotify developer app's client ID (`client_id` in its `app.toml`),
 since the shared default is rate-limited; register
 `http://127.0.0.1:8989/login` as one of the app's redirect URIs.
 
+### YubiKey for sudo and Swaylock (Fedora)
+
+Run in a local terminal as your normal user, with the key plugged in:
+
+```sh
+./scripts/setup-yubikey passwordless
+# Alternatively, require both the key and your password:
+# ./scripts/setup-yubikey two-factor
+```
+
+The script installs Fedora's FIDO PAM tools, registers the key, and requires a
+second touch to test it before changing `sudo` and `swaylock`. Other users keep
+their existing policy. `passwordless` allows touch instead of a password, with
+the original password authentication as fallback; `two-factor` requires both.
+Existing key mappings or YubiKey PAM rules cause the helper to stop for review.
+It uses a fixed `pam://dotfiles-local` origin so hostname changes do not break it.
+
+Original PAM files are saved under `/var/backups/dotfiles-pam-TIMESTAMP/`.
+Test `sudo -k; sudo true` in another terminal before testing the lock screen.
+For touch-only Swaylock, press Enter, then touch the key; the helper removes
+Swaylock's ignore-empty-password flag. Unplug the key to use password fallback.
+GNOME/GDM authentication is not modified. To restore the previous policy, copy
+the saved `sudo` and `swaylock` files back into `/etc/pam.d/` with sudo.
+
+To skip the physical key for sudo in SSH sessions, after enrollment run:
+
+```sh
+sudo python3 -I scripts/yubikey-ssh.py --install
+```
+
+This uses local Unix-password authentication for SSH, and leaves local sudo,
+Swaylock, and SSH login authentication unchanged. The helper uses systemd's
+process-session metadata (`Remote=yes`, service `sshd` or `tailscaled`), not spoofable SSH
+environment variables. If detection fails, the existing YubiKey rule applies.
+A tmux server retains the session where it started; use a fresh SSH shell to
+test, or start a separate tmux server inside SSH. Test `sudo -k; sudo true`
+both locally and over SSH. Backups are in `/var/backups/dotfiles-yubikey-ssh-*/`;
+restore the saved `sudo` file to `/etc/pam.d/sudo` to undo the skip.
+The remote branch bypasses both the custom key rule and authselect's shared
+`pam_u2f` rule. It retains PAM environment setup, authentication failure delay,
+and the existing account/session checks; a wrong password fails immediately.
+Installation validates this machine's local-password profile and refuses
+unrecognized authentication policy. Re-review it if that policy changes.
+
 ### Stow notes
+
+Emacs uses `~/.config/emacs` only when the legacy `~/.emacs`, `~/.emacs.el`, and
+`~/.emacs.d` paths are absent. Even a cache-only `.emacs.d` takes precedence.
+Close Emacs and rename any legacy paths to backups before restarting; setup
+warns about them but does not move your existing files automatically. To verify
+in Emacs, evaluate `user-init-file` and `user-emacs-directory` with `M-:`.
+For an explicit one-off launch, use `emacs --init-directory="$HOME/.config/emacs"`.
 
 The repository's `.stowrc` supplies common ignore rules when Stow traverses
 package directories. Stow refuses to replace existing real files; `./setup`

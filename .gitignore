@@ -6,6 +6,8 @@
 *.old
 *.OLD
 *.pyo
+*.pyc
+__pycache__/
 *.key
 key.txt
 STATE.md

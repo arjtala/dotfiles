@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# User-local Nerd Font installation for Rofi and Waybar; no sudo needed.
+set -euo pipefail
+version=3.4.0
+checksum=ef552a3e638f25125c6ad4c51176a6adcdce295ab1d2ffacf0db060caf8c1582
+destination="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/JetBrainsMonoNerdFont"
+for binary in curl tar sha256sum fc-cache fc-list; do
+  command -v "$binary" >/dev/null || { echo "Required command missing: $binary" >&2; exit 1; }
+done
+if [ -f "$destination/.version" ] && [ "$(cat "$destination/.version")" = "$version" ] \
+  && [ -n "$(fc-list 'JetBrainsMono Nerd Font' family)" ]; then
+  echo "JetBrainsMono Nerd Font $version already installed."
+  exit 0
+fi
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+curl -fL --retry 3 -o "$work/font.tar.xz" \
+  "https://github.com/ryanoasis/nerd-fonts/releases/download/v$version/JetBrainsMono.tar.xz"
+printf '%s  %s\n' "$checksum" "$work/font.tar.xz" | sha256sum --check
+mkdir -p "$work/unpacked" "$destination"
+tar -xJf "$work/font.tar.xz" -C "$work/unpacked"
+find "$work/unpacked" -type f \( -name '*.ttf' -o -name '*LICENSE*' -o -name 'OFL*' \) \
+  -exec cp -t "$destination" -- {} +
+fc-cache -f "$destination"
+[ -n "$(fc-list 'JetBrainsMono Nerd Font' family)" ] || { echo "Font installation was not detected by fontconfig." >&2; exit 1; }
+printf '%s\n' "$version" > "$destination/.version"
+echo "Installed JetBrainsMono Nerd Font $version. Reopen Rofi; restart Waybar to refresh its fonts."

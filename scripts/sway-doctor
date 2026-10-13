@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Read-only checks; safe to run from a TTY or another desktop.
+set -u
+warnings=0
+warn() { printf 'WARN: %s\n' "$*"; warnings=$((warnings + 1)); }
+
+printf 'Sway setup checks\n'
+for binary in sway ghostty waybar mako rofi grim slurp wl-copy way-sh matugen; do
+  command -v "$binary" >/dev/null 2>&1 || warn "Missing command: $binary"
+done
+[ -x /usr/libexec/sway-systemd/session.sh ] || warn "Missing Fedora sway-systemd session helper."
+for file in config.rasi colors.rasi; do
+  [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/rofi/$file" ] || warn "Missing Rofi $file; run stow --target=\"\$HOME\" --restow rofi from the dotfiles directory."
+done
+if command -v fc-list >/dev/null; then
+  for family in 'JetBrainsMono Nerd Font' 'Inter Variable'; do
+    [ -n "$(fc-list "$family" family)" ] || warn "Missing font family: $family (see sway/README.md)."
+  done
+else
+  warn "fontconfig is missing; cannot check fonts."
+fi
+[ -d /usr/share/icons/Papirus-Dark ] || warn "Papirus-Dark icons missing; install papirus-icon-theme."
+if [ ! -d /usr/share/icons/Bibata-Modern-Classic ] \
+  && [ ! -d "${XDG_DATA_HOME:-$HOME/.local/share}/icons/Bibata-Modern-Classic" ] \
+  && [ ! -d "$HOME/.icons/Bibata-Modern-Classic" ]; then
+  warn "Bibata-Modern-Classic cursor is missing; install it or change the cursor theme in the Sway config."
+fi
+
+target="$(systemctl get-default 2>/dev/null || true)"
+[ "$target" = graphical.target ] || warn "Default boot target is '$target'; use sudo systemctl set-default graphical.target for graphical boots."
+if grep -Eq '(^| )(3|systemd.unit=multi-user.target)( |$)' /proc/cmdline; then
+  warn "This boot forces text mode. Remove the standalone 3 / multi-user override on the next boot; sudo systemctl start graphical.target starts the GUI now."
+fi
+
+if [ -d /sys/module/nvidia ]; then
+  nvidia-smi --query-gpu=name,driver_version --format=csv,noheader || warn "nvidia-smi failed."
+  for parameter in modeset fbdev; do
+    value="$(cat "/sys/module/nvidia_drm/parameters/$parameter" 2>/dev/null || true)"
+    case "$value" in
+      Y|1) printf 'OK: nvidia-drm.%s enabled\n' "$parameter" ;;
+      "") warn "Cannot read nvidia-drm.$parameter; check the loaded module settings with sudo cat /sys/module/nvidia_drm/parameters/$parameter." ;;
+      *) warn "nvidia-drm.$parameter=$value; this workstation uses nvidia-drm.$parameter=1." ;;
+    esac
+  done
+  if ! grep -qsE '^Exec=.*sway .*--unsupported-gpu' \
+    /usr/share/wayland-sessions/sway*.desktop \
+    /usr/local/share/wayland-sessions/sway*.desktop; then
+    warn "No NVIDIA Sway login entry found. Run ./scripts/sway-session-setup --nvidia."
+  fi
+else
+  warn "NVIDIA module is not loaded (expected only on an NVIDIA machine)."
+fi
+for variable in WLR_DRM_NO_MODIFIERS WLR_DRM_NO_ATOMIC; do
+  if [ -n "${!variable:-}" ]; then
+    warn "$variable is set; remove legacy overrides before debugging this NVIDIA setup."
+  fi
+done
+printf '\n%s warning(s). See sway/README.md for recovery and logs.\n' "$warnings"
+[ "$warnings" -eq 0 ]

@@ -38,6 +38,14 @@ sudo dnf install -y --skip-unavailable \
   adw-gtk3-theme papirus-icon-theme \
   qgnomeplatform-qt6 qgnomeplatform-qt5 qt6-qtwayland qt5-qtwayland
 
+# Register the login entry before optional installs/builds can fail. This can also
+# be run independently on a machine whose packages are already installed.
+bash "$(dirname "$0")/../scripts/sway-session-setup"
+
+log "Installing desktop fonts"
+sudo dnf install -y fontconfig curl tar xz rsms-inter-vf-fonts
+bash "$(dirname "$0")/../scripts/install-sway-fonts"
+
 # matugen (Super+t wallpaper selector) — in Fedora repos only on recent releases (absent
 # on e.g. F42), so handle it on its own: try the repo, then cargo, else leave a note.
 if command -v matugen >/dev/null; then
@@ -84,28 +92,7 @@ else
   log "way-shell already installed — skipping"
 fi
 
-# 4. Sway session entry ------------------------------------------------------
-# On NVIDIA, sway refuses to start without --unsupported-gpu. Put the override in
-# /usr/local/share (takes precedence over /usr/share and survives package updates).
-if lsmod | grep -q '^nvidia' || lspci 2>/dev/null | grep -qi nvidia; then
-  log "NVIDIA detected — registering sway session with --unsupported-gpu"
-  sudo install -d /usr/local/share/wayland-sessions
-  sudo tee /usr/local/share/wayland-sessions/sway.desktop >/dev/null <<'EOF'
-[Desktop Entry]
-Name=Sway
-Comment=An i3-compatible Wayland compositor
-Exec=sway --unsupported-gpu
-Type=Application
-DesktopNames=sway;wlroots
-EOF
-  if ! grep -qs 'nvidia.drm.modeset=1' /proc/cmdline \
-     && ! grep -rqs 'modeset=1' /etc/modprobe.d/*nvidia* 2>/dev/null; then
-    echo "  ! nvidia-drm.modeset=1 not detected — enable it (kernel cmdline or modprobe.d) or sway may not start."
-  fi
-else
-  log "No NVIDIA GPU detected — stock sway.desktop is fine (no --unsupported-gpu needed)"
-  echo "  Note: environment.d/90-sway.conf carries NVIDIA-specific vars (GBM_BACKEND=nvidia-drm, …);"
-  echo "  remove/adjust them on non-NVIDIA hardware or sway may fail to start."
-fi
+log "Checking session readiness"
+bash "$(dirname "$0")/../scripts/sway-doctor" || true
 
-log "Done. Deploy the dotfiles symlinks (see repo README), then log out and pick 'Sway' at the GDM gear menu."
+log "Done. Deploy the dotfiles symlinks (see repo README), then select Sway (NVIDIA) or Sway at login."

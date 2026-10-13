@@ -2,7 +2,7 @@
 """Click-toggle calendar/prayer panels. Requires GTK3 and gtk-layer-shell."""
 import argparse
 import calendar
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 import fcntl
 import json
 import os
@@ -25,22 +25,25 @@ PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
 
 
 def prayer_state(data, now):
-    """Compute the marker and countdown locally between schedule refreshes."""
+    """Highlight today's latest schedule row, starting with Fajr at midnight."""
     today = date.fromisoformat(data['date'])
     if today != now.date():
         raise ValueError('Schedule is out of date')
     prayers = data['prayers']
     if [p['name'] for p in prayers] != PRAYER_NAMES:
         raise ValueError('Expected all five prayers; update athan first')
-    current = 'Isha'
-    current_date = today - timedelta(days=1)
+    current = 'Fajr'
+    current_date = today
     following = None
-    for prayer in prayers:
+    rows = list(prayers)
+    if data.get('sunrise'):
+        rows.insert(1, {'name': 'Sunrise', 'time': data['sunrise']})
+    for prayer in rows:
         hour, minute = map(int, prayer['time'].split(':'))
         start = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         if start <= now:
             current, current_date = prayer['name'], today
-        elif following is None:
+        elif following is None and prayer['name'] != 'Sunrise':
             minutes = max(1, int((start - now).total_seconds() + 59) // 60)
             hours, remainder = divmod(minutes, 60)
             delay = f'{hours}h {remainder:02}m' if hours else f'{remainder} min'
@@ -211,8 +214,6 @@ class Popup:
             row.pack_start(label(prayer['name'], 'muted' if prayer['name'] == 'Sunrise' else None), True, True, 0)
             row.pack_end(label(prayer['time'], 'muted' if prayer['name'] == 'Sunrise' else None), False, False, 0)
             self.content.pack_start(row, False, False, 0)
-        if current_date != now.date():
-            self.content.pack_start(label('● Isha · yesterday', 'overnight'), False, False, 0)
         self.content.pack_start(label(following, 'muted'), False, False, 0)
         if self.error:
             self.content.pack_start(label('Refresh failed · showing cached times', 'muted'), False, False, 0)

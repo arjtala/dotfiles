@@ -13,9 +13,10 @@ live in `XDG_RUNTIME_DIR`. No additional service is needed.
 The calendar uses America/Los_Angeles, matching the clock configuration.
 The prayer panel uses the timezone returned by `~/.cargo/bin/athan --all --json`.
 This requires athan's full-day `prayers` output, rather than the older `upcoming`
-output. Sunrise is shown separately and does not change the current prayer.
-“Current” means most recently started: before Fajr, yesterday's Isha is marked
-separately rather than highlighting tonight's time. After Isha the footer says
+output. The highlight starts with Fajr at midnight, moves to Sunrise at sunrise,
+then follows each prayer from Dhuhr onward. The countdown always targets the
+next prayer, skipping Sunrise. Before Fajr, the countdown still shows
+how long until it starts; no previous-day row is displayed. After Isha the footer says
 “Next: Fajr tomorrow”; it does not estimate tomorrow's time using today's Fajr.
 
 Prayer data is fetched in a background thread every minute while open. The

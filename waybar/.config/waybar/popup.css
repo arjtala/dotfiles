@@ -26,4 +26,4 @@
 #waybar-popup button:hover, #waybar-popup button:focus { background: #3c3836; }
 #waybar-popup .prayer-row { padding: 6px; border-radius: 4px; }
 #waybar-popup .current { background: #3c3836; }
-#waybar-popup .current label, #waybar-popup .overnight { color: #8ec07c; font-weight: bold; }
+#waybar-popup .current label { color: #8ec07c; font-weight: bold; }

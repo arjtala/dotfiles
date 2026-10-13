@@ -122,24 +122,22 @@ sketchybar --add item athan left \
     script="$PLUGIN_DIR/athan.sh" \
   --subscribe athan mouse.exited.global
 
-# Spotify, through spotify_player: the track and elapsed/duration, hidden
-# when nothing is loaded. Click for the whole title and the controls.
-# spotify_player's player_event_hook_command runs plugins/spotify_hook.sh,
-# which triggers spotify_update; without events it polls every 15s. Reads
-# run in the background and trigger spotify_refresh when done.
-sketchybar --add event spotify_update \
-  --add event spotify_refresh \
-  --add item spotify left \
-  --set spotify \
-    icon= \
+# Now Playing: what macOS is playing, from any app -- Podcasts, Music,
+# Safari, spotify_player -- with its title and elapsed/duration, hidden when
+# nothing is. Click for the whole title and the controls. A watcher started
+# by plugins/nowplaying.py runs `media-control stream` and triggers
+# nowplaying_update on every change, so nothing polls.
+sketchybar --add event nowplaying_update \
+  --add item nowplaying left \
+  --set nowplaying \
     icon.color=$BR_GREEN \
     label.color=$BR_GREEN \
     drawing=off \
-    update_freq=15 \
+    update_freq=30 \
     "${popup_style[@]}" \
-    click_script="$PLUGIN_DIR/spotify.py toggle" \
-    script="$PLUGIN_DIR/spotify.py update" \
-  --subscribe spotify spotify_update spotify_refresh system_woke mouse.exited.global
+    click_script="$PLUGIN_DIR/nowplaying.py toggle" \
+    script="$PLUGIN_DIR/nowplaying.py update" \
+  --subscribe nowplaying nowplaying_update system_woke mouse.exited.global
 
 ##### Right side items (added right-to-left) #####
 

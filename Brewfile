@@ -47,6 +47,8 @@ brew "gh"
 
 # Status bar / dock stack
 brew "sketchybar"
+brew "media-control"               # Now Playing, for the SketchyBar item and Emacs
+brew "spotify_player"              # Spotify client; config is the spotify-player package
 
 # Window manager + terminal
 cask "nikitabobko/tap/aerospace"

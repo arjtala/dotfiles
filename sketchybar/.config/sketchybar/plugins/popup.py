@@ -57,9 +57,9 @@ CAL = 'clock'
 TITLE = f'{CAL}.p.title'
 GRID_ITEMS = ['weekdays'] + [f'week{i}' for i in range(WEEKS)] + ['hint']
 PRAYERS = 'athan'
-SPOTIFY = 'spotify'  # filled in by plugins/spotify.py
+NOWPLAYING = 'nowplaying'  # filled in by plugins/nowplaying.py
 # Each popup's second level, opened and closed with it.
-CHILDREN = {CAL: TITLE, SPOTIFY: f'{SPOTIFY}.c.play'}
+CHILDREN = {CAL: TITLE, NOWPLAYING: f'{NOWPLAYING}.c.play'}
 PRAYER_ITEMS = (['heading', 'date'] + [f'row{i}' for i in range(len(PRAYER_NAMES) + 1)]
                 + ['overnight', 'next', 'error'])
 
@@ -330,7 +330,7 @@ def toggle(parent, create, render):
         return
     create()
     render()
-    for other in (CAL, PRAYERS, SPOTIFY):
+    for other in (CAL, PRAYERS, NOWPLAYING):
         if other != parent:
             close(other)
     bar('--set', parent, 'popup.drawing=on')

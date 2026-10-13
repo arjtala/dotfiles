@@ -35,6 +35,8 @@ progress_bar_position = "Bottom"
 genre_num = 2
 cover_img_length = 0
 cover_img_width = 5
+# Report to macOS Now Playing (and MPRIS on Linux), which is what the
+# SketchyBar nowplaying item and the Emacs mode line read.
 enable_media_control = true
 enable_streaming = "Always"
 enable_audio_visualization = false
@@ -48,12 +50,6 @@ enable_mouse_scroll_volume = false
 custom_queue = true
 enable_relative_line_number = false
 pause_on_startup = false
-
-# Tell SketchyBar on every player event; see sketchybar/plugins/spotify_hook.sh.
-# Through sh, for $HOME, and only where the hook exists: there is no
-# SketchyBar on Linux.  spotify_player appends the event's details as
-# arguments, which the -c script ignores.
-player_event_hook_command = { command = "sh", args = ["-c", 'h="$HOME/.config/sketchybar/plugins/spotify_hook.sh"; [ -x "$h" ] && exec "$h"; exit 0'] }
 
 [notify_format]
 summary = "{track} • {artists}"

@@ -117,17 +117,16 @@ popup, from `~/.cargo/bin/athan --all --json`; the open popup refreshes with
 the athan item each minute. Tests:
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s sketchybar/tests`.
 
-The Spotify item shows the playing track and elapsed/duration; click it for the
-whole title, a progress bar and `⏮ ⏯ ⏭`. It reads
-[spotify_player](https://github.com/aome510/spotify_player)
-(`brew install spotify_player`, Premium only), whose config is the
-`spotify-player` package: its event hook updates the bar at once, and with
-music on another device the item polls every 15 seconds. Log spotify_player in
-once with `spotify_player authenticate` — until then the item stays hidden
-rather than opening a login window from the background. spotify_player uses
-your own Spotify developer app's client ID (`client_id` in its `app.toml`),
-since the shared default is rate-limited; register
-`http://127.0.0.1:8989/login` as one of the app's redirect URIs.
+The Now Playing item shows what macOS is playing, from any app — Podcasts,
+Music, Safari, spotify_player — with its title and elapsed/duration; click it
+for the whole title, the artist or show, a progress bar and the controls. For a
+podcast, back and forward skip fifteen seconds; otherwise they change track. It
+reads macOS's Now Playing with
+[media-control](https://github.com/ungive/media-control) (`brew install
+media-control`), whose stream reports every change, so nothing polls. The Emacs
+mode line shows the same, from `my-nowplaying.el`. spotify_player reports to Now
+Playing because its config, the `spotify-player` package, turns on
+`enable_media_control`.
 
 ### YubiKey for sudo and Swaylock (Fedora)
 

@@ -45,6 +45,7 @@
 #bluetooth,
 #custom-nvidia,
 #custom-adhan,
+#custom-nowplaying,
 #custom-vpn,
 #window {
     margin: 6px 6px;
@@ -72,7 +73,7 @@
 }
 
 #network {
-    color: @br_purple;
+    color: @br_aqua;
 }
 
 #pulseaudio {
@@ -96,7 +97,7 @@
 }
 
 #custom-adhan {
-    color: @br_aqua;
+    color: @br_purple;
 }
 
 #window {
@@ -157,3 +158,7 @@ tooltip {
     color: @fg;
     border: 1px solid @yellow;
 }
+
+#custom-nowplaying { color: @br_green; }
+#custom-nowplaying.paused { color: @fg2; }
+#custom-nowplaying.idle { margin: 0; min-width: 0; padding: 0; }

@@ -10,6 +10,18 @@ popup = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(popup)
 
 
+class PlacementTests(unittest.TestCase):
+    def test_centered_above_click(self):
+        self.assertEqual(popup.panel_left(450, 300, 1920), 300)
+
+    def test_left_and_right_edges(self):
+        self.assertEqual(popup.panel_left(40, 300, 1920), 8)
+        self.assertEqual(popup.panel_left(1900, 300, 1920), 1612)
+
+    def test_content_width_change_keeps_anchor(self):
+        self.assertEqual(popup.panel_left(450, 400, 1920), 250)
+
+
 class PrayerStateTests(unittest.TestCase):
     def setUp(self):
         self.data = {

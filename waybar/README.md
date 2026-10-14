@@ -1,14 +1,44 @@
 # Waybar popups
 
-Click the clock for a month calendar, or athan for today's prayer times.
+Click the clock for a month calendar, athan for today's prayer times, or
+now playing for media details and controls.
 Click again or press Escape to close; clicking the other module switches panels.
 Clicking outside the panel dismisses it (the dismissal click is consumed).
-The popup sits at bottom center on the output chosen by the compositor.
+The popup opens above the click location on that output, clamped away from
+the screen edges. A brief transparent Wayland surface locates the pointer;
+this also works when module widths change and when switching between panels.
+On Sway, a zero-distance cursor command refreshes pointer focus without moving
+the cursor. Other compositors may require pointer motion to deliver the event.
+If pointer location is unavailable (for example, a keyboard-only launch),
+the popup retains its last position or defaults to bottom center.
 Both the Sway and dwl Waybar configurations use the shared helper.
 
-Requires Python 3, PyGObject, GTK3, and gtk-layer-shell with introspection support.
+Requires Python 3, PyGObject, GTK3, gtk-layer-shell, and Playerctl with introspection support.
 The helper runs only while a popup is open. Its private socket and launch lock
 live in `XDG_RUNTIME_DIR`. No additional service is needed.
+
+The layout follows SketchyBar: workspaces, compact app name (Sway), clock,
+athan, and now playing on the left; system/network indicators on the right.
+Sway's app label uses `app_id` with friendly rewrites for common applications,
+rather than exposing the full window title. The Linux bar stays at the bottom.
+
+Now playing uses MPRIS through Playerctl. Waybar starts the watcher; metadata
+and playback changes arrive through MPRIS signals, and a one-second tick reads
+position and keeps the shared runtime snapshot fresh. The bar is hidden without
+loaded playing/paused media, green while playing, and muted while paused.
+Playing players take priority over paused players; the most recently changed
+player wins within each group. The popup controls the exact player in that
+snapshot. Previous/next and ±15-second seeking are separate buttons, disabled
+when unsupported; podcast type detection is not assumed. Missing durations
+are displayed without a fake progress percentage. Requires an MPRIS-enabled
+player (browser support depends on the browser and media site).
+
+VPN status is read locally from NetworkManager and `tailscale status --json`.
+It uses the same compact connected/disconnected icons as SketchyBar, with VPN
+names and Tailscale details in the tooltip. Tailnet connection and a selected
+exit node are distinguished; a green icon does not promise all traffic is
+routed through a VPN. No connections are changed. Public-IP lookups are no
+longer needed for the indicator. The macOS VPN script itself is unchanged.
 
 The calendar uses America/Los_Angeles, matching the clock configuration.
 The prayer panel uses the timezone returned by `~/.cargo/bin/athan --all --json`.
@@ -30,3 +60,10 @@ dismissal surface covers the selected output above the bar while open.
 Validation: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s waybar/tests`
 (from the dotfiles root). Live Wayland testing is needed for placement, outside
 clicks, Escape, and toggling between modules.
+
+MPRIS integration smoke test (uses its own fake player and private session bus):
+`dbus-run-session -- python3 waybar/tests/run_mpris_smoke.py`.
+
+Placement integration check: `python3 waybar/tests/run_placement_smoke.py`.
+This launches a private headless Sway display and virtual pointer, checking
+stationary-pointer anchoring, switching panels, and resizing at the right edge.

@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import socket
 import subprocess
+import sys
 import threading
 from zoneinfo import ZoneInfo
 
@@ -18,6 +19,9 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('GtkLayerShell', '0.1')
 from gi.repository import Gdk, GLib, Gtk, GtkLayerShell
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import nowplaying
 
 ROOT = Path(__file__).resolve().parent.parent
 CLOCK_TZ = ZoneInfo('America/Los_Angeles')
@@ -64,12 +68,98 @@ def clear(box):
         child.destroy()
 
 
+def panel_left(pointer_x, panel_width, output_width, gap=8):
+    """Center over the click, keeping the complete panel inside the output."""
+    return max(gap, min(round(pointer_x - panel_width / 2),
+                        max(gap, output_width - panel_width - gap)))
+
+
+class ClickAnchor:
+    """Brief transparent surfaces obtain surface-local pointer coordinates.
+
+    Wayland doesn't expose global pointer coordinates to a separate process.
+    Mapping a surface on each output gives us an enter event on the clicked
+    output without hard-coded module widths. Sway additionally needs a
+    zero-distance pointer-focus refresh for stationary pointers.
+    """
+    def __init__(self, callback):
+        self.callback = callback
+        self.windows = []
+        self.done = False
+        display = Gdk.Display.get_default()
+        for index in range(display.get_n_monitors()):
+            monitor = display.get_monitor(index)
+            window = Gtk.Window()
+            window.set_name('popup-anchor-probe')
+            window.set_decorated(False)
+            window.set_app_paintable(True)
+            visual = window.get_screen().get_rgba_visual()
+            if visual:
+                window.set_visual(visual)
+            GtkLayerShell.init_for_window(window)
+            GtkLayerShell.set_namespace(window, 'waybar-popup-anchor')
+            GtkLayerShell.set_monitor(window, monitor)
+            GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY)
+            GtkLayerShell.set_exclusive_zone(window, -1)
+            GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE)
+            for edge in (GtkLayerShell.Edge.TOP, GtkLayerShell.Edge.BOTTOM,
+                         GtkLayerShell.Edge.LEFT, GtkLayerShell.Edge.RIGHT):
+                GtkLayerShell.set_anchor(window, edge, True)
+            window.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.POINTER_MOTION_MASK)
+            window.connect('enter-notify-event', self.enter, monitor)
+            window.connect('motion-notify-event', self.enter, monitor)
+            self.windows.append(window)
+            window.show_all()
+        self.timeout = GLib.timeout_add(500, self.finish, None, None)
+        if os.environ.get('SWAYSOCK'):
+            GLib.timeout_add(75, self.refresh_pointer_focus)
+
+    def refresh_pointer_focus(self):
+        if self.done:
+            return False
+        # Sway doesn't send enter for a newly mapped layer until pointer focus
+        # is recalculated. Zero-distance motion does that without moving it.
+        try:
+            subprocess.run(['swaymsg', '-q', 'seat', '-', 'cursor', 'move', '0', '0'],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=0.3)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        return False
+
+    def enter(self, _window, event, monitor):
+        if not self.done:
+            # Defer destruction until GTK has finished dispatching the event.
+            self.done = True
+            GLib.idle_add(self.finish, monitor, event.x)
+        return False
+
+    def finish(self, monitor, x):
+        if not self.windows:
+            return False
+        self.done = True
+        GLib.source_remove(self.timeout)
+        for window in self.windows:
+            window.destroy()
+        self.windows.clear()
+        self.callback(monitor, x)
+        return False
+
+    def cancel(self):
+        self.callback = lambda *_: None
+        self.finish(None, None)
+
+
 class Popup:
     def __init__(self, mode, bar_height):
         self.mode = mode
         self.data = None
         self.loading = False
         self.error = None
+        self.media_key = None
+        self.media_error = None
+        self.anchor = None
+        self.anchor_x = None
         self.visible_date = datetime.now(CLOCK_TZ).date()
         self.month = self.visible_date.replace(day=1)
         self.window = Gtk.Window(title='Waybar popup')
@@ -90,7 +180,8 @@ class Popup:
         # Leave the bar available for toggle/switch clicks.
         GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, bar_height)
         self.window.connect('key-press-event', self.keypress)
-        self.window.connect('destroy', lambda *_: Gtk.main_quit())
+        self.window.connect('destroy', self.destroyed)
+        self.window.connect('size-allocate', lambda *_: GLib.idle_add(self.reposition))
         self.window.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
         self.window.connect('button-press-event', self.outside_click)
         self.panel = Gtk.EventBox()
@@ -98,6 +189,7 @@ class Popup:
         self.panel.set_halign(Gtk.Align.CENTER)
         self.panel.set_valign(Gtk.Align.END)
         self.panel.set_margin_bottom(8)
+        self.panel.connect('size-allocate', lambda *_: GLib.idle_add(self.reposition))
         self.panel.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
         self.panel.connect('button-press-event', lambda *_: True)
         self.content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -109,11 +201,51 @@ class Popup:
         self.content.set_margin_top(15)
         self.content.set_margin_bottom(15)
         self.panel.add(self.content)
-        self.window.add(self.panel)
+        # An overlay child's offset must not increase the surface's minimum
+        # width when a wider panel replaces a narrow one near the right edge.
+        self.layout = Gtk.Overlay()
+        self.layout.add(Gtk.Box())
+        self.layout.add_overlay(self.panel)
+        self.window.add(self.layout)
         self.render()
-        self.window.show_all()
+        self.locate_click()
         GLib.timeout_add_seconds(15, self.tick)
         GLib.timeout_add_seconds(60, self.refresh)
+        GLib.timeout_add_seconds(1, self.media_tick)
+
+    def locate_click(self):
+        if self.anchor:
+            self.anchor.cancel()
+        # Hide while locating, so there is no flash at the previous position.
+        self.window.hide()
+        self.anchor = ClickAnchor(self.anchored)
+
+    def anchored(self, monitor, x):
+        self.anchor = None
+        if monitor is not None:
+            GtkLayerShell.set_monitor(self.window, monitor)
+            self.anchor_x = x
+        self.window.show_all()
+        GLib.idle_add(self.reposition)
+
+    def reposition(self, *_):
+        if self.anchor_x is None:
+            return
+        width = self.window.get_allocated_width()
+        if width <= 1:
+            return
+        panel_width = (self.panel.get_preferred_width().natural_width
+                       - self.panel.get_margin_start() - self.panel.get_margin_end())
+        left = panel_left(self.anchor_x, panel_width, width)
+        self.panel.set_halign(Gtk.Align.START)
+        if self.panel.get_margin_start() != left:
+            self.panel.set_margin_start(left)
+            self.layout.queue_allocate()
+
+    def destroyed(self, *_):
+        if self.anchor:
+            self.anchor.cancel()
+        Gtk.main_quit()
 
     def outside_click(self, _widget, event):
         # Events from labels may propagate; compare against the actual panel bounds.
@@ -137,17 +269,98 @@ class Popup:
         else:
             self.mode = mode
             self.render()
+            self.locate_click()
         return False
 
     def render(self):
         clear(self.content)
         if self.mode == 'calendar':
             self.render_calendar()
+        elif self.mode == 'nowplaying':
+            self.render_media()
         else:
             self.render_prayers()
             if self.data is None and not self.loading:
                 self.refresh()
         self.content.show_all()
+
+    def media_tick(self):
+        if self.mode == 'nowplaying':
+            info = nowplaying.read_snapshot()
+            key = self.media_signature(info)
+            if key != self.media_key:
+                self.render()
+            elif info:
+                self.update_progress(info)
+        return True
+
+    @staticmethod
+    def media_signature(info):
+        if not info:
+            return None
+        return tuple(info.get(field) for field in (
+            'player', 'title', 'artist', 'album', 'playing', 'duration',
+            'can_play', 'can_seek', 'can_previous', 'can_next'))
+
+    def render_media(self):
+        info = nowplaying.read_snapshot()
+        self.media_key = self.media_signature(info)
+        self.content.pack_start(label('Now playing', 'heading'), False, False, 0)
+        if not info:
+            self.content.pack_start(label('No media loaded', 'muted'), False, False, 0)
+            return
+        title = label(info['title'])
+        title.set_line_wrap(True)
+        title.set_max_width_chars(32)
+        self.content.pack_start(title, False, False, 0)
+        by = label(' · '.join(part for part in (info['artist'], info['album']) if part), 'muted')
+        by.set_line_wrap(True)
+        by.set_max_width_chars(32)
+        self.content.pack_start(by, False, False, 0)
+        self.progress = Gtk.ProgressBar()
+        self.progress.set_show_text(True)
+        self.content.pack_start(self.progress, False, False, 0)
+        self.update_progress(info)
+        controls = Gtk.Box(homogeneous=True, spacing=4)
+        for text, command, enabled in (
+            ('⏮', ['previous'], info['can_previous']),
+            ('−15s', ['position', '15-'], info['can_seek']),
+            ('⏸' if info['playing'] else '▶', ['play-pause'], info['can_play']),
+            ('+15s', ['position', '15+'], info['can_seek']),
+            ('⏭', ['next'], info['can_next']),
+        ):
+            button = Gtk.Button(label=text)
+            button.set_sensitive(enabled)
+            button.connect('clicked', lambda _, cmd=command, player=info['player']: self.media_control(player, cmd))
+            controls.pack_start(button, True, True, 0)
+        self.content.pack_start(controls, False, False, 0)
+        if self.media_error:
+            self.content.pack_start(label(self.media_error, 'muted'), False, False, 0)
+
+    def update_progress(self, info):
+        position = nowplaying.position(info)
+        duration = info['duration']
+        self.progress.set_fraction(position / duration if duration else 0)
+        self.progress.set_text(f'{nowplaying.clock(position)} / {nowplaying.clock(duration)}' if duration else 'Live / duration unavailable')
+
+    def media_control(self, player, command):
+        def worker():
+            error = None
+            try:
+                result = subprocess.run(['playerctl', '--player', player, *command],
+                                        capture_output=True, timeout=4)
+                if result.returncode:
+                    error = 'Player could not perform this action'
+            except (OSError, subprocess.TimeoutExpired):
+                error = 'Player is unavailable'
+            GLib.idle_add(self.media_control_done, error)
+        threading.Thread(target=worker, daemon=True).start()
+
+    def media_control_done(self, error):
+        self.media_error = error
+        if self.mode == 'nowplaying':
+            self.render()
+        return False
 
     def move_month(self, delta):
         index = self.month.year * 12 + self.month.month - 1 + delta
@@ -259,7 +472,7 @@ class Popup:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['calendar', 'prayers'])
+    parser.add_argument('mode', choices=['calendar', 'prayers', 'nowplaying'])
     parser.add_argument('--bar-height', type=int, default=31)
     args = parser.parse_args()
     runtime = Path(os.environ['XDG_RUNTIME_DIR'])
@@ -286,7 +499,7 @@ def main():
         popup = Popup(args.mode, args.bar_height)
         def receive(*_):
             mode = server.recv(32).decode()
-            if mode in ('calendar', 'prayers'):
+            if mode in ('calendar', 'prayers', 'nowplaying'):
                 popup.command(mode)
             return True
         GLib.io_add_watch(server.fileno(), GLib.IO_IN, receive)

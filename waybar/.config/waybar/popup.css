@@ -1,3 +1,4 @@
+#popup-anchor-probe { background-color: transparent; }
 #waybar-popup {
     background-color: transparent;
     font-family: "JetBrainsMono Nerd Font", monospace;
@@ -27,3 +28,6 @@
 #waybar-popup .prayer-row { padding: 6px; border-radius: 4px; }
 #waybar-popup .current { background: #3c3836; }
 #waybar-popup .current label { color: #8ec07c; font-weight: bold; }
+#waybar-popup progressbar trough { background: #504945; border: none; min-height: 5px; }
+#waybar-popup progressbar progress { background: #b8bb26; border: none; min-height: 5px; }
+#waybar-popup button:disabled { color: #665c54; }

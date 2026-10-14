@@ -4,29 +4,39 @@
     "height": 31,
     "modules-left": [
         "dwl/tags",
-        "tray",
-        "bluetooth",
-        "network",
-        "pulseaudio",
-        "battery",
-        "custom/vpn"
-    ],
-    "modules-center": [
+        "clock",
         "custom/adhan",
-        "clock"
+        "custom/nowplaying"
     ],
+    "modules-center": [],
     "modules-right": [
         "cpu",
         "memory",
         "disk",
-        "custom/nvidia"
+        "custom/nvidia",
+        "pulseaudio",
+        "network",
+        "bluetooth",
+        "custom/vpn",
+        "battery",
+        "tray"
     ],
     "dwl/tags": {
         "num-tags": 9,
-        "tag-labels": ["1","2","3","4","5","6","7","8","9"]
+        "tag-labels": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+        ]
     },
     "clock": {
-        "format": "  {:%a, %d %b %Y   %H:%M}",
+        "format": "{:%a, %d %b %Y     %H:%M}",
         "timezone": "America/Los_Angeles",
         "tooltip": false,
         "on-click": "python3 $HOME/.config/waybar/scripts/popup.py calendar",
@@ -87,7 +97,7 @@
         "tooltip": false
     },
     "custom/adhan": {
-        "format": "☪ {}",
+        "format": "☾ {}",
         "interval": 60,
         "tooltip": false,
         "exec": "zsh -lc athan",
@@ -132,9 +142,9 @@
     },
     "custom/vpn": {
         "format": "{}",
-        "interval": 60,
+        "interval": 15,
         "return-type": "json",
-        "exec": "$HOME/.config/waybar/scripts/vpn.sh 2> /dev/null",
+        "exec": "python3 $HOME/.config/waybar/scripts/vpn.py",
         "tooltip": true
     },
     "pulseaudio": {
@@ -168,5 +178,14 @@
         "tooltip": false,
         "on-scroll-down": "brightnessctl -c backlight set 5%-",
         "on-scroll-up": "brightnessctl -c backlight set +5%"
+    },
+    "custom/nowplaying": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "python3 $HOME/.config/waybar/scripts/nowplaying.py",
+        "restart-interval": 3,
+        "exec-on-event": false,
+        "tooltip": false,
+        "on-click": "python3 $HOME/.config/waybar/scripts/popup.py nowplaying"
     }
 }

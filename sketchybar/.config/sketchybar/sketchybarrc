@@ -3,7 +3,7 @@
 # Gruvbox SketchyBar config — matched to waybar layout
 # Left:   workspaces, front_app, clock
 # Center: emtpy (under camera)
-# Right:  calendar, cpu, memory, disk, volume, network, vpn, battery
+# Right:  tokens, calendar, cpu, memory, disk, volume, network, vpn, battery
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
@@ -214,6 +214,25 @@ sketchybar --add item calendar right \
     click_script="sketchybar --set calendar popup.drawing=toggle" \
     script="$PLUGIN_DIR/calendar.sh" \
   --subscribe calendar system_woke mouse.exited.global
+
+# Tokens — Apple Claude Code's spend meter, as Claude Code's status line shows
+# it: today's spend and the share of the budget, going from green to red as it
+# runs down.  Drawn only while a Claude Code session is running (its proxy is
+# alive and answering) and hidden otherwise.  Click for tokens, calls, the rate
+# limit, the reset time and the costliest model.  plugins/tokens.py asks the
+# proxy on loopback; nothing is written to ~/.claude.
+sketchybar --add item tokens right \
+  --set tokens \
+    drawing=off \
+    update_freq=20 \
+    popup.align=right \
+    popup.background.color=$BG1 \
+    popup.background.corner_radius=6 \
+    popup.background.border_width=1 \
+    popup.background.border_color=$BG2 \
+    click_script="$PLUGIN_DIR/tokens.py toggle" \
+    script="$PLUGIN_DIR/tokens.py update" \
+  --subscribe tokens system_woke mouse.exited.global
 
 ##### Force initial update #####
 sketchybar --update

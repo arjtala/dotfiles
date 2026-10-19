@@ -128,6 +128,18 @@ mode line shows the same, from `my-nowplaying.el`. spotify_player reports to Now
 Playing because its config, the `spotify-player` package, turns on
 `enable_media_control`.
 
+The Tokens item shows Apple Claude Code's spend meter, as Claude Code's status
+line does: today's spend and the share of the budget, going from green through
+yellow and orange to red as it runs down (at 50, 75 and 90%). It is drawn only
+while a Claude Code session is running and hidden otherwise. Click it for the
+tokens, calls, rate limit, when the budget resets and the model that cost most.
+`plugins/tokens.py` finds each session's proxy from
+`~/.claude/apple/logs/acc-port-<port>.pid`, checks that the process is alive,
+and reads `GET /api/quota` from it on loopback, so nothing is written to
+`~/.claude`. The proxies can differ by a few dollars, so it shows the largest.
+It depends on those two details of Apple Claude Code; if an update changes
+them, `plugins/tokens.py status` shows what was found.
+
 ### YubiKey for sudo and Swaylock (Fedora)
 
 Run in a local terminal as your normal user, with the key plugged in:

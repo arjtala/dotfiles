@@ -184,6 +184,63 @@ and the existing account/session checks; a wrong password fails immediately.
 Installation validates this machine's local-password profile and refuses
 unrecognized authentication policy. Re-review it if that policy changes.
 
+### YubiKey for sudo (macOS)
+
+Run in a local terminal as your normal user, with the key plugged in:
+
+```sh
+./scripts/setup-yubikey-macos passwordless
+# Alternatively, require a touch and then your password or smart-card PIN:
+# ./scripts/setup-yubikey-macos two-factor
+# Undo, re-enroll, or revoke a lost key:
+# ./scripts/setup-yubikey-macos remove
+```
+
+The script installs Homebrew's `pam-u2f` and registers the key with the same
+fixed `pam://dotfiles-local` origin as on Fedora. A second touch tests the key
+in an isolated PAM service before `sudo` changes. A third touch then makes
+`sudo` itself authenticate with the new rule; in `passwordless` mode that check
+refuses PIN and password prompts, so only the touch can pass. If a step fails,
+or you press Ctrl-C or close the terminal, the previous files come back; after
+a forced kill or power loss, run `remove`. The rule goes in
+`/etc/pam.d/sudo_local`, which macOS keeps across updates, ahead of any Touch ID
+or pam_reattach rules already there. The registration is stored root-owned in
+`/etc/u2f_mappings`. Other users keep their existing policy.
+
+The script stops for review rather than guessing when `/etc/pam.d/sudo` does
+not start with `auth include sudo_local`, when `sudo` or `sudo_local` already
+has a `pam_u2f` rule (it prints the command to delete a hand-made one), when
+`/etc/u2f_mappings` exists, or, in `passwordless` mode, when a touch would skip
+a `required` rule other than the stock password check.
+
+`passwordless` makes a touch replace the password while the key is plugged in.
+To use the key's smart-card (PIV) PIN instead, leave the key in and let the
+touch request time out; unplug the key to use your password. `two-factor`
+requires the touch and then the password or PIN. Only `sudo` changes: `su`,
+`login`, SSH logins, the login window, screen unlock, and System Settings
+prompts keep their rules.
+
+`remove` deletes the managed rule and `/etc/u2f_mappings`, which revokes the
+registered key; use it before re-enrolling, after losing the key, or to change
+mode. Copies go to `/var/backups/dotfiles-pam-*`, where setup also saves the
+original `sudo_local` (or `sudo_local.absent`) before changing anything. Run
+`remove` before uninstalling `pam-u2f`: `sudo` cannot start while its rules name
+a missing module. If `sudo` itself stops working, macOS's administrator prompt
+does not use these rules:
+
+```sh
+osascript -e 'do shell script "rm -f /etc/pam.d/sudo_local /etc/u2f_mappings" with administrator privileges'
+```
+
+`sudo` loads `pam_u2f` and its Homebrew libraries (`libfido2`, `libcbor`,
+OpenSSL) as root on every run, before any prompt, and the Homebrew prefix is
+writable by your account. Anything running as you could replace one of them and
+gain root on the next `sudo`, with no touch or password. A hand-made Homebrew
+`pam_u2f` rule has the same exposure; stock macOS and the Fedora setup, which
+load root-owned modules, do not. On a managed Mac, check that policy allows
+changing `sudo`'s PAM rules. Tests:
+`/usr/bin/python3 -B scripts/test-yubikey-pam-macos.py`.
+
 ### Stow notes
 
 Emacs uses `~/.config/emacs` only when the legacy `~/.emacs`, `~/.emacs.el`, and

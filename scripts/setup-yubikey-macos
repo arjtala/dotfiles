@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Enroll and verify a FIDO key before changing macOS sudo PAM rules.
+# Run in a local terminal as your normal user: ./scripts/setup-yubikey-macos passwordless
+# Or: ./scripts/setup-yubikey-macos two-factor
+# Undo, re-enroll, or revoke a lost key: ./scripts/setup-yubikey-macos remove
+set -euo pipefail
+mode="${1:-}"
+case "$mode" in
+  passwordless|two-factor|remove) ;;
+  *) echo "Usage: $0 {passwordless|two-factor|remove}" >&2; exit 2 ;;
+esac
+[[ "$(uname -s)" == Darwin ]] || { echo "macOS only; on Fedora use setup-yubikey." >&2; exit 1; }
+[ "$(id -u)" -ne 0 ] || { echo "Run as your normal user." >&2; exit 1; }
+# The root helper runs under Apple's Python, not Homebrew's (writable by this account).
+xcode-select -p >/dev/null 2>&1 || { echo "Install the Command Line Tools first: xcode-select --install" >&2; exit 1; }
+here="$(cd "$(dirname "$0")" && pwd)"
+helper="$here/yubikey-pam-macos.py"
+
+if [ "$mode" = remove ]; then
+  sudo /usr/bin/python3 -I "$helper" remove "$(id -un)"
+  exit
+fi
+
+# Stop before asking for a touch if a key setup already exists; the helper checks again as root.
+if grep -qs 'managed by setup-yubikey-macos' /etc/pam.d/sudo_local; then
+  echo "sudo already uses a key set up by this script. To re-enroll or change mode, first run: $0 remove" >&2
+  exit 1
+fi
+if grep -qs pam_u2f /etc/pam.d/sudo_local; then
+  echo "sudo already has a hand-made pam_u2f rule in /etc/pam.d/sudo_local:" >&2
+  grep pam_u2f /etc/pam.d/sudo_local >&2
+  echo "To let this script manage the key, delete that line (keep any other lines), then rerun:" >&2
+  echo "  sudo sed -i '' '/pam_u2f/d' /etc/pam.d/sudo_local" >&2
+  exit 1
+fi
+if [ -e /etc/u2f_mappings ]; then
+  if grep -qs u2f_mappings /etc/pam.d/*; then
+    echo "Existing /etc/u2f_mappings is used by a PAM rule: review it manually." >&2
+  else
+    echo "/etc/u2f_mappings is left over from an earlier run. Run $0 remove, then rerun." >&2
+  fi
+  exit 1
+fi
+
+command -v brew >/dev/null 2>&1 || { echo "Homebrew is required." >&2; exit 1; }
+brew list --formula pam-u2f >/dev/null 2>&1 || brew install pam-u2f
+# The opt/ path stays valid across Homebrew upgrades.
+prefix="$(brew --prefix)/opt/pam-u2f"
+module="$prefix/lib/pam/pam_u2f.so"
+[ -f "$module" ] || { echo "Missing $module; sudo unchanged." >&2; exit 1; }
+
+origin=pam://dotfiles-local
+registration="$(mktemp)"
+trap 'rm -f "$registration"' EXIT
+chmod 600 "$registration"
+echo "Touch your YubiKey to register it for this Mac."
+"$prefix/bin/pamu2fcfg" -u "$(id -un)" -o "$origin" -i "$origin" > "$registration"
+[ -s "$registration" ] || { echo "Registration failed; sudo unchanged." >&2; exit 1; }
+
+# Run from the user's terminal: sudo can prompt there, and the helper can ask
+# for more touches. Registration data contains a public key, not a private key.
+sudo /usr/bin/python3 -I "$helper" "$mode" "$(id -un)" "$registration" "$module"
+
+if [ "$mode" = passwordless ]; then
+  echo "While the key is plugged in, sudo asks for a touch; let the request time out to get the smart-card PIN prompt instead. Unplug the key to use your password."
+else
+  echo "sudo now needs a touch and then your password or smart-card PIN."
+fi
+[ ! -e "$HOME/.config/Yubico/u2f_keys" ] || echo "$HOME/.config/Yubico/u2f_keys is no longer used; you can delete it."
+echo "Undo, re-enroll, or revoke a lost key: $0 remove"
+echo "If sudo stops working: osascript -e 'do shell script \"rm -f /etc/pam.d/sudo_local /etc/u2f_mappings\" with administrator privileges'"

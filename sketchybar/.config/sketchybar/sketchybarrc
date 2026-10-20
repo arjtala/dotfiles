@@ -3,7 +3,7 @@
 # Gruvbox SketchyBar config — matched to waybar layout
 # Left:   workspaces, front_app, clock
 # Center: emtpy (under camera)
-# Right:  tokens, calendar, cpu, memory, disk, volume, network, vpn, battery
+# Right:  tokens, calendar, cpu, memory, disk, volume, network, tailscale, vpn, battery
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
@@ -155,6 +155,24 @@ sketchybar --add item vpn right \
   --set vpn \
     update_freq=120 \
     script="$PLUGIN_DIR/vpn.sh"
+
+# Tailscale — a dot grid like its logo: green when connected, aqua through an
+# exit node, orange when it needs a login, dim when off.  Click for the on/off
+# switch, the device, exit node and peers.  Hidden when Tailscale is not
+# installed (plugins/tailscale.py).
+sketchybar --add item tailscale right \
+  --set tailscale \
+    drawing=off \
+    label.drawing=off \
+    update_freq=15 \
+    popup.align=right \
+    popup.background.color=$BG1 \
+    popup.background.corner_radius=6 \
+    popup.background.border_width=1 \
+    popup.background.border_color=$BG2 \
+    click_script="$PLUGIN_DIR/tailscale.py toggle" \
+    script="$PLUGIN_DIR/tailscale.py update" \
+  --subscribe tailscale system_woke mouse.exited.global
 
 # Network — br_aqua (matches waybar)
 sketchybar --add item network right \

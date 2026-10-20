@@ -8,8 +8,8 @@ CISCO=$(/opt/cisco/secureclient/bin/vpn state 2>/dev/null | grep ">> state: Conn
 if [ -n "$CISCO" ]; then
   sketchybar --set "$NAME" icon="󰦝" label.drawing=off icon.color=$BR_GREEN
 else
-  # Fallback: check macOS native VPNs (NordVPN, etc.)
-  VPN=$(scutil --nc list 2>/dev/null | grep "Connected" | head -1)
+  # Fallback: check macOS native VPNs (NordVPN, etc.); Tailscale has its own item
+  VPN=$(scutil --nc list 2>/dev/null | grep -v 'io\.tailscale' | grep "Connected" | head -1)
   if [ -n "$VPN" ]; then
     sketchybar --set "$NAME" icon="󰦝" label.drawing=off icon.color=$BR_GREEN
   else

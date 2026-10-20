@@ -140,6 +140,17 @@ and reads `GET /api/quota` from it on loopback, so nothing is written to
 It depends on those two details of Apple Claude Code; if an update changes
 them, `plugins/tokens.py status` shows what was found.
 
+The Tailscale item shows Tailscale as a dot grid like its logo: green when
+connected, aqua through an exit node, orange when it needs a login, dim when off.
+Click it for the on/off switch, the device and tailnet, the exit node, and how
+many peers are online. The switch runs `tailscale down` (and `scutil --nc stop` if
+that does not turn it off), or `tailscale up` after starting the tunnel with
+`scutil --nc start` if nothing answers (the CLI may not answer while the tunnel is
+down). The state comes from `scutil --nc list`, which
+works even when Tailscale is off, and `tailscale status --json` for the details;
+the `vpn` item ignores Tailscale's entry in that list. `plugins/tailscale.py
+status` shows what it found. The item is hidden when Tailscale is not installed.
+
 ### YubiKey for sudo and Swaylock (Fedora)
 
 Run in a local terminal as your normal user, with the key plugged in:

@@ -20,6 +20,7 @@
         "bluetooth",
         "backlight",
         "custom/vpn",
+        "custom/tailscale",
         "battery",
         "tray"
     ],
@@ -149,6 +150,14 @@
         "interval": 15,
         "return-type": "json",
         "exec": "python3 $HOME/.config/waybar/scripts/vpn.py",
+        "tooltip": true
+    },
+    "custom/tailscale": {
+        "format": "{}",
+        "interval": 5,
+        "return-type": "json",
+        "exec": "python3 $HOME/.config/waybar/scripts/tailscale_status.py",
+        "on-click": "python3 $HOME/.config/waybar/scripts/popup.py tailscale",
         "tooltip": true
     },
     "pulseaudio": {

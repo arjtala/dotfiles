@@ -33,12 +33,26 @@ when unsupported; podcast type detection is not assumed. Missing durations
 are displayed without a fake progress percentage. Requires an MPRIS-enabled
 player (browser support depends on the browser and media site).
 
-VPN status is read locally from NetworkManager and `tailscale status --json`.
-It uses the same compact connected/disconnected icons as SketchyBar, with VPN
-names and Tailscale details in the tooltip. Tailnet connection and a selected
-exit node are distinguished; a green icon does not promise all traffic is
-routed through a VPN. No connections are changed. Public-IP lookups are no
-longer needed for the indicator. The macOS VPN script itself is unchanged.
+VPN status comes from NetworkManager. Tailscale has a separate dot-grid icon,
+matching SketchyBar: green when connected, aqua with an exit node selected,
+yellow while connecting, orange for login/approval, and dim when off or the
+daemon is unavailable. It is hidden when the CLI is not installed.
+
+Click Tailscale for an anchored popup with an on/off button, device/IP, tailnet,
+exit node, peer counts, and health warnings. Both views refresh every five
+seconds; status queries and button actions run without blocking the popup.
+Only the button changes the connection, using `tailscale up --timeout=15s` or
+`tailscale down`. Login opens the HTTPS authentication URL supplied by Tailscale.
+The popup reports permission failures; it never runs sudo automatically.
+To allow your user to operate the daemon, run once in a terminal:
+
+```sh
+sudo tailscale set --operator="$USER"
+```
+
+If the daemon is unavailable, inspect `systemctl status tailscaled`. A green
+icon indicates tailnet connectivity, not that all internet traffic uses an
+exit node. The separate VPN indicator does not count the Tailscale connection.
 
 The calendar uses America/Los_Angeles, matching the clock configuration.
 The prayer panel uses the timezone returned by `~/.cargo/bin/athan --all --json`.

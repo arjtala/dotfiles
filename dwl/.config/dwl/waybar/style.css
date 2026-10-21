@@ -47,6 +47,7 @@
 #custom-adhan,
 #custom-nowplaying,
 #custom-vpn,
+#custom-tailscale,
 #window {
     margin: 6px 6px;
     min-width: 6px;
@@ -152,6 +153,12 @@
 #custom-vpn.discon {
     color: @br_red;
 }
+
+#custom-tailscale.on { color: @br_green; }
+#custom-tailscale.exit { color: @br_aqua; }
+#custom-tailscale.busy { color: @br_yellow; }
+#custom-tailscale.login, #custom-tailscale.approval { color: @br_orange; }
+#custom-tailscale.off, #custom-tailscale.down { color: @fg2; }
 
 tooltip {
     background-color: @bg;

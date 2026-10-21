@@ -10,27 +10,20 @@ import vpn
 
 
 class VpnTests(unittest.TestCase):
-    def test_tailnet_without_exit_node_is_connected(self):
-        state = vpn.describe('', {'BackendState': 'Running'})
-        self.assertEqual(state['class'], 'con')
-        self.assertIn('no exit node', state['tooltip'])
-
-    def test_exit_node_status_is_not_assumed_online(self):
-        state = vpn.describe('', {'BackendState': 'Running', 'ExitNodeStatus': {'Online': False}})
-        self.assertIn('exit node selected (offline)', state['tooltip'])
-
-    def test_stopped_tailscale_is_not_connected(self):
-        self.assertEqual(vpn.describe('', {'BackendState': 'Stopped'})['class'], 'discon')
+    def test_tailscale_does_not_change_the_separate_vpn_indicator(self):
+        state = vpn.describe('tailscale0:tun')
+        self.assertEqual(state['class'], 'discon')
+        self.assertEqual(state['tooltip'], 'No active VPN')
 
     def test_networkmanager_vpn_and_wireguard(self):
         for kind in ('vpn', 'wireguard'):
-            state = vpn.describe(f'work\\: office:{kind}\nwifi:802-11-wireless', None)
+            state = vpn.describe(f'work\\: office:{kind}\nwifi:802-11-wireless')
             self.assertEqual(state['class'], 'con')
             self.assertIn('work: office', state['tooltip'])
 
     def test_unavailable_services_and_escaped_markup(self):
-        self.assertEqual(vpn.describe(None, None)['class'], 'discon')
-        self.assertIn('&amp;', vpn.describe('work & home:vpn', None)['tooltip'])
+        self.assertEqual(vpn.describe(None)['class'], 'discon')
+        self.assertIn('&amp;', vpn.describe('work & home:vpn')['tooltip'])
 
 
 class MediaTests(unittest.TestCase):

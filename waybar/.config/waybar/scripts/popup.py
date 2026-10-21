@@ -22,6 +22,7 @@ from gi.repository import Gdk, GLib, Gtk, GtkLayerShell
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import nowplaying
+import tailscale_status
 
 ROOT = Path(__file__).resolve().parent.parent
 CLOCK_TZ = ZoneInfo('America/Los_Angeles')
@@ -158,6 +159,10 @@ class Popup:
         self.error = None
         self.media_key = None
         self.media_error = None
+        self.tailscale_state = None
+        self.tailscale_loading = False
+        self.tailscale_switching = False
+        self.tailscale_error = None
         self.anchor = None
         self.anchor_x = None
         self.visible_date = datetime.now(CLOCK_TZ).date()
@@ -212,6 +217,7 @@ class Popup:
         GLib.timeout_add_seconds(15, self.tick)
         GLib.timeout_add_seconds(60, self.refresh)
         GLib.timeout_add_seconds(1, self.media_tick)
+        GLib.timeout_add_seconds(5, self.refresh_tailscale)
 
     def locate_click(self):
         if self.anchor:
@@ -278,11 +284,67 @@ class Popup:
             self.render_calendar()
         elif self.mode == 'nowplaying':
             self.render_media()
+        elif self.mode == 'tailscale':
+            self.render_tailscale()
         else:
             self.render_prayers()
             if self.data is None and not self.loading:
                 self.refresh()
         self.content.show_all()
+
+    def render_tailscale(self):
+        state = self.tailscale_state
+        self.content.pack_start(label('Tailscale · ' + (state['headline'] if state else 'Loading…'), 'heading'), False, False, 0)
+        button = Gtk.Button(label='Working…' if self.tailscale_switching else tailscale_status.action_label(state))
+        button.set_sensitive(bool(state and state['kind'] in ('on', 'exit', 'off', 'login') and not self.tailscale_switching))
+        button.connect('clicked', self.switch_tailscale)
+        self.content.pack_start(button, False, False, 0)
+        for key, value in state['rows'] if state else []:
+            row = label(f'{key}  {value}')
+            row.set_line_wrap(True)
+            row.set_max_width_chars(38)
+            self.content.pack_start(row, False, False, 0)
+        note = self.tailscale_error or (state['health'] if state else '')
+        if note:
+            row = label(note, 'muted')
+            row.set_line_wrap(True)
+            row.set_max_width_chars(38)
+            self.content.pack_start(row, False, False, 0)
+        if state is None:
+            self.refresh_tailscale()
+
+    def refresh_tailscale(self):
+        if self.mode != 'tailscale' or self.tailscale_loading or self.tailscale_switching:
+            return True
+        self.tailscale_loading = True
+        def worker():
+            GLib.idle_add(self.tailscale_loaded, tailscale_status.snapshot())
+        threading.Thread(target=worker, daemon=True).start()
+        return True
+
+    def tailscale_loaded(self, state):
+        self.tailscale_loading = False
+        self.tailscale_state = state or {'kind': 'down', 'headline': 'Not installed', 'rows': [], 'health': '', 'auth_url': None}
+        if self.mode == 'tailscale':
+            self.render()
+        return False
+
+    def switch_tailscale(self, *_):
+        if self.tailscale_switching or self.tailscale_loading:
+            return
+        state = self.tailscale_state
+        self.tailscale_switching = True
+        self.tailscale_error = None
+        self.render()
+        def worker():
+            error = tailscale_status.switch(state)
+            GLib.idle_add(self.tailscale_switched, error, tailscale_status.snapshot())
+        threading.Thread(target=worker, daemon=True).start()
+
+    def tailscale_switched(self, error, state):
+        self.tailscale_switching = False
+        self.tailscale_error = error
+        return self.tailscale_loaded(state)
 
     def media_tick(self):
         if self.mode == 'nowplaying':
@@ -472,7 +534,7 @@ class Popup:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['calendar', 'prayers', 'nowplaying'])
+    parser.add_argument('mode', choices=['calendar', 'prayers', 'nowplaying', 'tailscale'])
     parser.add_argument('--bar-height', type=int, default=31)
     args = parser.parse_args()
     runtime = Path(os.environ['XDG_RUNTIME_DIR'])
@@ -499,7 +561,7 @@ def main():
         popup = Popup(args.mode, args.bar_height)
         def receive(*_):
             mode = server.recv(32).decode()
-            if mode in ('calendar', 'prayers', 'nowplaying'):
+            if mode in ('calendar', 'prayers', 'nowplaying', 'tailscale'):
                 popup.command(mode)
             return True
         GLib.io_add_watch(server.fileno(), GLib.IO_IN, receive)

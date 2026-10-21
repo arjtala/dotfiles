@@ -103,6 +103,19 @@ def check():
             GLib.timeout_add(300,check)
             return False
         assert width >= 430, width
+        if stage == 2:
+            # Exercise the real GTK Tailscale panel with deterministic status;
+            # never operate the host VPN from a smoke test.
+            p.tailscale_state = popup.tailscale_status.summarize({
+                'BackendState': 'Running', 'Self': {'HostName': 'test-laptop'},
+                'CurrentTailnet': {'Name': 'test network'}, 'Peer': {}})
+            p.command('tailscale')
+            stage=3
+            GLib.timeout_add(800,check)
+            return False
+        buttons = [w for w in p.content.get_children() if isinstance(w, Gtk.Button)]
+        assert len(buttons) == 1 and buttons[0].get_label() == 'Turn off'
+        assert buttons[0].get_sensitive()
     except Exception as e:
         errors.append(repr(e))
     p.window.destroy()

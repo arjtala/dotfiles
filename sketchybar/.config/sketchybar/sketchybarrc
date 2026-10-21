@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # Gruvbox SketchyBar config — matched to waybar layout
-# Left:   workspaces, front_app, clock
+# Left:   workspaces, front_app, clock, athan, calendar, nowplaying
 # Center: emtpy (under camera)
-# Right:  tokens, calendar, cpu, memory, disk, volume, network, tailscale, vpn, battery
+# Right:  tokens, cpu, memory, disk, volume, network, tailscale, vpn, battery
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
@@ -122,6 +122,19 @@ sketchybar --add item athan left \
     script="$PLUGIN_DIR/athan.sh" \
   --subscribe athan mouse.exited.global
 
+# Calendar — current/next event (Eames-style); click for the rest of today.
+# Needs helpers/calendar.app built and approved (see helpers/build.sh).
+# Label length is capped in plugins/calendar.sh to keep it clear of the notch.
+sketchybar --add item calendar left \
+  --set calendar \
+    icon=" " \
+    drawing=off \
+    update_freq=30 \
+    "${popup_style[@]}" \
+    click_script="sketchybar --set calendar popup.drawing=toggle" \
+    script="$PLUGIN_DIR/calendar.sh" \
+  --subscribe calendar system_woke mouse.exited.global
+
 # Now Playing: what macOS is playing, from any app -- Podcasts, Music,
 # Safari, spotify_player -- with its title and elapsed/duration, hidden when
 # nothing is. Click for the whole title and the controls. A watcher started
@@ -215,23 +228,6 @@ sketchybar --add item cpu right \
     label.color=$BR_GREEN \
     update_freq=30 \
     script="$PLUGIN_DIR/cpu.sh"
-
-# Calendar — current/next event (Eames-style); click for the rest of today.
-# Needs helpers/calendar.app built and approved (see helpers/build.sh).
-# Label length is capped in plugins/calendar.sh to keep it clear of the notch.
-sketchybar --add item calendar right \
-  --set calendar \
-    icon=" " \
-    drawing=off \
-    update_freq=30 \
-    popup.align=right \
-    popup.background.color=$BG1 \
-    popup.background.corner_radius=6 \
-    popup.background.border_width=1 \
-    popup.background.border_color=$BG2 \
-    click_script="sketchybar --set calendar popup.drawing=toggle" \
-    script="$PLUGIN_DIR/calendar.sh" \
-  --subscribe calendar system_woke mouse.exited.global
 
 # Tokens — Apple Claude Code's spend meter, as Claude Code's status line shows
 # it: today's spend and the share of the budget, going from green to red as it

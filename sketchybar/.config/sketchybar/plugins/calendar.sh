@@ -18,10 +18,9 @@ CAL_APP="$CONFIG_DIR/helpers/calendar.app"
 CAL_CACHE="$HOME/.cache/sketchybar-calendar"
 CAL_MAX_AGE=300   # seconds
 SOON=600          # seconds; prefer and highlight an event starting this soon
-# Max label chars in the bar. This item is the innermost on the right, so it
-# grows leftward into the notch; 23 chars (~7.8pt each in JetBrains Mono 13pt)
-# keeps it clear on the built-in display with a char of slack for the CPU
-# label widening. Lower it if it creeps under again.
+# Max label chars in the bar. This item sits on the left after the athan, so
+# it grows rightward toward the notch; 23 chars (~7.8pt each in JetBrains Mono
+# 13pt) keeps it short. Lower it if it, or Now Playing after it, creeps under.
 LABEL_MAX=23
 
 if [ "$SENDER" = "mouse.exited.global" ]; then

@@ -173,7 +173,10 @@ Test `sudo -k; sudo true` in another terminal before testing the lock screen.
 For touch-only Swaylock, press Enter, then touch the key; the helper removes
 Swaylock's ignore-empty-password flag. Unplug the key to use password fallback.
 GNOME/GDM authentication is not modified. To restore the previous policy, copy
-the saved `sudo` and `swaylock` files back into `/etc/pam.d/` with sudo.
+the saved `sudo` and `swaylock` files back into `/etc/pam.d/` with sudo, then
+delete `/etc/u2f_mappings` to revoke the key; setup refuses to re-enroll while
+it exists. This also undoes the SSH skip below; remove
+`/usr/local/libexec/dotfiles-yubikey-ssh` too.
 
 To skip the physical key for sudo in SSH sessions, after enrollment run:
 

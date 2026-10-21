@@ -192,8 +192,10 @@ restore the saved `sudo` file to `/etc/pam.d/sudo` to undo the skip.
 The remote branch bypasses both the custom key rule and authselect's shared
 `pam_u2f` rule. It retains PAM environment setup, authentication failure delay,
 and the existing account/session checks; a wrong password fails immediately.
-Installation validates this machine's local-password profile and refuses
-unrecognized authentication policy. Re-review it if that policy changes.
+Installation accepts Fedora's local-password profile with or without its
+optional shared `pam_u2f` rule and refuses unrecognized authentication policy.
+Re-review it if that policy changes. Adding the script to dotfiles does not
+install the SSH exception: run the command above on each Linux machine.
 
 ### YubiKey for sudo (macOS)
 

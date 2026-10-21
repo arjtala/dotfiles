@@ -84,10 +84,10 @@ def validate_password_policy(contents):
              if line.strip().startswith('auth ')]
     expected = ['auth required pam_env.so',
                 'auth required pam_faildelay.so delay=2000000',
-                'auth sufficient pam_u2f.so cue',
                 'auth sufficient pam_unix.so nullok',
                 'auth required pam_deny.so']
-    if rules != expected:
+    with_key = expected[:2] + ['auth sufficient pam_u2f.so cue'] + expected[2:]
+    if rules not in (expected, with_key):
         raise ValueError('Password authentication policy changed; review before installing the SSH password branch.')
 
 

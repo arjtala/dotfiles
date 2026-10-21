@@ -78,8 +78,12 @@ class PolicyTests(unittest.TestCase):
                   'auth sufficient pam_unix.so nullok\n'
                   'auth required pam_deny.so\n')
         helper.validate_password_policy(actual)
+        # Fedora's local profile without with-pam-u2f (the current host).
+        helper.validate_password_policy(actual.replace('auth sufficient pam_u2f.so cue\n', ''))
         with self.assertRaises(ValueError):
             helper.validate_password_policy(actual + '\nauth required pam_faillock.so\n')
+        with self.assertRaises(ValueError):
+            helper.validate_password_policy(actual.replace('pam_unix.so nullok', 'pam_permit.so'))
 
     def test_unknown_rules_rejected(self):
         for original in (ORIGINAL.replace(helper.MARKER, ''),

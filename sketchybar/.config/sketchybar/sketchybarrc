@@ -154,6 +154,15 @@ sketchybar --add event nowplaying_update \
 
 ##### Right side items (added right-to-left) #####
 
+# Agent Status — shows last agent completion (left-most on right side)
+sketchybar --add item agent_status right \
+  --set agent_status \
+    icon="🏁" \
+    label.drawing=off \
+    update_freq=10 \
+    script="$PLUGIN_DIR/agent-status.sh" \
+  --subscribe agent_status mouse.exited.global
+
 # Battery — br_green (matches waybar)
 sketchybar --add item battery right \
   --set battery \
@@ -247,15 +256,6 @@ sketchybar --add item tokens right \
     click_script="$PLUGIN_DIR/tokens.py toggle" \
     script="$PLUGIN_DIR/tokens.py update" \
   --subscribe tokens system_woke mouse.exited.global
-
-# Agent Status — shows last agent completion (left-most on right side)
-sketchybar --add item agent_status right \
-  --set agent_status \
-    icon="🏁" \
-    label.drawing=off \
-    update_freq=10 \
-    script="$PLUGIN_DIR/agent-status.sh" \
-  --subscribe agent_status mouse.exited.global
 
 ##### Force initial update #####
 sketchybar --update

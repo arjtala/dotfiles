@@ -669,7 +669,7 @@ class UpdateTests(WorldTest):
     def test_popup_registers_tailscale_so_the_other_popups_close_it(self):
         self.assertEqual(tailscale.p.TAILSCALE, 'tailscale')
         source = (PLUGINS / 'popup.py').read_text()
-        self.assertIn('for other in (CAL, PRAYERS, NOWPLAYING, TOKENS, TAILSCALE):', source)
+        self.assertIn('for other in (CAL, PRAYERS, NOWPLAYING, TOKENS, TAILSCALE, AGENTS):', source)
 
 
 class VpnScriptTests(unittest.TestCase):

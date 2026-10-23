@@ -11,6 +11,7 @@
     ],
     "modules-center": [],
     "modules-right": [
+        "custom/agents",
         "cpu",
         "memory",
         "disk",
@@ -150,6 +151,14 @@
         "interval": 15,
         "return-type": "json",
         "exec": "python3 $HOME/.config/waybar/scripts/vpn.py",
+        "tooltip": true
+    },
+    "custom/agents": {
+        "format": "{}",
+        "interval": 5,
+        "return-type": "json",
+        "exec": "python3 $HOME/.config/waybar/scripts/agents.py",
+        "on-click": "python3 $HOME/.config/waybar/scripts/popup.py agents",
         "tooltip": true
     },
     "custom/tailscale": {

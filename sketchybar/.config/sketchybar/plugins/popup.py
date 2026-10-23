@@ -60,6 +60,7 @@ PRAYERS = 'athan'
 NOWPLAYING = 'nowplaying'  # filled in by plugins/nowplaying.py
 TOKENS = 'tokens'  # filled in by plugins/tokens.py
 TAILSCALE = 'tailscale'  # filled in by plugins/tailscale.py
+AGENTS = 'agents'  # filled in by plugins/agents.py
 # Each popup's second level, opened and closed with it.
 CHILDREN = {CAL: TITLE, NOWPLAYING: f'{NOWPLAYING}.c.play'}
 PRAYER_ITEMS = (['heading', 'date'] + [f'row{i}' for i in range(len(PRAYER_NAMES) + 1)]
@@ -332,7 +333,7 @@ def toggle(parent, create, render):
         return
     create()
     render()
-    for other in (CAL, PRAYERS, NOWPLAYING, TOKENS, TAILSCALE):
+    for other in (CAL, PRAYERS, NOWPLAYING, TOKENS, TAILSCALE, AGENTS):
         if other != parent:
             close(other)
     bar('--set', parent, 'popup.drawing=on')

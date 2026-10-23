@@ -10,6 +10,7 @@ README:
 | i3 (Linux/X11 tiling WM) | [i3/README.md](i3/README.md) |
 | tmux | [tmux/README.md](tmux/README.md) |
 | Emacs | [emacs/.config/emacs/README.md](emacs/.config/emacs/README.md) (submodule) |
+| Pi (coding agent) | [pi/README.md](pi/README.md) |
 
 AeroSpace, sway, and i3 share the same window-management scheme so muscle
 memory carries across platforms — see each file for the small deltas.
@@ -58,8 +59,8 @@ private. On macOS, install [Homebrew](https://brew.sh) first.
 3. Clones `oh-my-zsh` into `~/.oh-my-zsh` if missing (directly, so its
    installer does not replace `.zshrc`).
 4. Links packages into `$HOME` with GNU Stow:
-   - **macOS:** `zsh tmux emacs ghostty aerospace sketchybar spotify-player`
-   - **Linux:** `zsh tmux emacs ghostty sway waybar rofi way-shell gtk3 gtk4 Thunar`
+   - **macOS:** `zsh tmux emacs ghostty pi aerospace sketchybar spotify-player`
+   - **Linux:** `zsh tmux emacs ghostty pi sway waybar rofi way-shell gtk3 gtk4 Thunar`
 
    Pass package names to link a different set, e.g. `./setup zsh tmux`.
 5. **macOS only:** builds any missing SketchyBar helper apps, applies the
@@ -150,6 +151,38 @@ down). The state comes from `scutil --nc list`, which
 works even when Tailscale is off, and `tailscale status --json` for the details;
 the `vpn` item ignores Tailscale's entry in that list. `plugins/tailscale.py
 status` shows what it found. The item is hidden when Tailscale is not installed.
+
+### Agent status
+
+The bar shows one icon for every coding agent running — Claude Code, Pi and
+Codex — and a click lists each session with its own state:
+
+| Icon | Means |
+| --- | --- |
+| orange bell | an agent is waiting for you: a permission prompt or a dialog |
+| yellow robot | an agent is working, and none is waiting |
+| dim sleeping face | no agent is doing anything (open sessions are idle) |
+
+The item is `agents` in SketchyBar (`sketchybar` package) and `custom/agents`
+in Waybar (`waybar` package), both left-most on the right. Both read the agents
+with one file, [`agent_registry.py`](sketchybar/.config/sketchybar/plugins/agent_registry.py);
+Waybar's `scripts/agent_registry.py` is a symlink to it. Nothing runs in the
+background and nothing is written: each refresh, every five seconds, reads
+what the agents publish themselves.
+
+- **Claude Code** keeps `~/.claude/sessions/<pid>.json`. Nothing to install.
+- **Pi** needs the extension in the `pi` package; see [pi/README.md](pi/README.md).
+- **Codex** publishes nothing, so a running `codex` counts as working while
+  it writes its rollout in `~/.codex/sessions/`. It cannot show waiting.
+
+An entry counts only while its process is running, so a crashed session
+drops off by itself. To see what the bar sees, run:
+
+```sh
+python3 ~/.config/sketchybar/plugins/agent_registry.py   # or ~/.config/waybar/scripts/
+```
+
+Tests: `python3 -m unittest sketchybar/tests/test_agents.py waybar/tests/test_agents.py`.
 
 ### YubiKey for sudo and Swaylock (Fedora)
 

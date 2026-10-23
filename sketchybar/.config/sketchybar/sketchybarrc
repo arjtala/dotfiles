@@ -248,14 +248,22 @@ sketchybar --add item tokens right \
     script="$PLUGIN_DIR/tokens.py update" \
   --subscribe tokens system_woke mouse.exited.global
 
-# Agent Status — shows last agent completion (left-most on right side)
-sketchybar --add item agent_status right \
-  --set agent_status \
-    icon="🏁" \
+# Agents — one icon for every Claude, Pi and Codex session (left-most on the
+# right side): an orange bell when any is waiting for you, a yellow robot when
+# any is working, a dim sleeping face otherwise.  Click for each session and
+# its state.  plugins/agent_registry.py reads the files the agents publish.
+sketchybar --add item agents right \
+  --set agents \
     label.drawing=off \
-    update_freq=10 \
-    script="$PLUGIN_DIR/agent-status.sh" \
-  --subscribe agent_status mouse.exited.global
+    update_freq=5 \
+    popup.align=right \
+    popup.background.color=$BG1 \
+    popup.background.corner_radius=6 \
+    popup.background.border_width=1 \
+    popup.background.border_color=$BG2 \
+    click_script="$PLUGIN_DIR/agents.py toggle" \
+    script="$PLUGIN_DIR/agents.py update" \
+  --subscribe agents system_woke mouse.exited.global
 
 ##### Force initial update #####
 sketchybar --update

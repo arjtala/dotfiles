@@ -31,3 +31,6 @@
 #waybar-popup progressbar trough { background: #504945; border: none; min-height: 5px; }
 #waybar-popup progressbar progress { background: #b8bb26; border: none; min-height: 5px; }
 #waybar-popup button:disabled { color: #665c54; }
+#waybar-popup .agent-waiting { color: #fe8019; font-weight: bold; }
+#waybar-popup .agent-working { color: #fabd2f; }
+#waybar-popup .agent-unknown { color: #a89984; }

@@ -1,0 +1,1 @@
+../../../../sketchybar/.config/sketchybar/plugins/agent_registry.py

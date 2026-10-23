@@ -18,9 +18,11 @@ import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('GtkLayerShell', '0.1')
-from gi.repository import Gdk, GLib, Gtk, GtkLayerShell
+gi.require_version('Pango', '1.0')
+from gi.repository import Gdk, GLib, Gtk, GtkLayerShell, Pango
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import agents
 import nowplaying
 import tailscale_status
 
@@ -163,6 +165,8 @@ class Popup:
         self.tailscale_loading = False
         self.tailscale_switching = False
         self.tailscale_error = None
+        self.agents = None
+        self.agents_loading = False
         self.anchor = None
         self.anchor_x = None
         self.visible_date = datetime.now(CLOCK_TZ).date()
@@ -218,6 +222,7 @@ class Popup:
         GLib.timeout_add_seconds(60, self.refresh)
         GLib.timeout_add_seconds(1, self.media_tick)
         GLib.timeout_add_seconds(5, self.refresh_tailscale)
+        GLib.timeout_add_seconds(5, self.refresh_agents)
 
     def locate_click(self):
         if self.anchor:
@@ -286,6 +291,8 @@ class Popup:
             self.render_media()
         elif self.mode == 'tailscale':
             self.render_tailscale()
+        elif self.mode == 'agents':
+            self.render_agents()
         else:
             self.render_prayers()
             if self.data is None and not self.loading:
@@ -345,6 +352,38 @@ class Popup:
         self.tailscale_switching = False
         self.tailscale_error = error
         return self.tailscale_loaded(state)
+
+    def render_agents(self):
+        found = self.agents
+        heading = 'Agents · ' + (agents.registry.counts(found) if found is not None else 'Loading…')
+        self.content.pack_start(label(heading, 'heading'), False, False, 0)
+        grid = Gtk.Grid(column_spacing=12, row_spacing=6)
+        for index, (harness, name, state, detail) in enumerate(map(agents.row, found or [])):
+            cells = [label(harness, 'muted'), label(name), label(state, 'agent-' + state)]
+            for column, cell in enumerate(cells):
+                cell.set_tooltip_text(detail or None)
+                grid.attach(cell, column, index, 1, 1)
+            cells[1].set_max_width_chars(24)
+            cells[1].set_ellipsize(Pango.EllipsizeMode.END)
+        self.content.pack_start(grid, False, False, 0)
+        if found is None:
+            self.refresh_agents()
+
+    def refresh_agents(self):
+        if self.mode != 'agents' or self.agents_loading:
+            return True
+        self.agents_loading = True
+        def worker():
+            GLib.idle_add(self.agents_loaded, agents.registry.collect())
+        threading.Thread(target=worker, daemon=True).start()
+        return True
+
+    def agents_loaded(self, found):
+        self.agents_loading = False
+        self.agents = found
+        if self.mode == 'agents':
+            self.render()
+        return False
 
     def media_tick(self):
         if self.mode == 'nowplaying':
@@ -534,7 +573,7 @@ class Popup:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['calendar', 'prayers', 'nowplaying', 'tailscale'])
+    parser.add_argument('mode', choices=['calendar', 'prayers', 'nowplaying', 'tailscale', 'agents'])
     parser.add_argument('--bar-height', type=int, default=31)
     args = parser.parse_args()
     runtime = Path(os.environ['XDG_RUNTIME_DIR'])
@@ -561,7 +600,7 @@ def main():
         popup = Popup(args.mode, args.bar_height)
         def receive(*_):
             mode = server.recv(32).decode()
-            if mode in ('calendar', 'prayers', 'nowplaying', 'tailscale'):
+            if mode in ('calendar', 'prayers', 'nowplaying', 'tailscale', 'agents'):
                 popup.command(mode)
             return True
         GLib.io_add_watch(server.fileno(), GLib.IO_IN, receive)

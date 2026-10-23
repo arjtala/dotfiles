@@ -54,6 +54,11 @@ If the daemon is unavailable, inspect `systemctl status tailscaled`. A green
 icon indicates tailnet connectivity, not that all internet traffic uses an
 exit node. The separate VPN indicator does not count the Tailscale connection.
 
+The agents icon (`custom/agents`, left-most on the right) is a bell when a
+Claude, Pi or Codex session is waiting for you, a robot when one is working,
+and a sleeping face otherwise; click it for each session's state. It shares
+its reader with SketchyBar; see [Agent status](../README.md#agent-status).
+
 The calendar uses America/Los_Angeles, matching the clock configuration.
 The prayer panel uses the timezone returned by `~/.cargo/bin/athan --all --json`.
 This requires athan's full-day `prayers` output, rather than the older `upcoming`

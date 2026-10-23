@@ -41,8 +41,9 @@ clear_palette() {
   for role in "${ROLES[@]}"; do tmux set -gu "@thm_$role"; done
 }
 
+# Show theme $1; $2, if given, says where it is in the list.
 show() {
-  local name=$1 flavor
+  local name=$1 where=${2:-} flavor
   if [[ -f "$THEMES/$name.conf" ]]; then
     flavor=dune_dark  # any: the palette is set first, so its colours win
   elif [[ -f "$OASIS/themes/dark/oasis_$name.conf" ]]; then
@@ -62,6 +63,7 @@ show() {
   tmux set -Fg window-active-style 'bg=#{@thm_mantle}'
   tmux set -g @theme_preview "$name"
   tmux display-message "theme: $name  (tmux-theme-preview next | prev | reset)"
+  echo "theme: $name${where:+  ($where)}"
 }
 
 step() {
@@ -75,7 +77,7 @@ step() {
   else
     i=$(( (i + $1 + ${#list[@]}) % ${#list[@]} ))
   fi
-  show "${list[$i]}"
+  show "${list[$i]}" "$(( i + 1 )) of ${#list[@]}"
 }
 
 case "${1:-}" in
@@ -95,6 +97,7 @@ case "${1:-}" in
     tmux set -gu @theme_preview
     tmux source-file ~/.tmux.conf
     tmux display-message "theme: back to .tmux.conf's"
+    echo "theme: back to .tmux.conf's"
     ;;
   *) show "$1" ;;
 esac

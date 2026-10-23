@@ -154,7 +154,7 @@ sketchybar --add event nowplaying_update \
 
 ##### Right side items (added right-to-left) #####
 
-# Agent Status — shows last agent completion
+# Agent Status — shows last agent completion (left-most on right side)
 sketchybar --add item agent_status right \
   --set agent_status \
     icon="🏁" \

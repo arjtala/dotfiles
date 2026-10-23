@@ -61,6 +61,8 @@ show() {
   tmux set -Fg status-fg '#{@thm_secondary}'
   tmux set -Fg window-style 'bg=#{@thm_mantle}'
   tmux set -Fg window-active-style 'bg=#{@thm_mantle}'
+  # Keep local/SSH cues when previewing a different shared palette.
+  tmux source-file "$REPO/tmux/.config/tmux/connection-theme.conf"
   tmux set -g @theme_preview "$name"
   tmux display-message "theme: $name  (tmux-theme-preview next | prev | reset)"
   echo "theme: $name${where:+  ($where)}"

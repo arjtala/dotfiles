@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Cache SSH client identity on attach/focus; never run from a status format."""
+import os
+from pathlib import Path
+import re
+import subprocess
+
+def remote(pid):
+    try:
+        entries=(Path('/proc')/pid/'environ').read_bytes().split(b'\0')
+        return any(entry.startswith(b'SSH_CONNECTION=') and entry[len(b'SSH_CONNECTION='):] for entry in entries)
+    except OSError:
+        # macOS has no /proc. Inspect only this tmux client's environment.
+        result=subprocess.run(['ps','eww','-p',pid,'-o','command='],text=True,capture_output=True,timeout=2)
+        return bool(re.search(r'(?:^|\s)SSH_CONNECTION=\S+',result.stdout))
+
+args=['tmux']
+if os.environ.get('TMUX'):
+    args+=['-S',os.environ['TMUX'].split(',',1)[0]]
+try:
+    def tm(*command, optional=False):
+        result=subprocess.run(args+list(command),text=True,capture_output=True,timeout=2)
+        if result.returncode and not (optional and result.returncode == 1):
+            result.check_returncode()
+        return result.stdout.strip()
+    result=tm('list-clients','-F','#{client_pid}\t#{client_session}')
+    remote_sessions=set()
+    pids=[]
+    for row in result.splitlines():
+        pid,session=row.split('\t',1)
+        if pid.isdigit() and remote(pid):
+            pids.append(pid)
+            remote_sessions.add(session)
+    cached=' '+' '.join(pids)+' '
+    if tm('show-option','-gqv','@ssh_client_pids',optional=True) != cached.strip():
+        tm('set-option','-gq','@ssh_client_pids',cached)
+    local_bg=tm('show-option','-gqv','@thm_mantle') or '#1b2a1e'
+    local_fg=tm('show-option','-gqv','@thm_primary') or '#c5a96e'
+    windows={}
+    for row in tm('list-windows','-a','-F','#{session_name}\t#{window_id}').splitlines():
+        session,window=row.split('\t',1)
+        windows[window]=windows.get(window,False) or session in remote_sessions
+    # Window and pane styles are window-scoped, unlike status formats. Paint
+    # them literally; they have no dependable client_pid when tmux draws panes.
+    # If a window is shared, an attached SSH viewer takes precedence.
+    for window,is_remote in windows.items():
+        bg,fg=('#32302f','#a89984') if is_remote else (local_bg,local_fg)
+        signature=bg+'|'+fg
+        if tm('show-window-option','-qv','-t',window,'@connection_window_style',optional=True) == signature:
+            continue
+        for option,value in [('window-style','bg='+bg),('window-active-style','bg='+bg),
+                             ('pane-active-border-style','bg='+bg+',fg='+fg),
+                             ('pane-border-style','bg='+bg+',fg=' + ('#444444' if is_remote else '#243b28')),
+                             ('mode-style','bg=' + ('#262626' if is_remote else '#3a4c38')+',fg='+fg)]:
+            tm('set-window-option','-t',window,option,value)
+        tm('set-window-option','-t',window,'@connection_window_style',signature)
+except (OSError,subprocess.SubprocessError):
+    pass

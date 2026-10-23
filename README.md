@@ -10,7 +10,6 @@ README:
 | i3 (Linux/X11 tiling WM) | [i3/README.md](i3/README.md) |
 | tmux | [tmux/README.md](tmux/README.md) |
 | Emacs | [emacs/.config/emacs/README.md](emacs/.config/emacs/README.md) (submodule) |
-| Agent Notifications | [agent-notifications/README.md](agent-notifications/README.md) |
 
 AeroSpace, sway, and i3 share the same window-management scheme so muscle
 memory carries across platforms — see each file for the small deltas.

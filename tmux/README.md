@@ -77,6 +77,24 @@ Window labels auto-follow the current repo or directory, and pane borders show
 either the pane title (`prefix + T`) or a repo-aware shortened path/command
 fallback.
 
+Local sessions are drawn by oasis in the Woodland Dusk palette
+(`.config/tmux/woodland-dusk.conf`, sourced after oasis), matching Ghostty's
+`Woodland Dusk` theme.
+
+To try other themes on the running tmux without changing anything:
+
+```sh
+./scripts/tmux-theme-preview          # list: palettes in .config/tmux/themes/, then oasis flavors
+./scripts/tmux-theme-preview gruvbox  # show one (also everforest, foxglove_dark, rose_pine, ...)
+./scripts/tmux-theme-preview next     # or prev: step through the list
+./scripts/tmux-theme-preview reset    # back to what .tmux.conf sets
+```
+
+oasis draws every theme, so only the colours change, and pane backgrounds are
+painted in the theme's base colour so the preview reads as a whole even though
+Ghostty keeps its own. Nothing is written; reloading `.tmux.conf` also ends a
+preview. Gruvbox is the SketchyBar and Waybar palette.
+
 Swap the local oasis flavor (and regenerate a matching Ghostty theme in one
 shot) with:
 
@@ -87,7 +105,8 @@ shot) with:
 
 The script unsets stale `@thm_*` options and reloads `.tmux.conf` in place —
 no server restart needed. For Ghostty to pick up the new palette, `Cmd+Shift+,`
-(reload config).
+(reload config). While `.tmux.conf` sources `woodland-dusk.conf`, its colours
+replace the flavor's, so remove that line to see the flavor.
 
 ## Dependencies
 

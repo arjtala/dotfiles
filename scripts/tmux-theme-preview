@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# tmux-theme-preview — try colour themes on the running tmux, live.
+#
+#   tmux-theme-preview              list the themes, marking the one shown
+#   tmux-theme-preview NAME         show NAME
+#   tmux-theme-preview next|prev    show the next or previous one in the list
+#   tmux-theme-preview reset        back to what .tmux.conf sets (Woodland Dusk)
+#
+# A theme is one of the palettes in tmux/.config/tmux/themes/ (Gruvbox,
+# Catppuccin, Rosé Pine, ...) or one of tmux-oasis's own flavors.  Either
+# way tmux-oasis draws it, so the layout is the one you have and only the
+# colours change.  Pane backgrounds are painted in the theme's mantle, the
+# colour scripts/oasis-theme gives Ghostty, so the preview shows the theme
+# whole without touching Ghostty.
+#
+# Nothing is written.  A preview lasts until `reset', or until tmux reloads
+# .tmux.conf or restarts.  To keep an oasis flavor, see scripts/oasis-theme.
+
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+THEMES="$REPO/tmux/.config/tmux/themes"
+OASIS="$REPO/tmux/.tmux/plugins/tmux-oasis"
+ROLES=(strong_primary primary light_primary secondary prefix fg
+       core mantle surface visual red orange yellow green teal blue indigo)
+
+tmux info &>/dev/null || { echo "tmux is not running" >&2; exit 1; }
+
+themes() {
+  for f in "$THEMES"/*.conf; do basename "$f" .conf; done
+  for f in "$OASIS"/themes/dark/oasis_*.conf; do
+    f=$(basename "$f" .conf); echo "${f#oasis_}"
+  done
+}
+
+current() { tmux show -gqv @theme_preview; }
+
+# oasis sets its palette with `set -o', which leaves a value already set
+# alone, so the last theme's colours go first.
+clear_palette() {
+  for role in "${ROLES[@]}"; do tmux set -gu "@thm_$role"; done
+}
+
+show() {
+  local name=$1 flavor
+  if [[ -f "$THEMES/$name.conf" ]]; then
+    flavor=dune_dark  # any: the palette is set first, so its colours win
+  elif [[ -f "$OASIS/themes/dark/oasis_$name.conf" ]]; then
+    flavor=$name
+  else
+    echo "No such theme: $name; run with no arguments for the list" >&2
+    exit 1
+  fi
+  clear_palette
+  [[ "$flavor" == "$name" ]] || tmux source-file "$THEMES/$name.conf"
+  tmux set -g @oasis_flavor "$flavor"
+  tmux source-file "$OASIS/oasis_tmux.conf"
+  # As .tmux.conf does after oasis: the legacy status colours follow it.
+  tmux set -Fg status-bg '#{@thm_mantle}'
+  tmux set -Fg status-fg '#{@thm_secondary}'
+  tmux set -Fg window-style 'bg=#{@thm_mantle}'
+  tmux set -Fg window-active-style 'bg=#{@thm_mantle}'
+  tmux set -g @theme_preview "$name"
+  tmux display-message "theme: $name  (tmux-theme-preview next | prev | reset)"
+}
+
+step() {
+  local list here i
+  list=($(themes))  # names have no spaces; macOS's bash 3.2 has no mapfile
+  here=$(current)
+  i=-1
+  for j in "${!list[@]}"; do [[ "${list[$j]}" == "$here" ]] && i=$j; done
+  if (( i < 0 )); then
+    (( $1 > 0 )) && i=0 || i=$(( ${#list[@]} - 1 ))
+  else
+    i=$(( (i + $1 + ${#list[@]}) % ${#list[@]} ))
+  fi
+  show "${list[$i]}"
+}
+
+case "${1:-}" in
+  "")
+    here=$(current)
+    while read -r name; do
+      if [[ "$name" == "$here" ]]; then echo "* $name"; else echo "  $name"; fi
+    done < <(themes)
+    [[ -n "$here" ]] || echo "(showing .tmux.conf's own theme)"
+    ;;
+  next) step 1 ;;
+  prev) step -1 ;;
+  reset)
+    clear_palette
+    tmux set -gu window-style
+    tmux set -gu window-active-style
+    tmux set -gu @theme_preview
+    tmux source-file ~/.tmux.conf
+    tmux display-message "theme: back to .tmux.conf's"
+    ;;
+  *) show "$1" ;;
+esac

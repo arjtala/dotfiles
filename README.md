@@ -122,7 +122,9 @@ The Now Playing item shows what macOS is playing, from any app — Podcasts,
 Music, Safari, spotify_player — with its title and elapsed/duration; click it
 for the whole title, the artist or show, a progress bar and the controls. For a
 podcast, back and forward skip fifteen seconds; otherwise they change track. It
-reads macOS's Now Playing with
+is hidden when nothing is loaded, and also once a paused item has played to the
+end or been paused for ten minutes (macOS keeps the last thing played in Now
+Playing for as long as its app runs). It reads macOS's Now Playing with
 [media-control](https://github.com/ungive/media-control) (`brew install
 media-control`), whose stream reports every change, so nothing polls. The Emacs
 mode line shows the same, from `my-nowplaying.el`. spotify_player reports to Now

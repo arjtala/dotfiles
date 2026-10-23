@@ -69,6 +69,25 @@ class PositionTests(unittest.TestCase):
         info = nowplaying.parse(EPISODE)
         self.assertEqual(nowplaying.position(info, REPORTED + 100000), EPISODE['duration'])
 
+
+class StaleTests(unittest.TestCase):
+    def test_playing_is_never_stale(self):
+        info = nowplaying.parse(EPISODE)
+        self.assertFalse(nowplaying.stale(info, REPORTED + 100000))
+
+    def test_paused_goes_stale_after_ten_minutes(self):
+        info = nowplaying.parse(dict(EPISODE, playing=False, playbackRate=0))
+        self.assertFalse(nowplaying.stale(info, REPORTED + nowplaying.STALE - 1))
+        self.assertTrue(nowplaying.stale(info, REPORTED + nowplaying.STALE))
+
+    def test_finished_is_stale_at_once(self):
+        info = nowplaying.parse(dict(EPISODE, playing=False, elapsedTime=EPISODE['duration']))
+        self.assertTrue(nowplaying.stale(info, REPORTED))
+
+    def test_a_paused_stream_without_a_time_stays(self):
+        info = nowplaying.parse(dict(EPISODE, playing=False, duration=0, timestamp=None))
+        self.assertFalse(nowplaying.stale(info, REPORTED + 100000))
+
     def test_clock(self):
         self.assertEqual(nowplaying.clock(83), '1:23')
         self.assertEqual(nowplaying.clock(3298.27), '54:58')

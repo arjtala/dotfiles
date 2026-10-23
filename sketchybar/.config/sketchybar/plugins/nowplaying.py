@@ -20,6 +20,10 @@ it, keeps the merged state in a cache file, and triggers nowplaying_update;
 the item's script only draws from the cache, counting elapsed time from
 the position Now Playing last reported, and starts the watcher again if
 it has died.
+
+macOS keeps the last thing played in Now Playing for as long as its app
+runs, so a paused item is hidden once it has played to the end or been
+paused for `STALE' seconds, as the Emacs mode line's is (my-nowplaying.el).
 """
 from datetime import datetime
 import fcntl
@@ -41,6 +45,7 @@ PLAY = f'{ITEM}.c.play'
 CACHE_FILE = p.CACHE / 'sketchybar-nowplaying.json'
 LOCK_FILE = p.CACHE / 'sketchybar-nowplaying.lock'  # held by the one watcher
 IDLE_TICK = 30  # seconds between checks on the watcher while nothing plays
+STALE = 600  # seconds paused after which an item is hidden
 BAR_TITLE = 18  # characters of title in the bar
 WIDTH = 34  # characters across the popup
 LABEL_WIDTH = math.ceil(WIDTH * p.CHAR) + 2
@@ -110,6 +115,15 @@ def position(info, now):
     if info['playing']:
         pos += seconds_since(info['timestamp'], now) * (info['rate'] or 1.0)
     return min(pos, info['duration']) if info['duration'] else pos
+
+
+def stale(info, now):
+    """Return whether INFO is paused and left there: played to the end, or
+    paused for STALE seconds since Now Playing last reported it."""
+    if info['playing']:
+        return False
+    ended = info['duration'] and info['elapsed'] >= info['duration'] - 1
+    return bool(ended) or seconds_since(info['timestamp'], now) >= STALE
 
 
 def clock(seconds):
@@ -255,7 +269,7 @@ def create():
 def render(state, now, popup_open):
     palette = p.colors()
     info = parse(state.get('data')) if state else None
-    if not info:
+    if not info or stale(info, now):
         p.bar('--set', ITEM, 'drawing=off', f'update_freq={IDLE_TICK}')
         if popup_open:
             p.close(ITEM)

@@ -46,6 +46,22 @@ class ProcessTableTests(unittest.TestCase):
         self.assertEqual(table[3279]['command'], 'node')
         self.assertEqual(len(table), 7)
 
+    def test_a_recorded_start_rules_out_only_an_older_pid(self):
+        process = {'start': START_EPOCH, 'ppid': 0, 'command': 'node'}
+        now = START_EPOCH + 3600
+        self.assertTrue(registry.started_as_recorded(process, None, now))
+        self.assertTrue(registry.started_as_recorded(process, START_EPOCH, now))
+        # Trailing the kernel start is a launcher holding the pid; it may
+        # trail by any amount, so long as the file is not from the future.
+        self.assertTrue(registry.started_as_recorded(process, START_EPOCH + 600, now))
+        self.assertTrue(registry.started_as_recorded(
+            process, now + registry.START_SLACK, now))  # clock skew into the future
+        self.assertFalse(registry.started_as_recorded(
+            process, now + registry.START_SLACK + 60, now))
+        # Preceding it is a file left by a process the pid no longer names.
+        self.assertFalse(
+            registry.started_as_recorded(process, START_EPOCH - registry.START_SLACK - 1, now))
+
     def test_codex_matches_the_binary_once_per_session(self):
         # The npm wrapper is node, a nested codex is its parent's, the sandbox helper is not codex.
         self.assertEqual(registry.codex_processes(registry.parse_processes(PS)), [4000, 4101])
@@ -81,6 +97,9 @@ class ReaderTests(unittest.TestCase):
         self.assertIsNone(self.claude(pid=999))
         self.assertIsNone(self.claude(procStart=utc(START_EPOCH - 3600)))  # pid reused
         self.assertIsNotNone(self.claude(procStart=None))
+        # A date after the process started is a launcher that held the pid
+        # before exec'ing Claude, not a reused pid.
+        self.assertIsNotNone(self.claude(procStart=utc(START_EPOCH + 11)))
 
     def test_pi(self):
         found = self.pi()
@@ -89,6 +108,10 @@ class ReaderTests(unittest.TestCase):
         self.assertEqual(self.pi(status='busy', name='named')['name'], 'named')
         self.assertIsNone(self.pi(procStart=int(START_EPOCH - 60) * 1000))
         self.assertIsNone(self.pi(version=2))
+        # Pi's shell launcher provisions Node and installs upgrades before
+        # exec'ing the process that writes this file, so the file dates
+        # itself later than the pid's kernel start by however long it took.
+        self.assertIsNotNone(self.pi(procStart=int(START_EPOCH + 30) * 1000))
 
 
 class CodexTests(unittest.TestCase):

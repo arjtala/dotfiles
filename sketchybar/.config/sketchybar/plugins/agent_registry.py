@@ -26,8 +26,13 @@ Three harnesses, each read where it already publishes itself:
                  turn and its subagents finish, even while logs are quiet.
                  It cannot identify permission prompts as waiting.
 A file outlives a crash, so an entry counts only while its pid is running
-and, where the file records it, started when the file says it did; a
-recycled pid is a different process.  Nothing here writes anything.
+and, where the file records it, the pid is not older than the file says; a
+recycled pid is a later process, and looks like that.  The other way round
+is ordinary: Pi's `pi' is a shell launcher that provisions its Node runtime
+and installs upgrades before it execs the process that writes the file, so
+the kernel dates the pid from the launcher and the file from the process,
+and the file's start trails by however long the launcher took.  Nothing
+here writes anything.
 
 Runs under whichever python3 the bar's PATH finds, which may be the
 system's 3.9, so nothing newer than 3.9 is used.
@@ -48,7 +53,7 @@ PI_REGISTRY = Path(os.environ.get('PI_CODING_AGENT_DIR') or HOME / '.pi/agent') 
 # status at all, rather than a guess.
 STATUSES = {'busy': 'working', 'waiting': 'waiting', 'idle': 'idle'}
 ORDER = ['waiting', 'working', 'idle', None]  # how the list is sorted
-START_SLACK = 3  # seconds a recorded start may differ from the process's
+START_SLACK = 3  # seconds a recorded start may precede the process's
 # The native binary, as Homebrew installs it or npm's wrapper starts it.
 CODEX_COMMAND = re.compile(r'^codex(-[a-z0-9_]+-(apple-darwin|unknown-linux-(gnu|musl)))?$')
 LSTART = '%a %b %d %H:%M:%S %Y'  # `ps -o lstart', in the C locale
@@ -78,9 +83,20 @@ def parse_processes(text):
     return table
 
 
-def started_as_recorded(process, recorded):
-    """Return whether PROCESS started at RECORDED epoch seconds, or RECORDED is unknown."""
-    return recorded is None or abs(process['start'] - recorded) <= START_SLACK
+def started_as_recorded(process, recorded, now=None):
+    """Return whether PROCESS could have written a file dating itself RECORDED.
+
+    A recorded start may follow the process's own by any amount up to the
+    moment the file is read: a launcher can hold the pid for minutes before
+    exec'ing what writes the file, and the kernel dates the pid from the
+    launcher.  It may not precede it, since a file older than the process
+    running under that pid was written by a process that is gone, and the
+    pid has since been reused.  Unknown on either side counts as the same.
+    """
+    if recorded is None:
+        return True
+    return (process['start'] - START_SLACK <= recorded
+            <= (time.time() if now is None else now) + START_SLACK)
 
 
 def claude_start(value):

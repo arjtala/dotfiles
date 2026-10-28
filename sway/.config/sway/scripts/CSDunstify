@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euox pipefail
+set -euo pipefail
 
 # CSDunstify - Send audio and brightness notifications via notify-send (libnotify)
 
@@ -43,13 +43,23 @@ notifyAudio() {
 }
 
 notifyPlayPause() {
-	# Get player status
-	status=$(playerctl status)
+	# The binding toggles first, then calls us, so this is the state the
+	# toggle resulted in. Stay quiet if there is no active player.
+	status=$(playerctl status 2>/dev/null) || return 0
 
 	if [ "$status" = "Playing" ]; then
-		notify-send -h string:x-canonical-private-synchronous:media "Paused" -t 1500 --icon media-playback-pause
-	else
 		notify-send -h string:x-canonical-private-synchronous:media "Playing" -t 1500 --icon media-playback-start
+	else
+		notify-send -h string:x-canonical-private-synchronous:media "Paused" -t 1500 --icon media-playback-pause
+	fi
+}
+
+notifyMicMute() {
+	muted=$(pactl get-source-mute @DEFAULT_SOURCE@ | awk '{print $2}')
+	if [ "$muted" = "yes" ]; then
+		notify-send -h string:x-canonical-private-synchronous:mic "Mic muted" -t 1500 --icon audio-input-microphone-muted-symbolic
+	else
+		notify-send -h string:x-canonical-private-synchronous:mic "Mic unmuted" -t 1500 --icon audio-input-microphone-symbolic
 	fi
 }
 
@@ -85,8 +95,11 @@ brightness)
 	notifyBrightness "$brightness"
 	;;
 playpause)
-	# Toggle play/pause with playerctl and send notification
+	# The binding toggles with playerctl first, then reports the result
 	notifyPlayPause
+	;;
+micmuted)
+	notifyMicMute
 	;;
 *)
 	echo "Invalid arguments"

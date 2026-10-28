@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 theme="~/.config/rofi/windows.rasi"
-term="alacritty"
+term="ghostty"
 
 rofi \
 	-show window \

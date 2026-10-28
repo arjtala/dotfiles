@@ -20,6 +20,13 @@ if ((${#PICS[@]} == 0)); then
 	exit 1
 fi
 
+# Basename of every picture, for duplicate detection when building the menu.
+NAMES=()
+for pic in "${PICS[@]}"; do
+	NAMES+=("$(basename "${pic%.*}")")
+done
+NAMES_TEXT=$(printf '%s\n' "${NAMES[@]}")
+
 # List of all types:
 # scheme-content
 # scheme-expressive
@@ -32,7 +39,7 @@ fi
 
 MODE="dark"
 SCHEME_TYPE="scheme-fidelity"
-MATUGEN_ARGS=(-m "$MODE" -v -t "$SCHEME_TYPE" --show-colors --debug)
+MATUGEN_ARGS=(-m "$MODE" -v -t "$SCHEME_TYPE" --show-colors)
 
 INTERFACE="org.gnome.desktop.interface"
 WM_PREFERENCES="org.gnome.desktop.wm.preferences"
@@ -43,17 +50,27 @@ WM_PREFERENCES="org.gnome.desktop.wm.preferences"
 # MPVPAPER_ARGS=
 
 # Rofi command
-ROFI_COMMAND=(rofi -dmenu -theme "$ROFI_THEME")
+# -no-custom keeps the prompt from submitting free text (only menu lines).
+ROFI_COMMAND=(rofi -dmenu -no-custom -theme "$ROFI_THEME")
 
-# Function to generate the menu
+# Function to generate the menu.
+# Each line carries a 1-based index so the selection identifies the picture
+# exactly, even when basenames collide.
 menu() {
-	printf "Random\n"
+	local i=0 pic label
+	printf '00  Random\n'
 	for pic in "${PICS[@]}"; do
+		i=$((i + 1))
+		label="${NAMES[i-1]}"
+		# Disambiguate duplicate names with the path relative to WALLPAPER_DIR
+		if [[ $(grep -cxF "$label" <<<"$NAMES_TEXT") -gt 1 ]]; then
+			label="${pic#"$WALLPAPER_DIR"/}"
+		fi
 		# Display .gif to indicate animated images
 		if [[ ! "${pic}" =~ \.gif$ ]]; then
-			printf '%s\x00icon\x1f%s\n' "$(basename "${pic%.*}")" "$pic"
+			printf '%02d  %s\x00icon\x1f%s\n' "$i" "$label" "$pic"
 		else
-			printf '%s\n' "$(basename "${pic%.*}")"
+			printf '%02d  %s\n' "$i" "$label"
 		fi
 	done
 }
@@ -68,19 +85,23 @@ main() {
 	fi
 
 	# Handle random choice
-	if [[ "$choice" == "Random" ]]; then
+	if [[ "$choice" == "00  Random" ]]; then
 		selected_file="${PICS[RANDOM % ${#PICS[@]}]}"
+	# The index is the first field of the chosen line; anything that is not
+	# "number + space" is not a menu line (e.g. typed free text).
+	elif [[ $choice =~ ^([0-9]+)[[:space:]] ]]; then
+		index=$((10#${BASH_REMATCH[1]}))
+		((index >= 1 && index <= ${#PICS[@]})) || {
+			echo "Wallpaper not found."
+			exit 1
+		}
+		selected_file="${PICS[index-1]}"
 	else
-		selected_file=""
-		for file in "${PICS[@]}"; do
-			if [[ "$(basename "${file%.*}")" == "$choice" ]]; then
-				selected_file="$file"
-				break
-			fi
-		done
+		echo "Wallpaper not found."
+		exit 1
 	fi
 
-	if [[ -z "$selected_file" ]]; then
+	if [[ -z "$selected_file" || ! -f "$selected_file" ]]; then
 		echo "Wallpaper not found."
 		exit 1
 	fi

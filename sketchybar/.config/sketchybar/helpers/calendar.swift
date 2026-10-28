@@ -4,7 +4,8 @@
 // for a *bundled* app, so this is shipped as calendar.app (see build.sh).
 //
 // Behavior:
-//   - Writes the rest of today's timed events to ~/.cache/sketchybar-calendar,
+//   - Writes the rest of today's timed events to ~/.cache/sketchybar/calendar
+//     (private directory),
 //     one per line, sorted by start, tab-separated:
 //       start_epoch  end_epoch  title  meeting_url
 //     All-day, cancelled, and declined events are skipped. meeting_url is the
@@ -14,7 +15,7 @@
 import EventKit
 import Foundation
 
-let cachePath = ("~/.cache/sketchybar-calendar" as NSString).expandingTildeInPath
+let cachePath = ("~/.cache/sketchybar/calendar" as NSString).expandingTildeInPath
 let cacheDirectory = (cachePath as NSString).deletingLastPathComponent
 
 let meetingHosts = ["webex", "zoom.us", "teams.microsoft", "meet.google", "facetime"]
@@ -69,15 +70,19 @@ func writeEvents() -> Never {
             ].joined(separator: "\t")
         }
 
+    // The bar's shell plugin (same user) reads the cache; keep the directory
+    // and file private in case the machine is shared.
     try? FileManager.default.createDirectory(
         atPath: cacheDirectory,
         withIntermediateDirectories: true,
-        attributes: nil
+        attributes: [.posixPermissions: 0o700]
     )
+    try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: cacheDirectory)
     let contents = lines.map { $0 + "\n" }.joined()
     guard (try? contents.write(toFile: cachePath, atomically: true, encoding: .utf8)) != nil else {
         exit(1)
     }
+    try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: cachePath)
     exit(0)
 }
 

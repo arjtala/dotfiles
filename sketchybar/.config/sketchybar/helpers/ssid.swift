@@ -9,24 +9,33 @@
 // Behavior:
 //   - Prints the SSID to stdout (exit 0), or nothing (exit 1) if
 //     unavailable/unauthorized.
-//   - Also writes it to ~/.cache/sketchybar-ssid so the shell plugin can read
-//     a cached value instantly instead of waiting on Location each tick.
+//   - Also writes it to ~/.cache/sketchybar/ssid (private directory) so the
+//     shell plugin can read a cached value instantly instead of waiting on
+//     Location each tick.
 
 import CoreLocation
 import CoreWLAN
 import Foundation
 
-let cachePath = ("~/.cache/sketchybar-ssid" as NSString).expandingTildeInPath
+let cachePath = ("~/.cache/sketchybar/ssid" as NSString).expandingTildeInPath
 let cacheDirectory = (cachePath as NSString).deletingLastPathComponent
 
-func emit(_ ssid: String) {
-    print(ssid)
+// The bar's shell plugin (same user) reads the cache; keep the directory and
+// file private in case the machine is shared.
+func writePrivate(_ text: String, to path: String) {
     try? FileManager.default.createDirectory(
         atPath: cacheDirectory,
         withIntermediateDirectories: true,
-        attributes: nil
+        attributes: [.posixPermissions: 0o700]
     )
-    try? ssid.write(toFile: cachePath, atomically: true, encoding: .utf8)
+    try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: cacheDirectory)
+    try? text.write(toFile: path, atomically: true, encoding: .utf8)
+    try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: path)
+}
+
+func emit(_ ssid: String) {
+    print(ssid)
+    writePrivate(ssid, to: cachePath)
 }
 
 func currentSSID() -> String? {

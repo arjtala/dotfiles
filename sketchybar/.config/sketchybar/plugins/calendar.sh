@@ -15,7 +15,9 @@ export LC_ALL=en_US.UTF-8
 # remaining events to a cache file that we read here. Relative times are
 # recomputed from the cache every tick; the helper itself is throttled.
 CAL_APP="$CONFIG_DIR/helpers/calendar.app"
-CAL_CACHE="$HOME/.cache/sketchybar-calendar"
+CAL_CACHE="$HOME/.cache/sketchybar/calendar"
+# One-time migration: remove the old world-readable cache (self-cleans later).
+rm -f "$HOME/.cache/sketchybar-calendar"
 CAL_MAX_AGE=300   # seconds
 SOON=600          # seconds; prefer and highlight an event starting this soon
 # Max label chars in the bar. This item sits on the left after the athan, so

@@ -23,7 +23,9 @@ is_up() {
 # the SSID to a cache file that we read here. Refresh is throttled to avoid
 # spawning the helper on every tick.
 SSID_APP="$CONFIG_DIR/helpers/ssid.app"
-SSID_CACHE="$HOME/.cache/sketchybar-ssid"
+SSID_CACHE="$HOME/.cache/sketchybar/ssid"
+# One-time migration: remove the old world-readable cache (self-cleans later).
+rm -f "$HOME/.cache/sketchybar-ssid"
 SSID_MAX_AGE=60   # seconds
 
 refresh_ssid() {

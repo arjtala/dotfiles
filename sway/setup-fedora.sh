@@ -84,7 +84,10 @@ if ! command -v way-sh >/dev/null; then
     json-glib-devel NetworkManager-libnm-devel pulseaudio-libs-devel \
     wayland-devel wayland-protocols-devel
   build="$(mktemp -d)"; trap 'rm -rf "$build"' EXIT
-  git clone --depth 1 https://github.com/ldelossa/way-shell "$build/way-shell"
+  # Pinned revision; bump deliberately after testing.
+  way_shell_rev=96b7dd9487e19961d28f1efeb745a49740e295f6
+  git clone https://github.com/ldelossa/way-shell "$build/way-shell"
+  git -C "$build/way-shell" checkout --quiet "$way_shell_rev"
   make -C "$build/way-shell"
   sudo make -C "$build/way-shell" install
   sudo glib-compile-schemas /usr/share/glib-2.0/schemas

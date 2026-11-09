@@ -89,8 +89,13 @@ picker_cleanup() {
 
 picker() {
   local list here selected=0 top=0 rows height width key tail i scope
-  local snapshot accepted=0 PICKING=1
+  local snapshot accepted=0 PICKING=1 esc_wait=0.1
   [[ -t 0 && -t 1 ]] || { echo "The picker needs a terminal" >&2; return 1; }
+  # How long to wait after Escape for the rest of an arrow key.  macOS's
+  # bash 3.2 rejects fractional timeouts, which read as a lone Escape and
+  # cancelled the picker on the first arrow.  Arrow bytes arrive together,
+  # so only a real Escape waits out the whole second.
+  ((BASH_VERSINFO[0] >= 4)) || esc_wait=1
   list=($(themes))
   here=$(current)
   for i in "${!list[@]}"; do
@@ -127,8 +132,8 @@ picker() {
     IFS= read -rsn1 key || return 1
     if [[ $key == $'\e' ]]; then
       tail=
-      if IFS= read -rsn1 -t 0.1 tail && [[ $tail == '[' || $tail == O ]]; then
-        IFS= read -rsn1 -t 0.1 key || return 0
+      if IFS= read -rsn1 -t "$esc_wait" tail && [[ $tail == '[' || $tail == O ]]; then
+        IFS= read -rsn1 -t "$esc_wait" key || return 0
         case "$key" in A) key=k ;; B) key=j ;; *) continue ;; esac
       else
         return 0

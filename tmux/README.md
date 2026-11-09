@@ -99,7 +99,9 @@ Previews affect the shared tmux server, so other attached clients see them too.
 
 The shared `palette-style.conf` draws every theme. Pane backgrounds are
 painted in the theme's base colour so the preview reads as a whole even though
-Ghostty keeps its own. Nothing is written; reloading `.tmux.conf` also ends a
+Ghostty keeps its own. It also sets the 16 ANSI colours (`pane-colours`), so
+the shell prompt, `ls` and git follow the theme in Ghostty and in Emacs's
+ghostel alike. Nothing is written; reloading `.tmux.conf` also ends a
 preview. Gruvbox is the SketchyBar and Waybar palette.
 
 ## Dependencies

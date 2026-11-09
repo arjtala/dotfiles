@@ -7,21 +7,14 @@
 #   tmux-theme-preview next|prev    show the next or previous one in the list
 #   tmux-theme-preview reset        back to what .tmux.conf sets (Woodland Dusk)
 #
-# A theme is one of the palettes in tmux/.config/tmux/themes/ (Gruvbox,
-# Catppuccin, Rosé Pine, ...) or one of tmux-oasis's own flavors.  Either
-# way tmux-oasis draws it, so the layout is the one you have and only the
-# colours change.  Pane backgrounds are painted in the theme's mantle, the
-# colour scripts/oasis-theme gives Ghostty, so the preview shows the theme
-# whole without touching Ghostty.
-#
-# Nothing is written.  A preview lasts until `reset', or until tmux reloads
-# .tmux.conf or restarts.  To keep an oasis flavor, see scripts/oasis-theme.
+# Palettes live in tmux/.config/tmux/themes/. Preview changes tmux's
+# colours and pane backgrounds without changing the terminal emulator.
+# Nothing is written; reset, config reload, or a restart ends a preview.
 
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 THEMES="$REPO/tmux/.config/tmux/themes"
-OASIS="$REPO/tmux/.tmux/plugins/tmux-oasis"
 ROLES=(strong_primary primary light_primary secondary prefix fg
        core mantle surface visual red orange yellow green teal blue indigo)
 
@@ -29,43 +22,25 @@ tmux info &>/dev/null || { echo "tmux is not running" >&2; exit 1; }
 
 themes() {
   for f in "$THEMES"/*.conf; do basename "$f" .conf; done
-  for f in "$OASIS"/themes/dark/oasis_*.conf; do
-    f=$(basename "$f" .conf); echo "${f#oasis_}"
-  done
 }
 
 current() { tmux show -gqv @theme_preview; }
 
-# oasis sets its palette with `set -o', which leaves a value already set
-# alone, so the last theme's colours go first.
+# Clear the previous palette before applying a new one.
 clear_palette() {
   for role in "${ROLES[@]}"; do tmux set -gu "@thm_$role"; done
 }
 
 # Show theme $1; $2, if given, says where it is in the list.
 show() {
-  local name=$1 where=${2:-} flavor border_status border_format
-  border_status=$(tmux show -gwv pane-border-status)
-  border_format=$(tmux show -gwv pane-border-format)
-  if [[ -f "$THEMES/$name.conf" ]]; then
-    flavor=dune_dark  # any: the palette is set first, so its colours win
-  elif [[ -f "$OASIS/themes/dark/oasis_$name.conf" ]]; then
-    flavor=$name
-  else
+  local name=$1 where=${2:-}
+  if [[ ! -f "$THEMES/$name.conf" ]]; then
     echo "No such theme: $name; run with no arguments for the list" >&2
     exit 1
   fi
   clear_palette
-  [[ "$flavor" == "$name" ]] || tmux source-file "$THEMES/$name.conf"
-  tmux set -g @oasis_flavor "$flavor"
-  tmux source-file "$OASIS/oasis_tmux.conf"
-  tmux set -gw pane-border-status "$border_status"
-  tmux set -gw pane-border-format "$border_format"
-  # As .tmux.conf does after oasis: the legacy status colours follow it.
-  tmux set -Fg status-bg '#{@thm_mantle}'
-  tmux set -Fg status-fg '#{@thm_secondary}'
-  tmux set -Fg window-style 'bg=#{@thm_mantle}'
-  tmux set -Fg window-active-style 'bg=#{@thm_mantle}'
+  tmux source-file "$THEMES/$name.conf"
+  tmux source-file "$REPO/tmux/.config/tmux/palette-style.conf"
   # Keep local/SSH cues when previewing a different shared palette.
   tmux source-file "$REPO/tmux/.config/tmux/connection-theme.conf"
   tmux set -g @theme_preview "$name"
@@ -92,7 +67,7 @@ step() {
 # Limit rollback to appearance options; do not overwrite unrelated live changes.
 appearance() {
   tmux show "$1" | awk '
-    $1 ~ /^(@thm_|@oasis_|@connection_|@theme_preview$|status-|message-|mode-style$|clock-mode-colour$|menu-selected-style$|popup-|pane-border-|pane-active-border-style$|window-style$|window-active-style$|window-status-)/'
+    $1 ~ /^(@thm_|@connection_|@theme_preview$|status-|message-|mode-style$|clock-mode-colour$|menu-selected-style$|popup-|pane-border-|pane-active-border-style$|window-style$|window-active-style$|window-status-)/'
 }
 
 picker_cleanup() {

@@ -70,7 +70,3 @@
 	path = tmux/.tmux/plugins/tmux-fuzzback
 	url = https://github.com/roosta/tmux-fuzzback
 	branch = main
-[submodule "tmux/.tmux/plugins/tmux-oasis"]
-	path = tmux/.tmux/plugins/tmux-oasis
-	url = https://github.com/uhs-robert/tmux-oasis
-	branch = main

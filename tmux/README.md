@@ -67,6 +67,7 @@ Prefix is the default `Ctrl + b`. Defaults below are the commonly-used ones
 | Key | Action |
 | --- | --- |
 | `prefix + b` | Toggle status bar visibility |
+| `prefix + Ctrl-t` | Open live theme preview popup |
 
 ## Theme
 
@@ -84,11 +85,17 @@ Local sessions are drawn by oasis in the Woodland Dusk palette
 To try other themes on the running tmux without changing anything:
 
 ```sh
+./scripts/tmux-theme-preview pick     # popup picker (also prefix + Ctrl-t)
 ./scripts/tmux-theme-preview          # list: palettes in .config/tmux/themes/, then oasis flavors
 ./scripts/tmux-theme-preview gruvbox  # show one (also everforest, foxglove_dark, rose_pine, ...)
 ./scripts/tmux-theme-preview next     # or prev: step through the list
 ./scripts/tmux-theme-preview reset    # back to what .tmux.conf sets
 ```
+
+In the popup, use **↑/↓** or **j/k** to preview themes, **Enter** to keep
+the selection, and **Escape** or **q** to restore the starting appearance.
+The list scrolls and wraps at either end. No fzf installation is needed.
+Previews affect the shared tmux server, so other attached clients see them too.
 
 oasis draws every theme, so only the colours change, and pane backgrounds are
 painted in the theme's base colour so the preview reads as a whole even though

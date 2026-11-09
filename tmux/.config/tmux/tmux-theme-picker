@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Resolve the stowed directory to locate the repository scripts.
+config_dir="$(cd -P "$(dirname "$0")" && pwd)"
+exec "$config_dir/../../../scripts/tmux-theme-preview" pick

@@ -9,8 +9,9 @@
 #   tsu-stop       stop the daemon
 #
 # macOS: Homebrew's tailscale, by full path, never the GUI app's /usr/local/bin/tailscale wrapper.
-# Linux: the distro's tailscale/tailscaled (tailscaled is often in /usr/sbin, off a user's PATH). A system
-# tailscaled already running there is untouched: this one has its own state, socket and ports.
+# Linux: the distro's tailscale/tailscaled (tailscaled is often in /usr/sbin, off a user's PATH). If the system
+# tailscaled is running, the machine is already on the tailnet: tsu then talks to it, tssh is plain ssh, and
+# tsu-up and tsu-on do nothing (TSU_USERSPACE=1 tsu-up still starts a separate userspace node).
 
 _TSU_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/tailscale"
 _TSU_SOCK="$_TSU_DIR/tailscaled.sock"
@@ -35,18 +36,32 @@ _tsu_running() {
     pgrep -f -- "--socket=$_TSU_SOCK" >/dev/null 2>&1
 }
 
+# Linux only: the system tailscaled (a TUN device; the whole machine is on the tailnet).
+_tsu_system() {
+    [[ "$OSTYPE" == linux* ]] && { [[ -S /var/run/tailscale/tailscaled.sock ]] || [[ -S /run/tailscale/tailscaled.sock ]]; }
+}
+
 tsu() {
     if [[ -z "$_TSU_CLI" || ! -x "$_TSU_CLI" ]]; then
         echo "tsu: tailscale CLI not found (macOS: brew install tailscale)" >&2
         return 127
     fi
-    "$_TSU_CLI" --socket="$_TSU_SOCK" "$@"
+    if ! _tsu_running && _tsu_system; then
+        "$_TSU_CLI" "$@"  # no userspace daemon here: the system one
+    else
+        "$_TSU_CLI" --socket="$_TSU_SOCK" "$@"
+    fi
 }
 
 tsu-up() {
     if [[ -z "$_TSU_DAEMON" || ! -x "$_TSU_DAEMON" ]]; then
         echo "tsu-up: tailscaled not found (macOS: brew install tailscale)" >&2
         return 127
+    fi
+    if ! _tsu_running && _tsu_system && [[ -z "$TSU_USERSPACE" ]]; then
+        echo "tsu-up: the system tailscaled is running, so this machine is already on the tailnet; tsu uses it."
+        echo "        (TSU_USERSPACE=1 tsu-up starts a separate userspace node anyway.)"
+        return 0
     fi
     if ! _tsu_running; then
         mkdir -p "$_TSU_DIR"
@@ -66,6 +81,10 @@ tsu-stop() {
 
 tsu-on() {
     [[ -n "$_TSU_ON" ]] && return 0
+    if ! _tsu_running && _tsu_system; then
+        echo "tsu-on: not needed: the system tailscaled already routes tailnet traffic for every terminal"
+        return 0
+    fi
     _tsu_running || echo "tsu-on: the daemon is not running (tsu-up)" >&2
     typeset -g _TSU_SAVED="$(typeset -p -- "${_TSU_PROXY_VARS[@]}" 2>/dev/null)"
     local socks="socks5h://localhost:$_TSU_SOCKS_PORT" http="http://localhost:$_TSU_HTTP_PORT"
@@ -86,5 +105,9 @@ tsu-off() {
 }
 
 tssh() {
-    ssh -o ProxyCommand="'$_TSU_CLI' --socket='$_TSU_SOCK' nc %h %p" "$@"
+    if ! _tsu_running && _tsu_system; then
+        ssh "$@"  # the system tailscaled routes it
+    else
+        ssh -o ProxyCommand="'$_TSU_CLI' --socket='$_TSU_SOCK' nc %h %p" "$@"
+    fi
 }

@@ -286,3 +286,6 @@ fi
 # <<< conda initialize <<<
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin"
+
+# Tailscale in userspace mode, for one terminal at a time (tsu-up, tsu-on, tssh): see the file.
+[[ -r "$HOME/.zsh/tailscale-userspace.zsh" ]] && source "$HOME/.zsh/tailscale-userspace.zsh"
